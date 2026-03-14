@@ -2,7 +2,12 @@ import { http } from "./http";
 import type { SellWindowSummary } from "../types/domain";
 import type { PageResponse } from "../types/page";
 import type { ProductSellWindowView } from "../types/domain";
-import type { Product, AutoGroupOrderRequest, AutoGroupOrderResponse } from "../types/domain";
+import type {
+  Product,
+  ProductImage,
+  AutoGroupOrderRequest,
+  AutoGroupOrderResponse,
+} from "../types/domain";
 
 
 export const catalogApi = {
@@ -27,6 +32,8 @@ export const catalogApi = {
     console.log("getSellWindow raw data:", data);
     return data;
   },
+
+  
   
   async pageProductSellWindows(page: number, size: number): Promise<PageResponse<ProductSellWindowView>> {
     const { data } = await http.get<PageResponse<ProductSellWindowView>>(
@@ -41,8 +48,21 @@ export const catalogApi = {
     return data;
   },
 
+  async getProductSellWindowView(productSellWindowId: string): Promise<ProductSellWindowView> {
+    const { data } = await http.get(`/api/catalog/views/product-sell-windows/${productSellWindowId}`);
+    if (typeof data === "string" && data.trim().startsWith("<!doctype html")) {
+      throw new Error("API returned HTML. Proxy/baseURL is wrong.");
+    }
+    return data;
+  },
+
   async listProducts(): Promise<Product[]> {
     const { data } = await http.get<Product[]>("/api/catalog/products");
+    return data;
+  },
+
+  async listProductImages(productId: string): Promise<ProductImage[]> {
+    const { data } = await http.get<ProductImage[]>(`/api/catalog/products/${productId}/images`);
     return data;
   },
 

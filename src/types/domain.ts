@@ -1,16 +1,23 @@
 export type SellWindowStatus = "OPEN" | "CLOSED" | "PAYMENT_OPEN" | "FINALIZED";
 
 export interface SellWindowSummary {
-    id: string;
-    name: string;
-    startAt: string;
-    endAt: string;
-    timezone: string;
-
+  sellWindowId: string;
+  productName: string;
+  status: SellWindowStatus;
+  soldQty: number;
+  minQty: number;
+  maxQty?: number | null;
+  orderCloseAt: string;
+  paymentCloseAt?: string | null;
+  startAt: string;
+  endAt: string;
+  timezone: string;
 }
 
 // src/types/domain.ts
 export type ProductSellWindowView = {
+  productSellWindowId: string;
+  
   sellWindowId: string;
   sellWindowName: string;
   startAt: string;
@@ -20,6 +27,8 @@ export type ProductSellWindowView = {
 
   productId: string;
   productName: string;
+  unitPriceCents: number;
+  currency: string;
 
   minQty: number;
   maxQty?: number | null;
@@ -67,7 +76,26 @@ export type Product = {
   id: string;
   name: string;
   description?: string | null;
+  unitPriceCents?: number | null;
+  currency?: string | null;
   status: "DRAFT" | "ACTIVE" | "INACTIVE";
+};
+
+export type ProductImage = {
+  id: string;
+  productId: string;
+  imageType: "THUMBNAIL" | "GALLERY" | "DETAIL" | "ORIGINAL" | string;
+  sortOrder: number;
+  cdnUrl: string;
+  originalFilename: string;
+  contentType: string;
+  fileSize: number;
+  width: number;
+  height: number;
+  isPrimary: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type AutoGroupOrderRequest = {

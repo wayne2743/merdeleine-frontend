@@ -3,9 +3,16 @@ import NavBar from "./NavBar";
 
 export default function Layout() {
   return (
-    <div style={{ fontFamily: "system-ui, Arial" }}>
+    <div>
       <NavBar />
-      <main style={{ maxWidth: 1100, margin: "0 auto", padding: 16 }}>
+      <main
+        style={{
+          maxWidth: 1100,
+          margin: "0 auto",
+          padding: 16,
+          color: "#f4efdf",
+        }}
+      >
         <Outlet />
       </main>
     </div>

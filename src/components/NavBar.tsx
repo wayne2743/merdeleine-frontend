@@ -2,17 +2,21 @@ import { NavLink } from "react-router-dom";
 
 const linkStyle = ({ isActive }: { isActive: boolean }) => ({
   padding: "8px 10px",
-  borderRadius: 8,
+  borderRadius: 10,
   textDecoration: "none",
-  color: isActive ? "white" : "#111",
-  background: isActive ? "#111" : "transparent",
+  color: isActive ? "#1a281f" : "#eadfbd",
+  background: isActive
+    ? "linear-gradient(180deg, #e2c37f 0%, #c79f52 100%)"
+    : "rgba(255,255,255,0.04)",
+  border: `1px solid ${isActive ? "#cda95e" : "rgba(205, 169, 94, 0.35)"}`,
+  boxShadow: isActive ? "0 6px 14px rgba(0,0,0,0.28)" : "none",
 });
 
 export default function NavBar() {
   return (
-    <div style={{ borderBottom: "1px solid #eee" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: 12, display: "flex", gap: 8 }}>
-        <strong style={{ marginRight: 12 }}>merdeleine.tw</strong>
+    <div style={{ borderBottom: "1px solid rgba(207, 173, 102, 0.35)", background: "rgba(8,20,16,0.72)" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: 12, display: "flex", gap: 8, alignItems: "center" }}>
+        <strong style={{ marginRight: 12, color: "#f0dfb3", letterSpacing: 0.5 }}>merdeleine.tw</strong>
         <NavLink to="/customer/products" style={linkStyle}>
           客人：商品列表
         </NavLink>

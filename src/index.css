@@ -1,11 +1,11 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light;
-  color: #222;
-  background-color: #f7f7f7;
+  color: #f6f0de;
+  background-color: #14342b;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,19 +15,28 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #d4b46a;
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: #eed79f;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+  display: block;
   min-width: 320px;
-  min-height: 100vh;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 15% -10%, rgba(212, 180, 106, 0.28), transparent 38%),
+    radial-gradient(circle at 90% 8%, rgba(212, 180, 106, 0.16), transparent 30%),
+    linear-gradient(180deg, #1b4639 0%, #15392f 55%, #102b23 100%);
+  color: #faf4e4;
+}
+
+h2,
+h3 {
+  color: #f1dba1;
 }
 
 h1 {
@@ -36,33 +45,58 @@ h1 {
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
+  border-radius: 10px;
+  border: 1px solid #d3b166;
   padding: 0.6em 1.2em;
   font-size: 1em;
-  font-weight: 500;
+  font-weight: 600;
   font-family: inherit;
-  background-color: #0cc4c2;
+  background: linear-gradient(180deg, #dcbc72 0%, #bd9648 100%);
+  color: #17281f;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.28);
 }
 button:hover {
-  border-color: #646cff;
+  filter: brightness(1.06);
+  transform: translateY(-1px);
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 2px solid #f0d593;
+  outline-offset: 2px;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+input,
+textarea,
+select {
+  border: 1px solid #5e6f57;
+  border-radius: 10px;
+  padding: 9px 10px;
+  background: #f9f5ea;
+  color: #1f2c23;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid #d4b46a;
+  outline-offset: 1px;
+}
+
+table {
+  background: #f8f4e8;
+  color: #203026;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+#root {
+  min-height: 100dvh;
 }

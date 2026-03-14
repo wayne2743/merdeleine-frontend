@@ -1,9 +1,27 @@
 import { http } from "./http";
 import type { OrderSummary } from "../types/domain";
 
+export type ReserveOrderRequest = {
+  sellWindowId: string;
+  productId: string;
+
+  quantity: number;
+  currency: string;
+  unitPriceCents: number;
+  customerId: string;
+};
+
 export const orderApi = {
-  async reserveOrder(input: { sellWindowId: string; productId: string; qty: number }): Promise<{ orderId: string }> {
-    const { data } = await http.post("/orders", { ...input, status: "RESERVED" });
+  async reserveOrder(input: ReserveOrderRequest): Promise<{ orderId: string }> {
+
+    const { data } = await http.post(
+      "/api/order/orders",
+      {
+        ...input,
+        status: "RESERVED"
+      }
+    );
+
     return data;
   },
 

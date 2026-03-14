@@ -22,7 +22,7 @@ export default function App() {
 
         {/* Customer */}
         <Route path="/customer/sell-windows" element={<SellWindowListPage />} />
-        <Route path="/customer/sell-windows/:sellWindowId" element={<SellWindowDetailPage />} />
+        <Route path="/customer/sell-windows/:productSellWindowId" element={<SellWindowDetailPage />} />
         <Route path="/customer/orders" element={<MyOrdersPage />} />
         <Route path="/customer/orders/:orderId/payment" element={<PaymentPage />} />
         <Route path="/customer/products" element={<CustomerProductsPage />} />
