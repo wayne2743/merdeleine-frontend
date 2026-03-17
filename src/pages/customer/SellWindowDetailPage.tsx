@@ -106,7 +106,7 @@ export default function SellWindowDetailPage() {
   if (!data) return <div>載入中...</div>;
 
   return (
-    <div>
+    <div className="page-container">
       <h2>檔期詳情 / 預約下單</h2>
 
       <div style={{ border: "1px solid #eee", borderRadius: 12, padding: 12 }}>
@@ -151,8 +151,8 @@ export default function SellWindowDetailPage() {
       </div> */}
       <div style={{ marginTop: 16, display: "grid", gap: 12, maxWidth: 520 }}>
         {/* quantity */}
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <label style={{ width: 110 }}>數量：</label>
+        <div className="detail-form-row">
+          <label>數量：</label>
           <input
             type="number"
             min={1}
@@ -160,13 +160,13 @@ export default function SellWindowDetailPage() {
             onChange={(e) =>
               setForm((p) => ({ ...p, quantity: Number(e.target.value) }))
             }
-            style={{ width: 200, padding: 8 }}
+            style={{ width: "100%", maxWidth: 240, padding: 8, boxSizing: "border-box" }}
           />
         </div>
 
         {/* currency */}
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <label style={{ width: 110 }}>幣別：</label>
+        <div className="detail-form-row">
+          <label>幣別：</label>
           <input
             type="text"
             value={form.currency}
@@ -174,13 +174,13 @@ export default function SellWindowDetailPage() {
               setForm((p) => ({ ...p, currency: e.target.value }))
             }
             placeholder="例如 TWD"
-            style={{ width: 200, padding: 8 }}
+            style={{ width: "100%", maxWidth: 240, padding: 8, boxSizing: "border-box" }}
           />
         </div>
 
         {/* unitPriceCents */}
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <label style={{ width: 110 }}>單價(分)：</label>
+        <div className="detail-form-row">
+          <label>單價(分)：</label>
           <input
             type="number"
             min={0}
@@ -189,13 +189,13 @@ export default function SellWindowDetailPage() {
               setForm((p) => ({ ...p, unitPriceCents: Number(e.target.value) }))
             }
             placeholder="例如 12000"
-            style={{ width: 200, padding: 8 }}
+            style={{ width: "100%", maxWidth: 240, padding: 8, boxSizing: "border-box" }}
           />
         </div>
 
         {/* customerId */}
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <label style={{ width: 110 }}>客戶ID：</label>
+        <div className="detail-form-row">
+          <label>客戶ID：</label>
           <input
             type="text"
             value={form.customerId}
@@ -203,7 +203,7 @@ export default function SellWindowDetailPage() {
               setForm((p) => ({ ...p, customerId: e.target.value }))
             }
             placeholder="UUID"
-            style={{ width: 360, padding: 8 }}
+            style={{ width: "100%", maxWidth: 420, padding: 8, boxSizing: "border-box" }}
           />
         </div>
 

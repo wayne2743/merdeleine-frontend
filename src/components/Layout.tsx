@@ -5,14 +5,7 @@ export default function Layout() {
   return (
     <div>
       <NavBar />
-      <main
-        style={{
-          maxWidth: 1100,
-          margin: "0 auto",
-          padding: 16,
-          color: "#f4efdf",
-        }}
-      >
+      <main className="app-main">
         <Outlet />
       </main>
     </div>

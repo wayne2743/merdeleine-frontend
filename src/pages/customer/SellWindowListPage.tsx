@@ -65,7 +65,7 @@ export default function SellWindowListPage() {
   }, [totalPages, page]);
 
   return (
-    <div style={{ padding: 16, maxWidth: 980, margin: "0 auto" }}>
+    <div className="page-container">
       <h2 style={{ marginBottom: 6, color: "#f2dfad", letterSpacing: 0.3 }}>可預約檔期</h2>
       <div style={{ fontSize: 12, color: "#eadfbd", marginBottom: 12 }}>
         顯示 {total === 0 ? 0 : page * PAGE_SIZE + 1} - {Math.min((page + 1) * PAGE_SIZE, total)} / 共 {total} 筆
@@ -107,7 +107,7 @@ export default function SellWindowListPage() {
               background: "#fff",
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+            <div className="sellwindow-card-top">
               <div>
                 <div style={{ fontWeight: 700, fontSize: 16, color: "#4a321f" }}>{it.productName}</div>
                 <div style={{ fontSize: 12, color: "#5f4a38", marginTop: 2 }}>

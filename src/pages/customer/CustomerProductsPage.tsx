@@ -73,14 +73,7 @@ export default function CustomerProductsPage() {
 
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailSelected, setDetailSelected] = useState<Product | null>(null);
-
-  const [activeOriginalPreviewUrl, setActiveOriginalPreviewUrl] = useState<string | null>(null);
-  const [hoverFocusPoint, setHoverFocusPoint] = useState<{ xPercent: number; yPercent: number } | null>(null);
-  const [hoverOriginalOpen, setHoverOriginalOpen] = useState(false);
-  const [hoverPreviewPosition, setHoverPreviewPosition] = useState<{ left: number; top: number }>({
-    left: 24,
-    top: 24,
-  });
+  const [originalModalUrl, setOriginalModalUrl] = useState<string | null>(null);
 
   const detailStripRef = useRef<HTMLDivElement | null>(null);
 
@@ -177,12 +170,7 @@ export default function CustomerProductsPage() {
 
   function openDetailModal(p: Product) {
     setDetailSelected(p);
-    const firstDetailOriginal = detailImageByProductId[p.id]?.[0]?.originalUrl ?? null;
-    const fallbackOriginal = originalImageByProductId[p.id] ?? null;
-    setActiveOriginalPreviewUrl(firstDetailOriginal || fallbackOriginal);
-    setHoverFocusPoint(null);
-    setHoverPreviewPosition({ left: 24, top: 24 });
-    setHoverOriginalOpen(false);
+    setOriginalModalUrl(null);
     setDetailOpen(true);
 
     if (detailStripRef.current) {
@@ -219,81 +207,71 @@ export default function CustomerProductsPage() {
   }
 
   return (
-    <div style={{ padding: 16, maxWidth: 980, margin: "0 auto" }}>
-      <h2 style={{ marginBottom: 6, color: "#f2dfad", letterSpacing: 0.3 }}>商品列表</h2>
-      <div style={{ fontSize: 12, color: "#eadfbd", marginBottom: 12 }}>
+    <div className="page-container customer-products-page">
+      <div className="customer-products-head">
+        <p className="customer-products-kicker">CUSTOMER PICKS</p>
+        <h2>商品列表</h2>
+      </div>
+      <div className="customer-products-subtitle">
         選擇商品後可直接「發起開團 / 立即預約」，檔期時間由系統自動規劃。
       </div>
 
-      {loading && <div>載入中...</div>}
-      {error && <div style={{ color: "#b00020" }}>錯誤：{error}</div>}
+      {loading && <div className="customer-products-hint">載入中...</div>}
+      {error && <div className="customer-products-error">錯誤：{error}</div>}
 
-      <div style={{ display: "grid", gap: 12 }}>
-        {products.map((p) => (
-          <div
-            key={p.id}
-            onClick={() => openDetailModal(p)}
-            style={{
-              border: "1px solid #ddd",
-              borderRadius: 12,
-              padding: 12,
-              background: "#fff",
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 12,
-              alignItems: "center",
-              cursor: "pointer",
-            }}
-          >
-            <div style={{ display: "flex", gap: 12, alignItems: "center", flex: 1, minWidth: 0 }}>
-              <div
-                style={{
-                  width: 96,
-                  height: 96,
-                  borderRadius: 10,
-                  overflow: "hidden",
-                  background: "#f4f4f4",
-                  border: "1px solid #eee",
-                  flexShrink: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {thumbnailByProductId[p.id] ? (
-                  <img
-                    src={thumbnailByProductId[p.id]}
-                    alt={p.name}
-                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                  />
+      <div className="featured-grid customer-products-grid">
+        {products.map((p) => {
+          const imageUrl =
+            thumbnailByProductId[p.id] ||
+            detailImageByProductId[p.id]?.[0]?.detailUrl ||
+            originalImageByProductId[p.id] ||
+            "";
+
+          const descriptionText = (p.description ?? "(暫無描述)")
+            .replace(/\\n/g, "\n")
+            .split(/\r?\n/)
+            .filter((line) => line.trim().length > 0)
+            .join(" ");
+
+          return (
+            <article
+              key={p.id}
+              onClick={() => openDetailModal(p)}
+              className="featured-card customer-product-card"
+            >
+              <div className="customer-product-media">
+                {imageUrl ? (
+                  <img src={imageUrl} alt={p.name} />
                 ) : (
-                  <div style={{ fontSize: 12, color: "#999" }}>暫無圖片</div>
+                  <div className="product-thumb-empty">暫無圖片</div>
                 )}
               </div>
 
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontWeight: 700, fontSize: 16, color: "#4a321f" }}>{p.name}</div>
-                <div style={{ fontSize: 12, color: "#5f4a38", marginTop: 4 }}>
-                  {p.description || "（無描述）"}
+              <div className="featured-body customer-product-body">
+                <h3>{p.name}</h3>
+                <p className="customer-product-desc">{descriptionText}</p>
+                <div className="featured-row customer-product-row">
+                  <strong>{formatPrice(p)}</strong>
+                  <span className="product-status">狀態：{p.status}</span>
                 </div>
-                <div style={{ fontSize: 12, color: "#7a6755", marginTop: 6 }}>狀態：{p.status}</div>
-              </div>
-            </div>
 
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                openModal(p);
-              }}
-              disabled={p.status !== "ACTIVE"}
-            >
-              發起開團 / 立即預約
-            </button>
-          </div>
-        ))}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openModal(p);
+                  }}
+                  disabled={p.status !== "ACTIVE"}
+                  className="product-action-btn customer-product-btn"
+                >
+                  發起開團 / 立即預約
+                </button>
+              </div>
+            </article>
+          );
+        })}
       </div>
 
-      {!loading && !error && products.length === 0 && <div style={{ color: "#666" }}>目前沒有商品</div>}
+      {!loading && !error && products.length === 0 && <div className="customer-products-hint">目前沒有商品</div>}
 
       {detailOpen && detailSelected && (
         <div
@@ -308,11 +286,20 @@ export default function CustomerProductsPage() {
             alignItems: "center",
             justifyContent: "center",
             padding: 16,
+            overflowY: "auto",
           }}
           onClick={() => setDetailOpen(false)}
         >
           <div
-            style={{ width: "100%", maxWidth: 680, background: "#fff", borderRadius: 12, padding: 16 }}
+            style={{
+              width: "100%",
+              maxWidth: 680,
+              maxHeight: "calc(100dvh - 32px)",
+              overflowY: "auto",
+              background: "#fff",
+              borderRadius: 12,
+              padding: 16,
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
@@ -382,42 +369,10 @@ export default function CustomerProductsPage() {
                         <img
                           src={item.detailUrl}
                           alt={`${detailSelected.name}-detail-${index + 1}`}
-                          onMouseEnter={() => {
-                            setActiveOriginalPreviewUrl(
+                          onClick={() => {
+                            setOriginalModalUrl(
                               item.originalUrl || originalImageByProductId[detailSelected.id] || null
                             );
-                            setHoverOriginalOpen(true);
-                          }}
-                          onMouseMove={(e) => {
-                            const rect = e.currentTarget.getBoundingClientRect();
-                            const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
-                            const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
-                            const previewWidth = Math.min(window.innerWidth * 0.46, 760);
-                            const previewHeight = Math.min(window.innerHeight * 0.62, 560);
-                            const gap = 18;
-
-                            let left = e.clientX + gap;
-                            let top = e.clientY + gap;
-
-                            if (left + previewWidth > window.innerWidth - 8) {
-                              left = e.clientX - previewWidth - gap;
-                            }
-                            if (top + previewHeight > window.innerHeight - 8) {
-                              top = e.clientY - previewHeight - gap;
-                            }
-
-                            left = Math.max(8, left);
-                            top = Math.max(8, top);
-
-                            setHoverFocusPoint({
-                              xPercent: Math.max(0, Math.min(100, xPercent)),
-                              yPercent: Math.max(0, Math.min(100, yPercent)),
-                            });
-                            setHoverPreviewPosition({ left, top });
-                          }}
-                          onMouseLeave={() => {
-                            setHoverFocusPoint(null);
-                            setHoverOriginalOpen(false);
                           }}
                           style={{
                             width: "100%",
@@ -467,44 +422,65 @@ export default function CustomerProductsPage() {
               )}
             </div>
 
-            {hoverOriginalOpen && (activeOriginalPreviewUrl || originalImageByProductId[detailSelected.id]) && (
+            {originalModalUrl && (
               <div
                 style={{
                   position: "fixed",
-                  top: hoverPreviewPosition.top,
-                  left: hoverPreviewPosition.left,
-                  width: "min(46vw, 760px)",
-                  height: "min(62vh, 560px)",
-                  background: "rgba(0,0,0,0.75)",
-                  borderRadius: 12,
+                  left: 0,
+                  top: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: "rgba(0,0,0,0.65)",
                   display: "flex",
-                  flexDirection: "column",
-                  padding: 10,
-                  zIndex: 30,
-                  pointerEvents: "none",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 16,
+                  zIndex: 40,
                 }}
+                onClick={() => setOriginalModalUrl(null)}
               >
                 <div
                   style={{
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    borderRadius: 10,
+                    width: "min(92vw, 1200px)",
+                    height: "min(88vh, 860px)",
+                    borderRadius: 12,
                     overflow: "hidden",
                     background: "#111",
-                    flex: 1,
+                    border: "1px solid rgba(255,255,255,0.18)",
+                    position: "relative",
                   }}
+                  onClick={(e) => e.stopPropagation()}
                 >
+                  <button
+                    onClick={() => setOriginalModalUrl(null)}
+                    style={{ position: "absolute", top: 10, right: 10, zIndex: 2 }}
+                  >
+                    關閉
+                  </button>
                   <div
                     style={{
                       width: "100%",
                       height: "100%",
-                      backgroundImage: `url(${activeOriginalPreviewUrl || originalImageByProductId[detailSelected.id]})`,
-                      backgroundRepeat: "no-repeat",
-                      backgroundSize: "auto",
-                      backgroundPosition: hoverFocusPoint
-                        ? `${hoverFocusPoint.xPercent}% ${hoverFocusPoint.yPercent}%`
-                        : "center center",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: 8,
+                      boxSizing: "border-box",
                     }}
-                  />
+                  >
+                    <img
+                      src={originalModalUrl}
+                      alt={`${detailSelected.name}-original`}
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        width: "auto",
+                        height: "auto",
+                        objectFit: "contain",
+                        display: "block",
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             )}
@@ -531,11 +507,20 @@ export default function CustomerProductsPage() {
             alignItems: "center",
             justifyContent: "center",
             padding: 16,
+            overflowY: "auto",
           }}
           onClick={() => setOpen(false)}
         >
           <div
-            style={{ width: "100%", maxWidth: 520, background: "#fff", borderRadius: 12, padding: 16 }}
+            style={{
+              width: "100%",
+              maxWidth: 520,
+              maxHeight: "calc(100dvh - 32px)",
+              overflowY: "auto",
+              background: "#fff",
+              borderRadius: 12,
+              padding: 16,
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 12 }}>發起開團：{selected.name}</div>
