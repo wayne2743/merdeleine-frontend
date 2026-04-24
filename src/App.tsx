@@ -11,9 +11,11 @@ import HomePage from "./pages/HomePage.tsx";
 
 // admin pages
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
-import SellWindowAdminPage from "./pages/admin/SellWindowAdminPage";
 import ConfirmBatchPage from "./pages/admin/ConfirmBatchPage";
 import ProductionPage from "./pages/admin/ProductionPage";
+import ProductAdminPage from "./pages/admin/ProductAdminPage";
+import PaymentAdminPage from "./pages/admin/PaymentAdminPage";
+import SellWindowCrudPage from "./pages/admin/SellWindowCrudPage";
 
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -41,9 +43,12 @@ export default function App() {
 
           <Route element={<RequireRole allow={["ADMIN"]} />}>
             <Route path="/admin" element={<AdminDashboardPage />} />
-            <Route path="/admin/sell-windows" element={<SellWindowAdminPage />} />
+            <Route path="/admin/products" element={<ProductAdminPage />} />
+            <Route path="/admin/payments" element={<PaymentAdminPage />} />
+            <Route path="/admin/sell-window-crud" element={<SellWindowCrudPage />} />
             <Route path="/admin/confirm" element={<ConfirmBatchPage />} />
             <Route path="/admin/production" element={<ProductionPage />} />
+            <Route path="/admin/production-planning" element={<ProductionPage />} />
           </Route>
         </Route>
       </Route>

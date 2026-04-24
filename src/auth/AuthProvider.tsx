@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { authApi } from "../api/authApi";
-import { setTokenGetter } from "../api/http";
+import { setTokenGetter, setUnauthorizedHandler } from "../api/http";
 import type { AuthMeResponse, AuthUser, Role } from "../types/auth";
 
 type AuthStatus = "loading" | "authenticated" | "anonymous";
@@ -11,6 +11,7 @@ type AuthContextValue = {
   token: string | null;
   roles: Role[];
   loginWithGoogle: () => void;
+  loginWithFacebook: () => void;
   logout: () => Promise<void>;
   refreshMe: () => Promise<void>;
   /** 直接用後端回傳的 MeResponse 佔用 auth context（例如註冊後拿到新 JWT）*/
@@ -105,8 +106,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setTokenGetter(() => token);
   }, [token]);
 
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      clearAuth();
+    });
+  }, []);
+
   function loginWithGoogle() {
     authApi.startGoogleLogin();
+  }
+
+  function loginWithFacebook() {
+    authApi.startFacebookLogin();
   }
 
   async function logout() {
@@ -126,6 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       token,
       roles,
       loginWithGoogle,
+      loginWithFacebook,
       logout,
       refreshMe,
       applyAuthResponse,

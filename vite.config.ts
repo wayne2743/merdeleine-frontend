@@ -9,6 +9,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": { target, changeOrigin: true },
+      "/orders": { target, changeOrigin: true },
       "/auth": { target, changeOrigin: true },
       "/oauth2": { target, changeOrigin: true },
       "/bff": { target, changeOrigin: true },
