@@ -12,6 +12,7 @@ type AuthContextValue = {
   roles: Role[];
   loginWithGoogle: () => void;
   loginWithFacebook: () => void;
+  loginWithLine: () => void;
   logout: () => Promise<void>;
   refreshMe: () => Promise<void>;
   /** 直接用後端回傳的 MeResponse 佔用 auth context（例如註冊後拿到新 JWT）*/
@@ -120,6 +121,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     authApi.startFacebookLogin();
   }
 
+  function loginWithLine() {
+    authApi.startLineLogin();
+  }
+
   async function logout() {
     try {
       await authApi.logout();
@@ -138,6 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       roles,
       loginWithGoogle,
       loginWithFacebook,
+      loginWithLine,
       logout,
       refreshMe,
       applyAuthResponse,

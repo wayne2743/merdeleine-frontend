@@ -1,6 +1,8 @@
 import { http } from "./http";
 import type { AuthMeResponse } from "../types/auth";
 
+const OAUTH_BASE_URL = import.meta.env.VITE_OAUTH_BASE_URL ?? "http://localhost:8089";
+
 export type RegisterPayload = {
   contactName: string;
   contactPhone: string;
@@ -67,10 +69,14 @@ export const authApi = {
   },
 
   startGoogleLogin() {
-    window.location.href = "/oauth2/authorization/google";
+    window.location.href = `${OAUTH_BASE_URL}/oauth2/authorization/google`;
   },
 
   startFacebookLogin() {
-    window.location.href = "http://localhost:8089/oauth2/authorization/facebook";
+    window.location.href = `${OAUTH_BASE_URL}/oauth2/authorization/facebook`;
+  },
+
+  startLineLogin() {
+    window.location.href = `${OAUTH_BASE_URL}/oauth2/authorization/line`;
   },
 };

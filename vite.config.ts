@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const target = "http://localhost:8089";
+// const target = "http://localhost:8089";
+const target = "https://api.merdeleine.com";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -15,5 +16,9 @@ export default defineConfig({
       "/bff": { target, changeOrigin: true },
       "/logout": { target, changeOrigin: true },
     },
+    allowedHosts: [
+      'merdeleine.com',
+      'www.merdeleine.com'
+    ]
   },
 })

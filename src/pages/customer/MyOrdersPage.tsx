@@ -77,11 +77,10 @@ function getOrderStatusClassName(status: OrderSummary["status"]): string {
   return "is-reserved";
 }
 
-const ORDER_STATUS_TABS = ["ALL", "RESERVED", "PAYMENT_REQUESTED", "PAID", "EXPIRED"] as const;
+const ORDER_STATUS_TABS = ["RESERVED", "PAYMENT_REQUESTED", "PAID", "EXPIRED"] as const;
 type OrderStatusTab = (typeof ORDER_STATUS_TABS)[number];
 
 function getOrderStatusFilterLabel(status: OrderStatusTab): string {
-  if (status === "ALL") return "全部";
   if (status === "RESERVED") return "已預約";
   if (status === "PAYMENT_REQUESTED") return "待付款";
   if (status === "PAID") return "已付款";
@@ -127,20 +126,16 @@ export default function MyOrdersPage() {
     open: false,
     maxAllowed: null,
   });
-  const [activeStatusTab, setActiveStatusTab] = useState<OrderStatusTab>("ALL");
+  const [activeStatusTab, setActiveStatusTab] = useState<OrderStatusTab>("RESERVED");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const filteredItems = items.filter((order) => activeStatusTab === "ALL" || order.status === activeStatusTab);
+  const filteredItems = items.filter((order) => order.status === activeStatusTab);
 
   const tabOrderCounts = ORDER_STATUS_TABS.reduce<Record<OrderStatusTab, number>>((acc, tab) => {
-    if (tab === "ALL") {
-      acc[tab] = items.length;
-      return acc;
-    }
     acc[tab] = items.filter((order) => order.status === tab).length;
     return acc;
-  }, { ALL: 0, RESERVED: 0, PAYMENT_REQUESTED: 0, PAID: 0, EXPIRED: 0 });
+  }, { RESERVED: 0, PAYMENT_REQUESTED: 0, PAID: 0, EXPIRED: 0 });
 
   async function loadOrdersForUser(customerId: string) {
     setLoading(true);
