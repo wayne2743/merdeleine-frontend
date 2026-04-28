@@ -12,33 +12,6 @@ type FeaturedProductCard = {
   actionTo: string;
 };
 
-const DEFAULT_FEATURED_PRODUCTS: FeaturedProductCard[] = [
-  {
-    id: "default-earl-grey-madeleine",
-    name: "伯爵茶瑪德蓮",
-    desc: "佛手柑香氣與奶油尾韻，口感濕潤。",
-    price: "NT$ 65",
-    image: "https://images.unsplash.com/photo-1621743478914-cc8a86d7e7b5?auto=format&fit=crop&w=900&q=80",
-    actionTo: "/customer/products",
-  },
-  {
-    id: "default-canele",
-    name: "焦糖海鹽可麗露",
-    desc: "外脆內柔，帶焦糖與海鹽平衡。",
-    price: "NT$ 80",
-    image: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=900&q=80",
-    actionTo: "/customer/products",
-  },
-  {
-    id: "default-basque",
-    name: "開心果巴斯克",
-    desc: "濃郁奶香，尾韻有堅果甜香。",
-    price: "NT$ 180",
-    image: "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=900&q=80",
-    actionTo: "/customer/products",
-  },
-];
-
 function pickHomeImage(images: ProductImage[]): string | null {
   const activeImages = images.filter((image) => image.isActive);
 
@@ -71,7 +44,7 @@ function formatPrice(product: Product): string {
 }
 
 export default function HomePage() {
-  const [featuredProducts, setFeaturedProducts] = useState<FeaturedProductCard[]>(DEFAULT_FEATURED_PRODUCTS);
+  const [featuredProducts, setFeaturedProducts] = useState<FeaturedProductCard[]>([]);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
 
   useEffect(() => {
@@ -101,26 +74,31 @@ export default function HomePage() {
 
         if (cancelled) return;
 
-        const nextCards = finalProducts.map((product, index) => {
-          const fallback = DEFAULT_FEATURED_PRODUCTS[index % DEFAULT_FEATURED_PRODUCTS.length];
-          const images = imageResults[index]?.status === "fulfilled" ? imageResults[index].value : [];
-          const desc = trimDescription(decodeDescription(product.description) || fallback.desc);
+        const nextCards = finalProducts
+          .map((product, index) => {
+            const images = imageResults[index]?.status === "fulfilled" ? imageResults[index].value : [];
+            const image = pickHomeImage(images);
 
-          return {
-            id: product.id,
-            name: product.name || fallback.name,
-            desc,
-            price: formatPrice(product),
-            image: pickHomeImage(images) || fallback.image,
-            actionTo: `/customer/products?action=group&productId=${encodeURIComponent(product.id)}`,
-          };
-        });
+            if (!image) return null;
+
+            const desc = trimDescription(decodeDescription(product.description));
+
+            return {
+              id: product.id,
+              name: product.name,
+              desc,
+              price: formatPrice(product),
+              image,
+              actionTo: `/customer/products?action=group&productId=${encodeURIComponent(product.id)}`,
+            };
+          })
+          .filter((item): item is FeaturedProductCard => item !== null);
 
         setFeaturedProducts(nextCards);
       } catch (error) {
         console.error(error);
         if (!cancelled) {
-          setFeaturedProducts(DEFAULT_FEATURED_PRODUCTS);
+          setFeaturedProducts([]);
         }
       } finally {
         if (!cancelled) {
