@@ -49,10 +49,31 @@ function normalizeRoles(rawRoles: string[]): string[] {
   return rawRoles.map((r) => (r.startsWith("ROLE_") ? r.slice(5) : r));
 }
 
+function getInitialAccessToken(): string | null {
+  const storedToken = sessionStorage.getItem("accessToken");
+  if (storedToken) {
+    return storedToken;
+  }
+
+  const url = new URL(window.location.href);
+  const tokenFromQuery = url.searchParams.get("token")?.trim();
+
+  if (!tokenFromQuery || url.pathname === "/register") {
+    return null;
+  }
+
+  sessionStorage.setItem("accessToken", tokenFromQuery);
+  url.searchParams.delete("token");
+  const nextUrl = `${url.pathname}${url.search}${url.hash}`;
+  window.history.replaceState({}, document.title, nextUrl || "/");
+
+  return tokenFromQuery;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(() => sessionStorage.getItem("accessToken"));
+  const [token, setToken] = useState<string | null>(() => getInitialAccessToken());
 
   const roles = user?.roles ?? [];
 
@@ -100,12 +121,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    void refreshMe();
-  }, []);
-
-  useEffect(() => {
     setTokenGetter(() => token);
   }, [token]);
+
+  useEffect(() => {
+    void refreshMe();
+  }, []);
 
   useEffect(() => {
     setUnauthorizedHandler(() => {
