@@ -26,7 +26,10 @@ function looksLikeHtml(data: unknown): boolean {
 
 http.interceptors.request.use((config) => {
   const token = tokenGetter();
-  if (token) {
+  const requestUrl = String(config?.url ?? "");
+
+  // /auth/me must use cookie session only; bearer token can cause false 401 with OAuth2User validation
+  if (token && !requestUrl.includes("/auth/me")) {
     config.headers = config.headers ?? {};
     (config.headers as Record<string, string>).Authorization = `Bearer ${token}`;
   }

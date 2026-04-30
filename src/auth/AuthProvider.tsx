@@ -49,25 +49,16 @@ function normalizeRoles(rawRoles: string[]): string[] {
 }
 
 function getInitialAccessToken(): string | null {
-  const url = new URL(window.location.href);
-  const tokenFromQuery = url.searchParams.get("token")?.trim();
-
-  if (tokenFromQuery && url.pathname !== "/register") {
-    sessionStorage.setItem("accessToken", tokenFromQuery);
-    url.searchParams.delete("token");
-    const nextUrl = `${url.pathname}${url.search}${url.hash}`;
-    window.history.replaceState({}, document.title, nextUrl || "/");
-    return tokenFromQuery;
-  }
-
-  const storedToken = sessionStorage.getItem("accessToken");
-  return storedToken || null;
+  // Do NOT store or return callback token from URL.
+  // Let refreshMe handle the callback via cookie-only /auth/me.
+  return sessionStorage.getItem("accessToken");
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(() => getInitialAccessToken());
+  const [hasProcessedCallback, setHasProcessedCallback] = useState(false);
 
   const roles = user?.roles ?? [];
 
@@ -119,8 +110,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [token]);
 
   useEffect(() => {
+    // Handle OAuth callback: detect and clean up callback token in URL
+    if (!hasProcessedCallback) {
+      const url = new URL(window.location.href);
+      const callbackToken = url.searchParams.get("token")?.trim();
+
+      if (callbackToken && url.pathname !== "/register") {
+        // Clean up callback token from URL; refreshMe will verify via cookie-only /auth/me
+        url.searchParams.delete("token");
+        window.history.replaceState({}, document.title, url.toString() || "/");
+      }
+
+      setHasProcessedCallback(true);
+    }
+
     void refreshMe();
-  }, []);
+  }, [hasProcessedCallback]);
 
   useEffect(() => {
     setUnauthorizedHandler(() => {
