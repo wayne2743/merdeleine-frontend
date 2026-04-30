@@ -50,24 +50,19 @@ function normalizeRoles(rawRoles: string[]): string[] {
 }
 
 function getInitialAccessToken(): string | null {
-  const storedToken = sessionStorage.getItem("accessToken");
-  if (storedToken) {
-    return storedToken;
-  }
-
   const url = new URL(window.location.href);
   const tokenFromQuery = url.searchParams.get("token")?.trim();
 
-  if (!tokenFromQuery || url.pathname === "/register") {
-    return null;
+  if (tokenFromQuery && url.pathname !== "/register") {
+    sessionStorage.setItem("accessToken", tokenFromQuery);
+    url.searchParams.delete("token");
+    const nextUrl = `${url.pathname}${url.search}${url.hash}`;
+    window.history.replaceState({}, document.title, nextUrl || "/");
+    return tokenFromQuery;
   }
 
-  sessionStorage.setItem("accessToken", tokenFromQuery);
-  url.searchParams.delete("token");
-  const nextUrl = `${url.pathname}${url.search}${url.hash}`;
-  window.history.replaceState({}, document.title, nextUrl || "/");
-
-  return tokenFromQuery;
+  const storedToken = sessionStorage.getItem("accessToken");
+  return storedToken || null;
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
