@@ -17,10 +17,8 @@ export type BatchUserProfile = {
 };
 
 export const authApi = {
-  async me(accessToken?: string | null): Promise<AuthMeResponse> {
-    const { data } = await http.get<AuthMeResponse>("/auth/me", {
-      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
-    });
+  async me(): Promise<AuthMeResponse> {
+    const { data } = await http.get<AuthMeResponse>("/auth/me");
     return data;
   },
 

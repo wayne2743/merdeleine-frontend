@@ -32,7 +32,6 @@ function isAuthMeResponse(data: unknown): data is AuthMeResponse {
   if (typeof value.provider !== "string") return false;
   if (!Array.isArray(value.roles)) return false;
   if (!value.roles.every((r) => typeof r === "string")) return false;
-  if (typeof value.token !== "string" || value.token.trim() === "") return false;
 
   return true;
 }
@@ -90,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function refreshMe() {
     try {
-      const meUnknown = (await authApi.me(token)) as unknown;
+      const meUnknown = (await authApi.me()) as unknown;
 
       // /auth/me 被導去登入頁時，多半拿到 HTML，不可視為 authenticated
       if (looksLikeHtml(meUnknown)) {
