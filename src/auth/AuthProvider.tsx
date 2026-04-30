@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function refreshMe() {
     try {
-      const meUnknown = (await authApi.me()) as unknown;
+      const meUnknown = (await authApi.me(token)) as unknown;
 
       // /auth/me 被導去登入頁時，多半拿到 HTML，不可視為 authenticated
       if (looksLikeHtml(meUnknown)) {
