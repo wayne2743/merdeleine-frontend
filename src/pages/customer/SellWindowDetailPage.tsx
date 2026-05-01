@@ -13,6 +13,25 @@ function sortImages(images: ProductImage[]): ProductImage[] {
   return [...images].sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary) || a.sortOrder - b.sortOrder);
 }
 
+function pickHeroImage(images: ProductImage[]): string | null {
+  const activeImages = images.filter((img) => img.isActive);
+
+  const galleryImage = sortImages(
+    activeImages.filter((img) => String(img.imageType).toUpperCase() === "GALLERY")
+  )[0];
+  if (galleryImage?.cdnUrl) return galleryImage.cdnUrl;
+
+  const thumbnailImage = sortImages(
+    activeImages.filter((img) => String(img.imageType).toUpperCase() === "THUMBNAIL")
+  )[0];
+  if (thumbnailImage?.cdnUrl) return thumbnailImage.cdnUrl;
+
+  const originalImage = sortImages(
+    activeImages.filter((img) => String(img.imageType).toUpperCase() === "ORIGINAL")
+  )[0];
+  return originalImage?.cdnUrl ?? null;
+}
+
 export default function SellWindowDetailPage() {
   const { productSellWindowId } = useParams();
   const nav = useNavigate();
@@ -59,10 +78,7 @@ export default function SellWindowDetailPage() {
       .listProductImages(data.productId)
       .then((images) => {
         if (cancelled) return;
-        const thumbnail = sortImages(
-          images.filter((img) => img.isActive && img.imageType === "THUMBNAIL")
-        )[0];
-        setThumbnailUrl(thumbnail?.cdnUrl ?? null);
+        setThumbnailUrl(pickHeroImage(images));
       })
       .catch(() => {
         if (cancelled) return;
