@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { catalogApi } from "../../api/catalogApi";
+import { fetchImageWithCache } from "../../utils/imageCache";
 import { useAuth } from "../../auth/AuthProvider";
 import type {
   Product,
@@ -242,9 +243,11 @@ export default function CustomerProductsPage() {
         const imageResults = await Promise.allSettled(
           nextProducts.map(async (product) => {
             const images = await catalogApi.listProductImages(product.id);
+            const cardImageUrl = pickCardImageUrl(images);
+            const cachedCardUrl = cardImageUrl ? await fetchImageWithCache(cardImageUrl) : null;
             return [
               product.id,
-              pickCardImageUrl(images),
+              cachedCardUrl,
               buildDetailPreviewItems(images),
               pickImageUrl(images, "ORIGINAL"),
             ] as const;

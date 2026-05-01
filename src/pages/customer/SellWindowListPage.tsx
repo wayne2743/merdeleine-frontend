@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { catalogApi } from "../../api/catalogApi";
+import { fetchImageWithCache } from "../../utils/imageCache";
 import type { ProductSellWindowView } from "../../types/domain";
 
 const PAGE_SIZE = 10;
@@ -76,7 +77,9 @@ export default function SellWindowListPage() {
         const imageResults = await Promise.allSettled(
           nextItems.map(async (it) => {
             const images = await catalogApi.listProductImages(it.productId);
-            return [it.productId, pickImageUrl(images)] as const;
+            const imageUrl = pickImageUrl(images);
+            const cachedUrl = imageUrl ? await fetchImageWithCache(imageUrl) : "";
+            return [it.productId, cachedUrl] as const;
           })
         );
 

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { catalogApi } from "../../api/catalogApi";
 import { orderApi } from "../../api/orderApi";
+import { fetchImageWithCache } from "../../utils/imageCache";
 import { useAuth } from "../../auth/AuthProvider";
 import type { ProductImage, ProductSellWindowView } from "../../types/domain";
 
@@ -76,9 +77,15 @@ export default function SellWindowDetailPage() {
 
     catalogApi
       .listProductImages(data.productId)
-      .then((images) => {
+      .then(async (images) => {
         if (cancelled) return;
-        setThumbnailUrl(pickHeroImage(images));
+        const heroImage = pickHeroImage(images);
+        if (heroImage) {
+          const cachedUrl = await fetchImageWithCache(heroImage);
+          if (!cancelled) setThumbnailUrl(cachedUrl);
+        } else {
+          if (!cancelled) setThumbnailUrl(null);
+        }
       })
       .catch(() => {
         if (cancelled) return;
