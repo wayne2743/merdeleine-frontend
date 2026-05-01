@@ -818,15 +818,17 @@ export default function CustomerProductsPage() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              type="button"
-              onClick={() => setOrderOpen(false)}
-              aria-label="關閉視窗"
-              title="關閉"
-              className="modal-close-btn modal-close-btn-sticky"
-            >
-              ×
-            </button>
+            <div className="customer-order-modal-topbar">
+              <button
+                type="button"
+                onClick={() => setOrderOpen(false)}
+                aria-label="關閉視窗"
+                title="關閉"
+                className="modal-close-btn customer-order-close-btn"
+              >
+                ×
+              </button>
+            </div>
 
             {reserveSuccess ? (
               <div style={{ textAlign: "center", padding: "8px 0 4px" }}>
