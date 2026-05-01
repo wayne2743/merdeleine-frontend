@@ -179,7 +179,7 @@ export default function SellWindowDetailPage() {
         {/* 圖片區 */}
         <div
           style={{
-            width: "min(100%, 300px)",
+            width: "100%",
             aspectRatio: "4 / 3",
             background: "rgba(0,0,0,0.25)",
             flexShrink: 0,
