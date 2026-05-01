@@ -863,7 +863,7 @@ export default function CustomerProductsPage() {
                 </div>
               </div>
             ) : (
-              <>
+              <div className="customer-order-modal-body">
                 <div style={{ fontWeight: 800, fontSize: 17, color: "#4a321f", marginBottom: 6 }}>
                   {orderSelected.name}
                 </div>
@@ -1023,7 +1023,7 @@ export default function CustomerProductsPage() {
                     {reserving === orderSelected.id ? "處理中…" : "確認預約"}
                   </button>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>

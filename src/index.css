@@ -901,6 +901,15 @@ table {
   overscroll-behavior: contain;
 }
 
+.customer-order-modal-topbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.customer-order-modal-body {
+  min-height: 0;
+}
+
 .customer-order-modal-actions {
   width: 100%;
 }
@@ -2385,7 +2394,31 @@ table {
     padding: 16px 14px !important;
     padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 20px)) !important;
     border-radius: 0 !important;
-    overflow-y: auto !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .customer-order-modal-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    padding-bottom: 10px;
+    background: #ffffff;
+    flex-shrink: 0;
+  }
+
+  .customer-order-close-btn {
+    position: static;
+    margin-left: auto;
+  }
+
+  .customer-order-modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: 16px;
   }
 
   .customer-order-modal-actions {
@@ -2612,11 +2645,3 @@ body.modal-scroll-lock {
   color: #3b2d20;
 }
 
-.modal-close-btn-sticky {
-  position: sticky;
-  top: 0;
-  right: auto;
-  margin-left: auto;
-  margin-bottom: 12px;
-  z-index: 6;
-}
