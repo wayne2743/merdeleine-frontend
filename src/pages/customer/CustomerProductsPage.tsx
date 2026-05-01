@@ -229,6 +229,19 @@ export default function CustomerProductsPage() {
   const [autoTriggeredProductId, setAutoTriggeredProductId] = useState<string | null>(null);
 
   useEffect(() => {
+    const shouldLockScroll = detailOpen || !!originalModalUrl;
+    if (shouldLockScroll) {
+      document.documentElement.classList.add("modal-scroll-lock");
+      document.body.classList.add("modal-scroll-lock");
+    }
+
+    return () => {
+      document.documentElement.classList.remove("modal-scroll-lock");
+      document.body.classList.remove("modal-scroll-lock");
+    };
+  }, [detailOpen, originalModalUrl]);
+
+  useEffect(() => {
     let cancelled = false;
     async function load() {
       setLoading(true);

@@ -118,6 +118,7 @@ table {
 }
 
 .app-main {
+  --mobile-nav-height: 64px;
   width: 100%;
   max-width: 1100px;
   margin: 0 auto;
@@ -575,6 +576,14 @@ table {
 
 .customer-modal-backdrop {
   overflow-y: auto;
+}
+
+.customer-detail-modal-backdrop {
+  overscroll-behavior: contain;
+}
+
+.customer-detail-modal {
+  overscroll-behavior: contain;
 }
 
 .customer-modal-panel {
@@ -2001,15 +2010,17 @@ table {
     padding: 0 !important;
     background: #ffffff !important;
     overflow: hidden !important;
+    top: var(--mobile-nav-height) !important;
+    bottom: 0 !important;
   }
 
   .customer-detail-modal {
     width: 100% !important;
     max-width: none !important;
-    height: 100svh !important;
-    max-height: 100svh !important;
+    height: calc(100svh - var(--mobile-nav-height)) !important;
+    max-height: calc(100svh - var(--mobile-nav-height)) !important;
     border-radius: 0 !important;
-    padding: max(16px, calc(env(safe-area-inset-top) + 12px)) 14px max(16px, calc(env(safe-area-inset-bottom) + 12px)) !important;
+    padding: 16px 14px max(16px, calc(env(safe-area-inset-bottom) + 12px)) !important;
     overflow-y: auto !important;
   }
 
@@ -2073,6 +2084,13 @@ table {
   button {
     padding: 0.55em 0.9em;
   }
+}
+
+html.modal-scroll-lock,
+body.modal-scroll-lock {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+  height: 100%;
 }
 
 /* ── Register Page ───────────────────────────────────────── */
