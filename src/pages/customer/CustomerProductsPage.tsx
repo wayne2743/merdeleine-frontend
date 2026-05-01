@@ -60,13 +60,17 @@ function getIsoWeekInfo(iso?: string | null): { year: number; week: number } | n
 
 function pickImageUrl(
   images: ProductImage[],
-  imageType: "THUMBNAIL" | "DETAIL" | "ORIGINAL"
+  imageType: "THUMBNAIL" | "DETAIL" | "ORIGINAL" | "GALLERY"
 ): string | null {
   const selectedImage = [...images]
     .filter((image) => image.isActive && image.imageType === imageType)
     .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary) || a.sortOrder - b.sortOrder)[0];
 
   return selectedImage?.cdnUrl ?? null;
+}
+
+function pickCardImageUrl(images: ProductImage[]): string | null {
+  return pickImageUrl(images, "GALLERY") || pickImageUrl(images, "THUMBNAIL") || pickImageUrl(images, "ORIGINAL");
 }
 
 type DetailPreviewItem = {
@@ -240,7 +244,7 @@ export default function CustomerProductsPage() {
             const images = await catalogApi.listProductImages(product.id);
             return [
               product.id,
-              pickImageUrl(images, "THUMBNAIL"),
+              pickCardImageUrl(images),
               buildDetailPreviewItems(images),
               pickImageUrl(images, "ORIGINAL"),
             ] as const;
