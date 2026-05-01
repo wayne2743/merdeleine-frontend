@@ -23,11 +23,24 @@ function formatPrice(amount: number, currency: string) {
   return `${currency} ${Number(amount).toLocaleString()}`;
 }
 
-function pickThumbnail(images: { imageType: string; isActive: boolean; isPrimary: boolean; sortOrder: number; cdnUrl: string }[]) {
-  const hit = [...images]
-    .filter((img) => img.isActive && img.imageType === "THUMBNAIL")
-    .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary) || a.sortOrder - b.sortOrder)[0];
-  return hit?.cdnUrl ?? "";
+function pickImageUrl(images: { imageType: string; isActive: boolean; isPrimary: boolean; sortOrder: number; cdnUrl: string }[]) {
+  const activeImages = images.filter((img) => img.isActive);
+  const sorted = (imgs: typeof images) => [...imgs].sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary) || a.sortOrder - b.sortOrder);
+
+  const galleryImage = sorted(
+    activeImages.filter((img) => String(img.imageType).toUpperCase() === "GALLERY")
+  )[0];
+  if (galleryImage?.cdnUrl) return galleryImage.cdnUrl;
+
+  const thumbnailImage = sorted(
+    activeImages.filter((img) => String(img.imageType).toUpperCase() === "THUMBNAIL")
+  )[0];
+  if (thumbnailImage?.cdnUrl) return thumbnailImage.cdnUrl;
+
+  const originalImage = sorted(
+    activeImages.filter((img) => String(img.imageType).toUpperCase() === "ORIGINAL")
+  )[0];
+  return originalImage?.cdnUrl ?? "";
 }
 
 export default function SellWindowListPage() {
@@ -63,7 +76,7 @@ export default function SellWindowListPage() {
         const imageResults = await Promise.allSettled(
           nextItems.map(async (it) => {
             const images = await catalogApi.listProductImages(it.productId);
-            return [it.productId, pickThumbnail(images)] as const;
+            return [it.productId, pickImageUrl(images)] as const;
           })
         );
 
