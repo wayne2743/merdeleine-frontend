@@ -19,6 +19,13 @@ export default function RequireRole({ allow }: { allow: Role[] }) {
   const ok = allow.some((r) => roles.includes(r) || roles.includes("ROLE_" + r));
 
   if (!ok) {
+    const requiresUserRole = allow.some((r) => r === "USER" || r === "ROLE_USER");
+    const hasAdminRole = roles.includes("ADMIN") || roles.includes("ROLE_ADMIN");
+
+    if (requiresUserRole && !hasAdminRole) {
+      return <Navigate to="/register" replace state={{ from: location }} />;
+    }
+
     return <Navigate to="/forbidden" replace />;
   }
 

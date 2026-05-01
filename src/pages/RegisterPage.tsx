@@ -6,7 +6,7 @@ import { useAuth } from "../auth/AuthProvider";
 export default function RegisterPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { status, applyAuthResponse } = useAuth();
+  const { status, roles, applyAuthResponse } = useAuth();
 
   // 取得 OAuth2 後端 redirect 帶來的臨時 JWT
   const tempToken = searchParams.get("token") ?? "";
@@ -19,15 +19,16 @@ export default function RegisterPage() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasUserRole = roles.includes("USER") || roles.includes("ROLE_USER");
 
   // 如果已完整登入「且」不在新用戶流程（URL 沒有 token），才導離此頁。
   // 有 tempToken 時代表正在走 OAuth 新用戶流程，即使 /auth/me 仍回傳 authenticated
   // （後端可能維持了部分 session），也不應在此時跳走 —— 讓使用者完成填表再跳。
   useEffect(() => {
-    if (status === "authenticated" && !tempToken) {
+    if (status === "authenticated" && !tempToken && hasUserRole) {
       navigate("/customer/products", { replace: true });
     }
-  }, [status, tempToken, navigate]);
+  }, [status, tempToken, hasUserRole, navigate]);
 
   // 如果沒有臨時 token 且非 authenticated，導回登入
   useEffect(() => {
@@ -64,7 +65,9 @@ export default function RegisterPage() {
 
     setSubmitting(true);
     try {
-      const meResponse = await authApi.register(tempToken, form);
+      const meResponse = tempToken
+        ? await authApi.register(tempToken, form)
+        : await authApi.updateMe(form);
       applyAuthResponse(meResponse);
       navigate("/customer/products", { replace: true });
     } catch (err: unknown) {
@@ -78,7 +81,7 @@ export default function RegisterPage() {
     }
   }
 
-  if (status === "loading" || !tempToken) {
+  if (status === "loading" || (!tempToken && status !== "authenticated")) {
     return null;
   }
 

@@ -33,6 +33,11 @@ export const authApi = {
     return data;
   },
 
+  async updateMe(payload: RegisterPayload): Promise<AuthMeResponse> {
+    const { data } = await http.put<AuthMeResponse>("/auth/me", payload);
+    return data;
+  },
+
   // 如果你的後端不是 /logout，改成你的實際端點
   async logout(): Promise<void> {
     await http.post("/logout");
