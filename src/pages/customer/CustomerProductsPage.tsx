@@ -769,6 +769,7 @@ export default function CustomerProductsPage() {
 
       {orderOpen && orderSelected && (
         <div
+          className="customer-order-modal-backdrop"
           style={{
             position: "fixed",
             inset: 0,
@@ -781,9 +782,12 @@ export default function CustomerProductsPage() {
           }}
         >
           <div
+            className="customer-order-modal"
             style={{
               width: "100%",
               maxWidth: 400,
+              maxHeight: "calc(100dvh - 32px)",
+              overflowY: "auto",
               background: "#fff",
               borderRadius: 16,
               padding: "24px 20px",
@@ -810,7 +814,7 @@ export default function CustomerProductsPage() {
                 <div style={{ fontSize: 13, color: "#6a513a", marginBottom: 24, lineHeight: 1.7 }}>
                   您的下單已送出，請至檔期列表確認目前狀態。
                 </div>
-                <div style={{ display: "flex", gap: 10 }}>
+                <div className="customer-order-modal-actions" style={{ display: "flex", gap: 10 }}>
                   <button onClick={() => setOrderOpen(false)} style={{ flex: 1 }}>
                     關閉
                   </button>
@@ -987,7 +991,7 @@ export default function CustomerProductsPage() {
                   />
                 </label>
 
-                <div style={{ display: "flex", gap: 10 }}>
+                <div className="customer-order-modal-actions" style={{ display: "flex", gap: 10 }}>
                   <button onClick={() => setOrderOpen(false)} style={{ flex: 1 }}>
                     取消
                   </button>
