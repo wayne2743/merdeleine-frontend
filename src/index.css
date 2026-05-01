@@ -1995,6 +1995,24 @@ table {
     max-height: calc(100dvh - 96px) !important;
   }
 
+  .customer-detail-modal-backdrop {
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    overflow: hidden !important;
+  }
+
+  .customer-detail-modal {
+    width: 100% !important;
+    max-width: none !important;
+    height: 100svh !important;
+    max-height: 100svh !important;
+    border-radius: 0 !important;
+    padding: max(16px, calc(env(safe-area-inset-top) + 12px)) 14px max(16px, calc(env(safe-area-inset-bottom) + 12px)) !important;
+    overflow-y: auto !important;
+  }
+
   .customer-order-modal {
     max-height: calc(100svh - 104px) !important;
     padding: 20px 16px !important;
