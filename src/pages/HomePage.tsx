@@ -169,6 +169,22 @@ export default function HomePage() {
           </div>
         )}
       </section>
+
+      <section className="home-section" style={{ paddingTop: 8 }}>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 14,
+            fontSize: 13,
+            color: "#eadfbd",
+          }}
+        >
+          <Link to="/privacy-policy">隱私權政策</Link>
+          <Link to="/terms">服務條款</Link>
+          <Link to="/data-deletion">資料刪除說明</Link>
+        </div>
+      </section>
     </div>
   );
 }
