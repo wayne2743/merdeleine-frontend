@@ -497,6 +497,7 @@ export default function CustomerProductsPage() {
 
       {redirectingModalOpen && (
         <div
+          className="customer-modal-backdrop customer-redirecting-modal-backdrop"
           style={{
             position: "fixed",
             inset: 0,
@@ -505,10 +506,11 @@ export default function CustomerProductsPage() {
             alignItems: "center",
             justifyContent: "center",
             padding: 16,
-            zIndex: 40,
+            zIndex: 120,
           }}
         >
           <div
+            className="customer-modal-panel customer-redirecting-modal"
             style={{
               width: "100%",
               maxWidth: 360,
@@ -537,6 +539,7 @@ export default function CustomerProductsPage() {
 
       {detailOpen && detailSelected && (
         <div
+          className="customer-modal-backdrop customer-detail-modal-backdrop"
           style={{
             position: "fixed",
             left: 0,
@@ -549,9 +552,11 @@ export default function CustomerProductsPage() {
             justifyContent: "center",
             padding: 16,
             overflowY: "auto",
+            zIndex: 120,
           }}
         >
           <div
+            className="customer-modal-panel customer-detail-modal"
             style={{
               width: "100%",
               maxWidth: 680,
@@ -695,6 +700,7 @@ export default function CustomerProductsPage() {
 
             {originalModalUrl && (
               <div
+                className="customer-modal-backdrop customer-original-modal-backdrop"
                 style={{
                   position: "fixed",
                   left: 0,
@@ -706,10 +712,11 @@ export default function CustomerProductsPage() {
                   alignItems: "center",
                   justifyContent: "center",
                   padding: 16,
-                  zIndex: 40,
+                  zIndex: 130,
                 }}
               >
                 <div
+                  className="customer-modal-panel customer-original-modal"
                   style={{
                     width: "min(92vw, 1200px)",
                     height: "min(88vh, 860px)",
@@ -769,7 +776,7 @@ export default function CustomerProductsPage() {
 
       {orderOpen && orderSelected && (
         <div
-          className="customer-order-modal-backdrop"
+          className="customer-modal-backdrop customer-order-modal-backdrop"
           style={{
             position: "fixed",
             inset: 0,
@@ -778,11 +785,11 @@ export default function CustomerProductsPage() {
             alignItems: "center",
             justifyContent: "center",
             padding: 16,
-            zIndex: 30,
+            zIndex: 120,
           }}
         >
           <div
-            className="customer-order-modal"
+            className="customer-modal-panel customer-order-modal"
             style={{
               width: "100%",
               maxWidth: 400,
