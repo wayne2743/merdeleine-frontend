@@ -20,6 +20,7 @@ import SellWindowCrudPage from "./pages/admin/SellWindowCrudPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForbiddenPage from "./pages/ForbiddenPage";
+import OrderGuidePage from "./pages/OrderGuidePage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsPage from "./pages/TermsPage";
 import DataDeletionPage from "./pages/DataDeletionPage";
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forbidden" element={<ForbiddenPage />} />
+        <Route path="/order-guide" element={<OrderGuidePage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/data-deletion" element={<DataDeletionPage />} />

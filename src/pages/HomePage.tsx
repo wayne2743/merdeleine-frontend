@@ -132,6 +132,9 @@ export default function HomePage() {
             <Link to="/customer/products" className="hero-btn hero-btn-primary">
               立即選購
             </Link>
+            <Link to="/order-guide" className="hero-btn hero-btn-secondary">
+              先看訂購流程
+            </Link>
             <Link to="/customer/sell-windows" className="hero-btn hero-btn-secondary">
               看檔期活動
             </Link>
@@ -140,6 +143,32 @@ export default function HomePage() {
       </section>
 
       <section className="home-section" />
+
+      <section className="home-section home-guide-highlight">
+        <div className="home-guide-highlight-copy">
+          <p className="home-guide-kicker">FIRST TIME HERE?</p>
+          <h2>第一次購買，先看流程會更清楚</h2>
+          <p>
+            我們把「開團、加入、付款、製作、取貨」整理成一頁式說明，幫助你快速理解整體購買方式。
+          </p>
+          <div className="home-guide-points">
+            <span>開團前可先加入，不會先扣款</span>
+            <span>未達成團門檻會自動取消</span>
+            <span>付款完成後才進入製作與出貨</span>
+          </div>
+        </div>
+
+        <div className="home-guide-highlight-card">
+          <div className="home-guide-mini-steps">
+            <div><strong>1</strong><span>加入或發起開團</span></div>
+            <div><strong>2</strong><span>成團後通知付款</span></div>
+            <div><strong>3</strong><span>製作完成後出貨 / 取貨</span></div>
+          </div>
+          <Link to="/order-guide" className="hero-btn hero-btn-primary home-guide-highlight-btn">
+            查看完整流程
+          </Link>
+        </div>
+      </section>
 
       <section className="home-section">
         <div className="home-section-head">
