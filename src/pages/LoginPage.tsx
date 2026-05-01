@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 
 export default function LoginPage() {
-  const { status, loginWithGoogle, loginWithFacebook } = useAuth();
+  const { status, loginWithGoogle, loginWithFacebook, loginWithLine } = useAuth();
 
   if (status === "authenticated") return <Navigate to="/customer/products" replace />;
 
@@ -13,6 +13,7 @@ export default function LoginPage() {
       <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 280 }}>
         <button onClick={loginWithGoogle}>使用 Google 登入</button>
         <button onClick={loginWithFacebook}>使用 Facebook 登入</button>
+        <button onClick={loginWithLine}>使用 LINE 登入</button>
       </div>
     </div>
   );
