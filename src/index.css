@@ -2383,17 +2383,21 @@ table {
     height: calc(100svh - var(--mobile-nav-height)) !important;
     max-height: calc(100svh - var(--mobile-nav-height)) !important;
     padding: 16px 14px !important;
-    padding-bottom: max(20px, calc(env(safe-area-inset-bottom) + 18px)) !important;
+    padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 20px)) !important;
     border-radius: 0 !important;
     overflow-y: auto !important;
   }
 
   .customer-order-modal-actions {
+    display: flex;
     flex-direction: column;
     position: sticky;
     bottom: 0;
-    padding-top: 10px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #ffffff 18%);
+    padding-top: 12px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
+    margin-top: 16px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #ffffff 18%, #ffffff 100%);
+    z-index: 4;
   }
 
   .customer-product-media {
@@ -2606,4 +2610,13 @@ body.modal-scroll-lock {
   background: rgba(255, 255, 255, 0.92);
   border-color: rgba(255, 255, 255, 0.78);
   color: #3b2d20;
+}
+
+.modal-close-btn-sticky {
+  position: sticky;
+  top: 0;
+  right: auto;
+  margin-left: auto;
+  margin-bottom: 12px;
+  z-index: 6;
 }

@@ -823,7 +823,7 @@ export default function CustomerProductsPage() {
               onClick={() => setOrderOpen(false)}
               aria-label="關閉視窗"
               title="關閉"
-              className="modal-close-btn"
+              className="modal-close-btn modal-close-btn-sticky"
             >
               ×
             </button>
@@ -1015,13 +1015,10 @@ export default function CustomerProductsPage() {
                 </label>
 
                 <div className="customer-order-modal-actions" style={{ display: "flex", gap: 10 }}>
-                  <button onClick={() => setOrderOpen(false)} style={{ flex: 1 }}>
-                    取消
-                  </button>
                   <button
                     onClick={() => void handleReserve()}
                     disabled={reserving === orderSelected.id || qty < 1 || !user?.id?.trim()}
-                    style={{ flex: 1 }}
+                    style={{ width: "100%" }}
                   >
                     {reserving === orderSelected.id ? "處理中…" : "確認預約"}
                   </button>
