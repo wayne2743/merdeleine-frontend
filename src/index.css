@@ -482,6 +482,8 @@ table {
   background: linear-gradient(180deg, #fff7ee 0%, #f8eddc 100%);
   display: grid;
   gap: 18px;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .home-guide-mini-steps {
@@ -514,7 +516,10 @@ table {
 }
 
 .home-guide-highlight-btn {
+  display: flex;
+  justify-content: center;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .order-guide-page {

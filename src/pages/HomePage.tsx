@@ -43,7 +43,50 @@ function formatPrice(product: Product): string {
   return `${product.currency || "TWD"} ${Number(product.unitPriceCents).toLocaleString()}`;
 }
 
+type Season = "spring" | "summer" | "autumn" | "winter";
+
+function getSeason(): Season {
+  const month = new Date().getMonth() + 1; // 1-12
+  if (month >= 3 && month <= 5) return "spring";
+  if (month >= 6 && month <= 8) return "summer";
+  if (month >= 9 && month <= 11) return "autumn";
+  return "winter";
+}
+
+const seasonalHero: Record<Season, { kicker: string; title: string; subtitle: string; image: string; alt: string }> = {
+  spring: {
+    kicker: "SPRING PATISSERIE",
+    title: "春季甜點提案",
+    subtitle: "以細緻奶油香與低糖配方，呈現適合日常與送禮的法式甜點。",
+    image: "https://images.unsplash.com/photo-1464305795204-6f5bbfc7fb81?auto=format&fit=crop&w=1800&q=80",
+    alt: "春季甜點 — 莓果塔與奶油派",
+  },
+  summer: {
+    kicker: "SUMMER PATISSERIE",
+    title: "夏季甜點提案",
+    subtitle: "清爽柑橘與熱帶水果風味，帶來一整個夏天的清甜滋味。",
+    image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=1800&q=80",
+    alt: "夏季甜點 — 芒果與柑橘慕斯",
+  },
+  autumn: {
+    kicker: "AUTUMN PATISSERIE",
+    title: "秋季甜點提案",
+    subtitle: "以栗子、焦糖與肉桂勾勒豐收時節的暖心甜點。",
+    image: "https://images.unsplash.com/photo-1506459225024-1428097a7e18?auto=format&fit=crop&w=1800&q=80",
+    alt: "秋季甜點 — 栗子塔與焦糖蘋果",
+  },
+  winter: {
+    kicker: "WINTER PATISSERIE",
+    title: "冬季甜點提案",
+    subtitle: "濃郁巧克力與抹茶融入溫暖節日氛圍，每一口都是療癒享受。",
+    image: "https://images.unsplash.com/photo-1481391319762-47dff72954d9?auto=format&fit=crop&w=1800&q=80",
+    alt: "冬季甜點 — 巧克力蛋糕與糖霜",
+  },
+};
+
 export default function HomePage() {
+  const season = getSeason();
+  const hero = seasonalHero[season];
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProductCard[]>([]);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
 
@@ -117,17 +160,15 @@ export default function HomePage() {
     <div className="home-page">
       <section className="hero-shell">
         <img
-          src="https://images.unsplash.com/photo-1464305795204-6f5bbfc7fb81?auto=format&fit=crop&w=1800&q=80"
-          alt="Dessert showcase"
+          src={hero.image}
+          alt={hero.alt}
           className="hero-image"
         />
         <div className="hero-overlay" />
         <div className="hero-content">
-          <p className="hero-kicker">SEASONAL PATISSERIE</p>
-          <h1 className="hero-title">春季甜點提案</h1>
-          <p className="hero-subtitle">
-            以細緻奶油香與低糖配方，呈現適合日常與送禮的法式甜點。
-          </p>
+          <p className="hero-kicker">{hero.kicker}</p>
+          <h1 className="hero-title">{hero.title}</h1>
+          <p className="hero-subtitle">{hero.subtitle}</p>
           <div className="hero-actions">
             <Link to="/customer/products" className="hero-btn hero-btn-primary">
               立即選購
