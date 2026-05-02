@@ -574,6 +574,20 @@ table {
   box-shadow: var(--shadow-soft);
 }
 
+.order-guide-desktop-flow {
+  display: block;
+}
+
+.order-guide-desktop-flow img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  border: 1px solid rgba(226, 204, 178, 0.9);
+  box-shadow: 0 12px 26px rgba(83, 53, 30, 0.1);
+  background: #fff;
+}
+
 .order-guide-map-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) 64px minmax(0, 0.95fr) minmax(220px, 0.75fr);
