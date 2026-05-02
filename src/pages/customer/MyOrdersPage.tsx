@@ -129,6 +129,11 @@ export default function MyOrdersPage() {
   const [activeStatusTab, setActiveStatusTab] = useState<OrderStatusTab>("RESERVED");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [confirmQtyModal, setConfirmQtyModal] = useState<{ open: boolean; order: OrderSummary | null; newQty: number | null }>({
+    open: false,
+    order: null,
+    newQty: null,
+  });
 
   const filteredItems = items.filter((order) => order.status === activeStatusTab);
 
@@ -341,10 +346,18 @@ export default function MyOrdersPage() {
       return;
     }
 
+    // 顯示確認 modal 而不是直接修改
+    setConfirmQtyModal({ open: true, order, newQty: nextQty });
+  }
+
+  async function onConfirmQtyChange() {
+    const { order, newQty } = confirmQtyModal;
+    if (!order || newQty === null) return;
+
     setUpdatingOrderId(order.orderId);
     setActionMessage(null);
     try {
-      await orderApi.updateOrderQty(order.orderId, nextQty);
+      await orderApi.updateOrderQty(order.orderId, newQty);
       const unitPrice = Number(productById[order.productId]?.unitPriceCents);
 
       setItems((prev) =>
@@ -352,12 +365,13 @@ export default function MyOrdersPage() {
           if (it.orderId !== order.orderId) return it;
           return {
             ...it,
-            qty: nextQty,
-            totalAmountCents: Number.isFinite(unitPrice) ? unitPrice * nextQty : it.totalAmountCents,
+            qty: newQty,
+            totalAmountCents: Number.isFinite(unitPrice) ? unitPrice * newQty : it.totalAmountCents,
           };
         })
       );
       setEditingOrderId(null);
+      setConfirmQtyModal({ open: false, order: null, newQty: null });
       setActionMessage("訂單數量已更新");
       closeQtyLimitModal();
     } catch (e: any) {
@@ -370,9 +384,14 @@ export default function MyOrdersPage() {
         });
       }
       setActionMessage(message);
+      setConfirmQtyModal({ open: false, order: null, newQty: null });
     } finally {
       setUpdatingOrderId(null);
     }
+  }
+
+  function closeConfirmQtyModal() {
+    setConfirmQtyModal({ open: false, order: null, newQty: null });
   }
 
   if (loading) return <div className="myorders-hint">載入中...</div>;
@@ -633,6 +652,101 @@ export default function MyOrdersPage() {
             <div className="myorders-modal-actions">
               <button type="button" onClick={closeQtyLimitModal} className="myorders-modal-btn">
                 我知道了
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmQtyModal.open && confirmQtyModal.order && confirmQtyModal.newQty !== null && (
+        <div className="myorders-modal-backdrop" onClick={closeConfirmQtyModal}>
+          <div
+            className="myorders-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="myorders-confirm-qty-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="myorders-modal-kicker">確認修改</div>
+            <h3 id="myorders-confirm-qty-title" className="myorders-modal-title">
+              確認修改數量？
+            </h3>
+            <p className="myorders-modal-body">
+              商品：<strong>{productById[confirmQtyModal.order.productId]?.name || confirmQtyModal.order.productName}</strong>
+            </p>
+
+            <div style={{
+              background: "rgba(255, 255, 255, 0.04)",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              borderRadius: 12,
+              padding: "16px",
+              marginBottom: 24,
+              fontSize: 14,
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, color: "#aaa" }}>
+                <span>原數量</span>
+                <span style={{ color: "#e7dfd2", fontWeight: 600 }}>{getOrderQtyNumber(confirmQtyModal.order)}</span>
+              </div>
+              <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", margin: "8px 0" }} />
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#aaa" }}>
+                <span>新數量</span>
+                <span style={{ color: "#c9b97a", fontWeight: 600 }}>{confirmQtyModal.newQty}</span>
+              </div>
+              <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", margin: "8px 0" }} />
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ color: "#aaa" }}>新單價</span>
+                <span style={{ color: "#f0c75c", fontWeight: 700, fontSize: 16 }}>
+                  {formatPrice((productById[confirmQtyModal.order.productId]?.unitPriceCents || 0) * confirmQtyModal.newQty, productById[confirmQtyModal.order.productId]?.currency)}
+                </span>
+              </div>
+            </div>
+
+            <p style={{
+              margin: "0 0 24px 0",
+              color: "#8b7562",
+              fontSize: 12,
+              lineHeight: 1.5,
+            }}>
+              修改後的金額將被更新。如已付款將依新金額進行結算。
+            </p>
+
+            <div className="myorders-modal-actions" style={{ display: "flex", gap: 10 }}>
+              <button
+                type="button"
+                onClick={closeConfirmQtyModal}
+                disabled={updatingOrderId === confirmQtyModal.order.orderId}
+                style={{
+                  flex: 1,
+                  padding: "10px 16px",
+                  borderRadius: 8,
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  background: "transparent",
+                  color: "#c9b97a",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                onClick={onConfirmQtyChange}
+                disabled={updatingOrderId === confirmQtyModal.order.orderId}
+                style={{
+                  flex: 1,
+                  padding: "10px 16px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: "linear-gradient(180deg, #deb981 0%, #ca9659 100%)",
+                  color: "#2f241b",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  opacity: updatingOrderId === confirmQtyModal.order.orderId ? 0.6 : 1,
+                }}
+              >
+                {updatingOrderId === confirmQtyModal.order.orderId ? "修改中..." : "確認修改"}
               </button>
             </div>
           </div>

@@ -47,6 +47,7 @@ export default function SellWindowDetailPage() {
   const [imageLoading, setImageLoading] = useState(false);
 
   const [msg, setMsg] = useState<string | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   console.log("productSellWindowId param =", productSellWindowId);
 
@@ -128,6 +129,13 @@ export default function SellWindowDetailPage() {
       return;
     }
 
+    // 基本驗證通過，顯示確認 modal
+    setShowConfirmModal(true);
+  }
+
+  async function onConfirmReserve() {
+    if (!data) return;
+
     try {
       const res = await orderApi.reserveOrder({
         sellWindowId: data.sellWindowId,
@@ -135,15 +143,17 @@ export default function SellWindowDetailPage() {
         quantity: qty,
         currency: "TWD",
         unitPriceCents: data.unitPriceCents,
-        customerId: user.id,
+        customerId: user!.id,
       });
 
+      setShowConfirmModal(false);
       nav(`/customer/orders`);
       console.log("reserved orderId:", res.orderId);
     } catch (e: any) {
       const status = e?.response?.status;
       if (status === 409) setMsg("名額不足或已關閉（409）");
       else setMsg("預約失敗，請稍後再試");
+      setShowConfirmModal(false);
     }
   }
 
@@ -304,6 +314,150 @@ export default function SellWindowDetailPage() {
           </div>
         )}
       </div>
+
+      {/* 確認預約 Modal */}
+      {showConfirmModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            padding: 16,
+          }}
+          onClick={() => setShowConfirmModal(false)}
+        >
+          <div
+            style={{
+              background: "#2f3a34",
+              border: "1px solid rgba(255, 255, 255, 0.12)",
+              borderRadius: 16,
+              padding: "32px 24px",
+              maxWidth: 400,
+              width: "100%",
+              boxShadow: "0 10px 40px rgba(0, 0, 0, 0.5)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2
+              style={{
+                margin: "0 0 8px 0",
+                fontSize: 20,
+                fontWeight: 700,
+                color: "#e7dfd2",
+              }}
+            >
+              確認預約
+            </h2>
+            <p
+              style={{
+                margin: "0 0 24px 0",
+                color: "#c9b97a",
+                fontSize: 14,
+                lineHeight: 1.6,
+              }}
+            >
+              {data?.productName}
+            </p>
+
+            <div
+              style={{
+                background: "rgba(255, 255, 255, 0.04)",
+                border: "1px solid rgba(255, 255, 255, 0.08)",
+                borderRadius: 12,
+                padding: "16px",
+                marginBottom: 24,
+                fontSize: 14,
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, color: "#aaa" }}>
+                <span>商品數量</span>
+                <span style={{ color: "#e7dfd2", fontWeight: 600 }}>{qty}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#aaa" }}>
+                <span>單價</span>
+                <span style={{ color: "#c9b97a", fontWeight: 600 }}>TWD {(data?.unitPriceCents || 0).toLocaleString()}</span>
+              </div>
+              <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", margin: "8px 0" }} />
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ color: "#aaa" }}>小計</span>
+                <span style={{ color: "#f0c75c", fontWeight: 700, fontSize: 16 }}>
+                  TWD {((data?.unitPriceCents || 0) * qty).toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            <p
+              style={{
+                margin: "0 0 24px 0",
+                color: "#8b7562",
+                fontSize: 12,
+                lineHeight: 1.5,
+              }}
+            >
+              確認預約後，將進行付款流程。如需取消，可在確認頁面進行調整。
+            </p>
+
+            <div
+              style={{
+                display: "flex",
+                gap: 10,
+                width: "100%",
+              }}
+            >
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                style={{
+                  flex: 1,
+                  padding: "10px 16px",
+                  borderRadius: 8,
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  background: "transparent",
+                  color: "#c9b97a",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background = "rgba(201, 185, 122, 0.1)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+                }}
+              >
+                取消
+              </button>
+              <button
+                onClick={onConfirmReserve}
+                style={{
+                  flex: 1,
+                  padding: "10px 16px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: "linear-gradient(180deg, #deb981 0%, #ca9659 100%)",
+                  color: "#2f241b",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.filter = "brightness(1.05)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.filter = "brightness(1)";
+                }}
+              >
+                確認預約
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
