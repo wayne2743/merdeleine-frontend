@@ -53,6 +53,9 @@ export default function NavBar() {
                 <NavLink to="/customer/orders" className={navLinkClass}>
                   我的訂單
                 </NavLink>
+                <NavLink to="/customer/profile" className={navLinkClass}>
+                  個人資料
+                </NavLink>
               </>
             )}
 

@@ -3055,6 +3055,22 @@ body.modal-scroll-lock {
   margin: 0;
 }
 
+.register-hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.register-success {
+  margin: 0;
+  font-size: 13px;
+  color: #256f3e;
+  background: #eefaf1;
+  border: 1px solid #b9e5c6;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
 .register-submit {
   margin-top: 4px;
   width: 100%;

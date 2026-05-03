@@ -10,6 +10,14 @@ export type RegisterPayload = {
   shippingAddress: string;
 };
 
+export type UpdateProfilePayload = {
+  displayName?: string;
+  contactName?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  shippingAddress?: string;
+};
+
 export type BatchUserProfile = {
   customerId: string;
   name: string;
@@ -36,6 +44,10 @@ export const authApi = {
   async updateMe(payload: RegisterPayload): Promise<AuthMeResponse> {
     const { data } = await http.put<AuthMeResponse>("/auth/me", payload);
     return data;
+  },
+
+  async updateProfile(payload: UpdateProfilePayload): Promise<void> {
+    await http.put("/auth/profile", payload);
   },
 
   // 如果你的後端不是 /logout，改成你的實際端點

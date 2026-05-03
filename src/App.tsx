@@ -7,6 +7,7 @@ import SellWindowDetailPage from "./pages/customer/SellWindowDetailPage";
 import MyOrdersPage from "./pages/customer/MyOrdersPage";
 import PaymentPage from "./pages/customer/PaymentPage";
 import CustomerProductsPage from "./pages/customer/CustomerProductsPage";
+import ProfilePage from "./pages/customer/ProfilePage";
 import HomePage from "./pages/HomePage.tsx";
 
 // admin pages
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="/customer/sell-windows/:productSellWindowId" element={<SellWindowDetailPage />} />
             <Route path="/customer/orders" element={<MyOrdersPage />} />
             <Route path="/customer/orders/:orderId/payment" element={<PaymentPage />} />
+            <Route path="/customer/profile" element={<ProfilePage />} />
           </Route>
 
           <Route element={<RequireRole allow={["ADMIN"]} />}>
