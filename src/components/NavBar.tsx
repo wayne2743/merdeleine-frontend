@@ -67,15 +67,15 @@ export default function NavBar() {
                 <NavLink to="/admin/products" className={navLinkClass}>
                   商品管理
                 </NavLink>                <NavLink to="/admin/payments" className={navLinkClass}>
-                  後台：付款管理
+                  付款管理
                 </NavLink>                <NavLink to="/admin/sell-window-crud" className={navLinkClass}>
-                  檔期 CRUD
+                  檔期管理
                 </NavLink>
                 {/* <NavLink to="/admin/confirm" className={navLinkClass}>
                   後台：Confirm 成團
                 </NavLink> */}
                 <NavLink to="/admin/production-planning" className={navLinkClass}>
-                  生產規劃 CRUD
+                  生產規劃管理
                 </NavLink>
               </>
             )}
