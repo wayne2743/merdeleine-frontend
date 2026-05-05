@@ -1,6 +1,35 @@
 import { http } from "./http";
 import type { OrderSummary } from "../types/domain";
 
+export type DeliveryMethod =
+  | "STORE_PICKUP"
+  | "CONVENIENCE_STORE_PICKUP"
+  | "HOME_DELIVERY";
+
+export type StorePickupDelivery = {
+  deliveryMethod: "STORE_PICKUP";
+  pickupLocationName?: string;
+  pickupLocationAddress: string;
+  pickupTime: string;
+};
+
+export type ConvenienceStorePickupDelivery = {
+  deliveryMethod: "CONVENIENCE_STORE_PICKUP";
+  convenienceStoreCode: string;
+  convenienceStoreName: string;
+  convenienceStoreAddress: string;
+};
+
+export type HomeDelivery = {
+  deliveryMethod: "HOME_DELIVERY";
+  homeDeliveryAddress: string;
+};
+
+export type OrderDeliveryRequest =
+  | StorePickupDelivery
+  | ConvenienceStorePickupDelivery
+  | HomeDelivery;
+
 export type ReserveOrderRequest = {
   sellWindowId: string;
   productId: string;
@@ -9,6 +38,7 @@ export type ReserveOrderRequest = {
   currency: string;
   unitPriceCents: number;
   customerId: string;
+  delivery: OrderDeliveryRequest;
 };
 
 export const orderApi = {

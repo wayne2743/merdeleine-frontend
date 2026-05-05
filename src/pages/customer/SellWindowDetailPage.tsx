@@ -10,6 +10,19 @@ type RouteState = {
   item?: ProductSellWindowView;
 };
 
+type DeliveryMethod = "STORE_PICKUP" | "CONVENIENCE_STORE_PICKUP" | "HOME_DELIVERY";
+
+type DeliveryForm = {
+  deliveryMethod: DeliveryMethod;
+  pickupLocationName: string;
+  pickupLocationAddress: string;
+  pickupTime: string;
+  convenienceStoreCode: string;
+  convenienceStoreName: string;
+  convenienceStoreAddress: string;
+  homeDeliveryAddress: string;
+};
+
 function sortImages(images: ProductImage[]): ProductImage[] {
   return [...images].sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary) || a.sortOrder - b.sortOrder);
 }
@@ -33,6 +46,27 @@ function pickHeroImage(images: ProductImage[]): string | null {
   return originalImage?.cdnUrl ?? null;
 }
 
+function toOffsetDateTime(value: string): string | null {
+  if (!value.trim()) return null;
+  const dt = new Date(value);
+  if (Number.isNaN(dt.getTime())) return null;
+
+  const year = dt.getFullYear();
+  const month = String(dt.getMonth() + 1).padStart(2, "0");
+  const day = String(dt.getDate()).padStart(2, "0");
+  const hours = String(dt.getHours()).padStart(2, "0");
+  const minutes = String(dt.getMinutes()).padStart(2, "0");
+  const seconds = String(dt.getSeconds()).padStart(2, "0");
+
+  const tzMinutes = -dt.getTimezoneOffset();
+  const sign = tzMinutes >= 0 ? "+" : "-";
+  const tzAbs = Math.abs(tzMinutes);
+  const tzHours = String(Math.floor(tzAbs / 60)).padStart(2, "0");
+  const tzMins = String(tzAbs % 60).padStart(2, "0");
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${sign}${tzHours}:${tzMins}`;
+}
+
 export default function SellWindowDetailPage() {
   const { productSellWindowId } = useParams();
   const nav = useNavigate();
@@ -48,6 +82,16 @@ export default function SellWindowDetailPage() {
 
   const [msg, setMsg] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [deliveryForm, setDeliveryForm] = useState<DeliveryForm>({
+    deliveryMethod: "HOME_DELIVERY",
+    pickupLocationName: "",
+    pickupLocationAddress: "",
+    pickupTime: "",
+    convenienceStoreCode: "",
+    convenienceStoreName: "",
+    convenienceStoreAddress: "",
+    homeDeliveryAddress: "",
+  });
 
   console.log("productSellWindowId param =", productSellWindowId);
 
@@ -136,6 +180,54 @@ export default function SellWindowDetailPage() {
   async function onConfirmReserve() {
     if (!data) return;
 
+    let delivery: any;
+    if (deliveryForm.deliveryMethod === "STORE_PICKUP") {
+      const pickupLocationAddress = deliveryForm.pickupLocationAddress.trim();
+      const pickupTime = toOffsetDateTime(deliveryForm.pickupTime);
+      if (!pickupLocationAddress) {
+        setMsg("請填寫門市取貨地址");
+        return;
+      }
+      if (!pickupTime) {
+        setMsg("請填寫有效的取貨時間");
+        return;
+      }
+
+      delivery = {
+        deliveryMethod: "STORE_PICKUP",
+        pickupLocationName: deliveryForm.pickupLocationName.trim() || undefined,
+        pickupLocationAddress,
+        pickupTime,
+      };
+    } else if (deliveryForm.deliveryMethod === "CONVENIENCE_STORE_PICKUP") {
+      const convenienceStoreCode = deliveryForm.convenienceStoreCode.trim();
+      const convenienceStoreName = deliveryForm.convenienceStoreName.trim();
+      const convenienceStoreAddress = deliveryForm.convenienceStoreAddress.trim();
+
+      if (!convenienceStoreCode || !convenienceStoreName || !convenienceStoreAddress) {
+        setMsg("請完整填寫超商代碼、門市名稱與門市地址");
+        return;
+      }
+
+      delivery = {
+        deliveryMethod: "CONVENIENCE_STORE_PICKUP",
+        convenienceStoreCode,
+        convenienceStoreName,
+        convenienceStoreAddress,
+      };
+    } else {
+      const homeDeliveryAddress = deliveryForm.homeDeliveryAddress.trim();
+      if (!homeDeliveryAddress) {
+        setMsg("請填寫宅配地址");
+        return;
+      }
+
+      delivery = {
+        deliveryMethod: "HOME_DELIVERY",
+        homeDeliveryAddress,
+      };
+    }
+
     try {
       const res = await orderApi.reserveOrder({
         sellWindowId: data.sellWindowId,
@@ -144,6 +236,7 @@ export default function SellWindowDetailPage() {
         currency: "TWD",
         unitPriceCents: data.unitPriceCents,
         customerId: user!.id,
+        delivery,
       });
 
       setShowConfirmModal(false);
@@ -381,6 +474,16 @@ export default function SellWindowDetailPage() {
                 <span>單價</span>
                 <span style={{ color: "#c9b97a", fontWeight: 600 }}>TWD {(data?.unitPriceCents || 0).toLocaleString()}</span>
               </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, color: "#aaa" }}>
+                <span>運送方式</span>
+                <span style={{ color: "#e7dfd2", fontWeight: 600 }}>
+                  {deliveryForm.deliveryMethod === "STORE_PICKUP"
+                    ? "門市定點取貨"
+                    : deliveryForm.deliveryMethod === "CONVENIENCE_STORE_PICKUP"
+                      ? "超商取貨"
+                      : "宅配貨運"}
+                </span>
+              </div>
               <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", margin: "8px 0" }} />
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ color: "#aaa" }}>小計</span>
@@ -388,6 +491,169 @@ export default function SellWindowDetailPage() {
                   TWD {((data?.unitPriceCents || 0) * qty).toLocaleString()}
                 </span>
               </div>
+            </div>
+
+            <div style={{ display: "grid", gap: 10, marginBottom: 18 }}>
+              <label style={{ color: "#e7dfd2", fontSize: 13, fontWeight: 600 }}>運送方式</label>
+              <select
+                value={deliveryForm.deliveryMethod}
+                onChange={(e) => {
+                  setDeliveryForm((prev) => ({
+                    ...prev,
+                    deliveryMethod: e.target.value as DeliveryMethod,
+                  }));
+                }}
+                style={{
+                  width: "100%",
+                  borderRadius: 8,
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  background: "rgba(255,255,255,0.06)",
+                  color: "#e7dfd2",
+                  padding: "10px 12px",
+                }}
+              >
+                <option value="HOME_DELIVERY">宅配貨運</option>
+                <option value="STORE_PICKUP">門市定點取貨</option>
+                <option value="CONVENIENCE_STORE_PICKUP">超商取貨</option>
+              </select>
+
+              {deliveryForm.deliveryMethod === "HOME_DELIVERY" && (
+                <input
+                  type="text"
+                  placeholder="宅配地址"
+                  value={deliveryForm.homeDeliveryAddress}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setDeliveryForm((prev) => ({ ...prev, homeDeliveryAddress: value }));
+                  }}
+                  style={{
+                    width: "100%",
+                    borderRadius: 8,
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    background: "rgba(255,255,255,0.06)",
+                    color: "#e7dfd2",
+                    padding: "10px 12px",
+                    boxSizing: "border-box",
+                  }}
+                />
+              )}
+
+              {deliveryForm.deliveryMethod === "STORE_PICKUP" && (
+                <>
+                  <input
+                    type="text"
+                    placeholder="取貨門市名稱（選填）"
+                    value={deliveryForm.pickupLocationName}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setDeliveryForm((prev) => ({ ...prev, pickupLocationName: value }));
+                    }}
+                    style={{
+                      width: "100%",
+                      borderRadius: 8,
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      background: "rgba(255,255,255,0.06)",
+                      color: "#e7dfd2",
+                      padding: "10px 12px",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="取貨門市地址（必填）"
+                    value={deliveryForm.pickupLocationAddress}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setDeliveryForm((prev) => ({ ...prev, pickupLocationAddress: value }));
+                    }}
+                    style={{
+                      width: "100%",
+                      borderRadius: 8,
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      background: "rgba(255,255,255,0.06)",
+                      color: "#e7dfd2",
+                      padding: "10px 12px",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                  <input
+                    type="datetime-local"
+                    value={deliveryForm.pickupTime}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setDeliveryForm((prev) => ({ ...prev, pickupTime: value }));
+                    }}
+                    style={{
+                      width: "100%",
+                      borderRadius: 8,
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      background: "rgba(255,255,255,0.06)",
+                      color: "#e7dfd2",
+                      padding: "10px 12px",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </>
+              )}
+
+              {deliveryForm.deliveryMethod === "CONVENIENCE_STORE_PICKUP" && (
+                <>
+                  <input
+                    type="text"
+                    placeholder="超商門市代碼（必填）"
+                    value={deliveryForm.convenienceStoreCode}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setDeliveryForm((prev) => ({ ...prev, convenienceStoreCode: value }));
+                    }}
+                    style={{
+                      width: "100%",
+                      borderRadius: 8,
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      background: "rgba(255,255,255,0.06)",
+                      color: "#e7dfd2",
+                      padding: "10px 12px",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="超商門市名稱（必填）"
+                    value={deliveryForm.convenienceStoreName}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setDeliveryForm((prev) => ({ ...prev, convenienceStoreName: value }));
+                    }}
+                    style={{
+                      width: "100%",
+                      borderRadius: 8,
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      background: "rgba(255,255,255,0.06)",
+                      color: "#e7dfd2",
+                      padding: "10px 12px",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="超商門市地址（必填）"
+                    value={deliveryForm.convenienceStoreAddress}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setDeliveryForm((prev) => ({ ...prev, convenienceStoreAddress: value }));
+                    }}
+                    style={{
+                      width: "100%",
+                      borderRadius: 8,
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      background: "rgba(255,255,255,0.06)",
+                      color: "#e7dfd2",
+                      padding: "10px 12px",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </>
+              )}
             </div>
 
             <p
