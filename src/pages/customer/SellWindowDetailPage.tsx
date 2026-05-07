@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { catalogApi } from "../../api/catalogApi";
 import { orderApi } from "../../api/orderApi";
+import type { StorePickupLocationResponse } from "../../api/orderApi";
 import { fetchImageWithCache } from "../../utils/imageCache";
 import { useAuth } from "../../auth/AuthProvider";
 import type { ProductImage, ProductSellWindowView } from "../../types/domain";
@@ -82,6 +83,8 @@ export default function SellWindowDetailPage() {
 
   const [msg, setMsg] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pickupLocations, setPickupLocations] = useState<StorePickupLocationResponse[]>([]);
+  const [selectedPickupLocationId, setSelectedPickupLocationId] = useState<string>("");
   const [deliveryForm, setDeliveryForm] = useState<DeliveryForm>({
     deliveryMethod: "HOME_DELIVERY",
     pickupLocationName: "",
@@ -92,6 +95,13 @@ export default function SellWindowDetailPage() {
     convenienceStoreAddress: "",
     homeDeliveryAddress: "",
   });
+
+  useEffect(() => {
+    if (!showConfirmModal) return;
+    orderApi.listPublicStorePickupLocations()
+      .then((list) => setPickupLocations(list.filter((l) => l.active !== false)))
+      .catch(() => setPickupLocations([]));
+  }, [showConfirmModal]);
 
   console.log("productSellWindowId param =", productSellWindowId);
 
@@ -184,8 +194,8 @@ export default function SellWindowDetailPage() {
     if (deliveryForm.deliveryMethod === "STORE_PICKUP") {
       const pickupLocationAddress = deliveryForm.pickupLocationAddress.trim();
       const pickupTime = toOffsetDateTime(deliveryForm.pickupTime);
-      if (!pickupLocationAddress) {
-        setMsg("請填寫門市取貨地址");
+      if (!selectedPickupLocationId || !pickupLocationAddress) {
+        setMsg("請選取取貨門市");
         return;
       }
       if (!pickupTime) {
@@ -540,42 +550,49 @@ export default function SellWindowDetailPage() {
 
               {deliveryForm.deliveryMethod === "STORE_PICKUP" && (
                 <>
-                  <input
-                    type="text"
-                    placeholder="取貨門市名稱（選填）"
-                    value={deliveryForm.pickupLocationName}
+                  <select
+                    value={selectedPickupLocationId}
                     onChange={(e) => {
-                      const value = e.target.value;
-                      setDeliveryForm((prev) => ({ ...prev, pickupLocationName: value }));
+                      const id = e.target.value;
+                      setSelectedPickupLocationId(id);
+                      const loc = pickupLocations.find((l) => l.id === id);
+                      setDeliveryForm((prev) => ({
+                        ...prev,
+                        pickupLocationName: loc?.name ?? "",
+                        pickupLocationAddress: loc?.address ?? "",
+                      }));
                     }}
                     style={{
                       width: "100%",
                       borderRadius: 8,
                       border: "1px solid rgba(255,255,255,0.2)",
                       background: "rgba(255,255,255,0.06)",
-                      color: "#e7dfd2",
+                      color: selectedPickupLocationId ? "#e7dfd2" : "#888",
                       padding: "10px 12px",
                       boxSizing: "border-box",
                     }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="取貨門市地址（必填）"
-                    value={deliveryForm.pickupLocationAddress}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setDeliveryForm((prev) => ({ ...prev, pickupLocationAddress: value }));
-                    }}
-                    style={{
-                      width: "100%",
-                      borderRadius: 8,
-                      border: "1px solid rgba(255,255,255,0.2)",
-                      background: "rgba(255,255,255,0.06)",
-                      color: "#e7dfd2",
-                      padding: "10px 12px",
-                      boxSizing: "border-box",
-                    }}
-                  />
+                  >
+                    <option value="">請選取門市</option>
+                    {pickupLocations.map((loc) => (
+                      <option key={loc.id} value={loc.id ?? ""}>
+                        {loc.name}
+                      </option>
+                    ))}
+                  </select>
+                  {deliveryForm.pickupLocationAddress && (
+                    <div
+                      style={{
+                        padding: "10px 12px",
+                        borderRadius: 8,
+                        border: "1px solid rgba(255,255,255,0.12)",
+                        background: "rgba(255,255,255,0.03)",
+                        color: "#aaa",
+                        fontSize: 13,
+                      }}
+                    >
+                      {deliveryForm.pickupLocationAddress}
+                    </div>
+                  )}
                   <input
                     type="datetime-local"
                     value={deliveryForm.pickupTime}
