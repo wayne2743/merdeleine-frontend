@@ -104,7 +104,7 @@ export const orderApi = {
   },
 
   async listPublicStorePickupLocations(): Promise<StorePickupLocationResponse[]> {
-    const { data } = await http.get<unknown>("/store-pickup-locations");
+    const { data } = await http.get<unknown>("/api/order/store-pickup-locations");
     const list: unknown[] = Array.isArray(data)
       ? data
       : Array.isArray((data as any)?.content)
