@@ -86,7 +86,7 @@ export default function SellWindowDetailPage() {
   const [pickupLocations, setPickupLocations] = useState<StorePickupLocationResponse[]>([]);
   const [selectedPickupLocationId, setSelectedPickupLocationId] = useState<string>("");
   const [deliveryForm, setDeliveryForm] = useState<DeliveryForm>({
-    deliveryMethod: "HOME_DELIVERY",
+    deliveryMethod: "STORE_PICKUP",
     pickupLocationName: "",
     pickupLocationAddress: "",
     pickupTime: "",
@@ -99,9 +99,21 @@ export default function SellWindowDetailPage() {
   useEffect(() => {
     if (!showConfirmModal) return;
     orderApi.listPublicStorePickupLocations()
-      .then((list) => setPickupLocations(list.filter((l) => l.active !== false)))
+      .then((list) => {
+        const active = list.filter((l) => l.active !== false);
+        setPickupLocations(active);
+        if (active.length > 0 && !selectedPickupLocationId) {
+          const first = active[0];
+          setSelectedPickupLocationId(first.id ?? "");
+          setDeliveryForm((prev) => ({
+            ...prev,
+            pickupLocationName: first.name ?? "",
+            pickupLocationAddress: first.address ?? "",
+          }));
+        }
+      })
       .catch(() => setPickupLocations([]));
-  }, [showConfirmModal]);
+  }, [showConfirmModal]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   console.log("productSellWindowId param =", productSellWindowId);
 
@@ -504,28 +516,6 @@ export default function SellWindowDetailPage() {
             </div>
 
             <div style={{ display: "grid", gap: 10, marginBottom: 18 }}>
-              <label style={{ color: "#e7dfd2", fontSize: 13, fontWeight: 600 }}>運送方式</label>
-              <select
-                value={deliveryForm.deliveryMethod}
-                onChange={(e) => {
-                  setDeliveryForm((prev) => ({
-                    ...prev,
-                    deliveryMethod: e.target.value as DeliveryMethod,
-                  }));
-                }}
-                style={{
-                  width: "100%",
-                  borderRadius: 8,
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  background: "rgba(255,255,255,0.06)",
-                  color: "#e7dfd2",
-                  padding: "10px 12px",
-                }}
-              >
-                <option value="HOME_DELIVERY">宅配貨運</option>
-                <option value="STORE_PICKUP">門市定點取貨</option>
-                <option value="CONVENIENCE_STORE_PICKUP">超商取貨</option>
-              </select>
 
               {deliveryForm.deliveryMethod === "HOME_DELIVERY" && (
                 <input
