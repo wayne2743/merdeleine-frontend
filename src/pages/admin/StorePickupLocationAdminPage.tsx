@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from "react";
-import { orderApi } from "../../api/orderApi";
+import { useEffect, useState, type FormEvent } from "react";
+import { orderApi, type StorePickupLocationResponse } from "../../api/orderApi";
 
 type FormState = {
   name: string;
@@ -45,6 +45,26 @@ export default function StorePickupLocationAdminPage() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [locations, setLocations] = useState<StorePickupLocationResponse[]>([]);
+  const [listLoading, setListLoading] = useState(true);
+  const [listError, setListError] = useState<string | null>(null);
+
+  async function loadLocations() {
+    setListLoading(true);
+    setListError(null);
+    try {
+      const data = await orderApi.listStorePickupLocations();
+      setLocations(data);
+    } catch {
+      setListError("讀取門市列表失敗，請稍後再試");
+    } finally {
+      setListLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void loadLocations();
+  }, []);
 
   function onChange(
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -83,6 +103,7 @@ export default function StorePickupLocationAdminPage() {
 
       setSuccess("門市定點取貨資訊已建立");
       setForm(INITIAL_FORM);
+      void loadLocations();
     } catch (e: unknown) {
       setError(getErrorMessage(e));
     } finally {
@@ -228,6 +249,121 @@ export default function StorePickupLocationAdminPage() {
           </button>
         </div>
       </form>
+
+      {/* 門市列表 */}
+      <section
+        style={{
+          marginTop: 24,
+          borderRadius: 18,
+          border: "1px solid rgba(233, 210, 176, 0.2)",
+          background: "rgba(255, 255, 255, 0.04)",
+          padding: "22px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 16,
+            flexWrap: "wrap",
+            gap: 8,
+          }}
+        >
+          <h2 style={{ margin: 0, fontSize: 17, color: "#f1dfbb" }}>目前門市列表</h2>
+          <button
+            type="button"
+            onClick={() => void loadLocations()}
+            disabled={listLoading}
+            style={{
+              minWidth: 72,
+              padding: "6px 14px",
+              fontSize: 13,
+              borderRadius: 999,
+            }}
+          >
+            {listLoading ? "載入中..." : "重新整理"}
+          </button>
+        </div>
+
+        {listError && (
+          <p
+            style={{
+              margin: 0,
+              fontSize: 13,
+              color: "#f8b7ad",
+              background: "rgba(173, 60, 48, 0.22)",
+              border: "1px solid rgba(248, 183, 173, 0.26)",
+              borderRadius: 10,
+              padding: "10px 12px",
+            }}
+          >
+            {listError}
+          </p>
+        )}
+
+        {!listLoading && !listError && locations.length === 0 && (
+          <p style={{ margin: 0, color: "#8b7562", fontSize: 14 }}>尚未建立任何門市</p>
+        )}
+
+        {locations.length > 0 && (
+          <div style={{ display: "grid", gap: 10 }}>
+            {locations.map((loc, index) => (
+              <div
+                key={loc.id ?? index}
+                style={{
+                  borderRadius: 12,
+                  border: "1px solid rgba(233, 210, 176, 0.18)",
+                  background: "rgba(255, 255, 255, 0.04)",
+                  padding: "14px 16px",
+                  display: "grid",
+                  gap: 4,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <span
+                    style={{ fontSize: 15, fontWeight: 600, color: "#f1dfbb" }}
+                  >
+                    {loc.name ?? "-"}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      padding: "2px 8px",
+                      borderRadius: 999,
+                      background: loc.active
+                        ? "rgba(43, 112, 64, 0.35)"
+                        : "rgba(100, 90, 80, 0.35)",
+                      color: loc.active ? "#9dedb4" : "#bba898",
+                      border: loc.active
+                        ? "1px solid rgba(157, 237, 180, 0.3)"
+                        : "1px solid rgba(187, 168, 152, 0.3)",
+                    }}
+                  >
+                    {loc.active ? "啟用中" : "已停用"}
+                  </span>
+                </div>
+                <div style={{ fontSize: 13, color: "#c9b08a" }}>
+                  {loc.address ?? "-"}
+                </div>
+                {loc.contactPhone && (
+                  <div style={{ fontSize: 12, color: "#8b7562" }}>
+                    {loc.contactPhone}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

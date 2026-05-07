@@ -103,6 +103,20 @@ export const orderApi = {
     await http.delete(`/api/order/orders/${orderId}`);
   },
 
+  async listStorePickupLocations(): Promise<StorePickupLocationResponse[]> {
+    const { data } = await http.get<unknown>(
+      "/api/order/admin/store-pickup-locations"
+    );
+    const list: unknown[] = Array.isArray(data)
+      ? data
+      : Array.isArray((data as any)?.content)
+        ? (data as any).content
+        : Array.isArray((data as any)?.items)
+          ? (data as any).items
+          : [];
+    return list as StorePickupLocationResponse[];
+  },
+
   async createStorePickupLocation(
     payload: StorePickupLocationRequest
   ): Promise<StorePickupLocationResponse> {
