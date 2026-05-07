@@ -41,6 +41,23 @@ export type ReserveOrderRequest = {
   delivery: OrderDeliveryRequest;
 };
 
+export type StorePickupLocationRequest = {
+  name: string;
+  address: string;
+  contactPhone?: string;
+  active?: boolean;
+};
+
+export type StorePickupLocationResponse = {
+  id?: string;
+  name?: string;
+  address?: string;
+  contactPhone?: string | null;
+  active?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export const orderApi = {
   async reserveOrder(input: ReserveOrderRequest): Promise<{ orderId: string }> {
 
@@ -84,5 +101,15 @@ export const orderApi = {
 
   async deleteOrder(orderId: string): Promise<void> {
     await http.delete(`/api/order/orders/${orderId}`);
+  },
+
+  async createStorePickupLocation(
+    payload: StorePickupLocationRequest
+  ): Promise<StorePickupLocationResponse> {
+    const { data } = await http.post<StorePickupLocationResponse>(
+      "/admin/store-pickup-locations",
+      payload
+    );
+    return data;
   },
 };

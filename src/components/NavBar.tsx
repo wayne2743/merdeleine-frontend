@@ -66,10 +66,15 @@ export default function NavBar() {
                 </NavLink> */}
                 <NavLink to="/admin/products" className={navLinkClass}>
                   商品管理
-                </NavLink>                <NavLink to="/admin/payments" className={navLinkClass}>
+                </NavLink>
+                <NavLink to="/admin/payments" className={navLinkClass}>
                   付款管理
-                </NavLink>                <NavLink to="/admin/sell-window-crud" className={navLinkClass}>
+                </NavLink>
+                <NavLink to="/admin/sell-window-crud" className={navLinkClass}>
                   檔期管理
+                </NavLink>
+                <NavLink to="/admin/store-pickup-locations" className={navLinkClass}>
+                  門市取貨點管理
                 </NavLink>
                 {/* <NavLink to="/admin/confirm" className={navLinkClass}>
                   後台：Confirm 成團
