@@ -107,7 +107,7 @@ export const orderApi = {
     payload: StorePickupLocationRequest
   ): Promise<StorePickupLocationResponse> {
     const { data } = await http.post<StorePickupLocationResponse>(
-      "/admin/store-pickup-locations",
+      "/api/order/admin/store-pickup-locations",
       payload
     );
     return data;
