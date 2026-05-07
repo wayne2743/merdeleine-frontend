@@ -98,6 +98,10 @@ export default function SellWindowDetailPage() {
 
   useEffect(() => {
     if (!showConfirmModal) return;
+    // 預帶取貨時間為檔期預計取貨時間
+    if (data?.predictedShipDate) {
+      setDeliveryForm((prev) => ({ ...prev, pickupTime: data.predictedShipDate! }));
+    }
     orderApi.listPublicStorePickupLocations()
       .then((list) => {
         const active = list.filter((l) => l.active !== false);
@@ -583,23 +587,25 @@ export default function SellWindowDetailPage() {
                       {deliveryForm.pickupLocationAddress}
                     </div>
                   )}
-                  <input
-                    type="datetime-local"
-                    value={deliveryForm.pickupTime}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setDeliveryForm((prev) => ({ ...prev, pickupTime: value }));
-                    }}
+                  <div
                     style={{
-                      width: "100%",
-                      borderRadius: 8,
-                      border: "1px solid rgba(255,255,255,0.2)",
-                      background: "rgba(255,255,255,0.06)",
-                      color: "#e7dfd2",
                       padding: "10px 12px",
-                      boxSizing: "border-box",
+                      borderRadius: 8,
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      background: "rgba(255,255,255,0.03)",
+                      fontSize: 13,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
                     }}
-                  />
+                  >
+                    <span style={{ color: "#888" }}>預計取貨時間</span>
+                    <span style={{ color: "#e7dfd2" }}>
+                      {data?.predictedShipDate
+                        ? new Date(data.predictedShipDate).toLocaleString("zh-TW")
+                        : "未設定"}
+                    </span>
+                  </div>
                 </>
               )}
 
