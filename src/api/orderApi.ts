@@ -8,6 +8,7 @@ export type DeliveryMethod =
 
 export type StorePickupDelivery = {
   deliveryMethod: "STORE_PICKUP";
+  pickupLocationId: string;
   pickupLocationName?: string;
   pickupLocationAddress: string;
   pickupTime: string;

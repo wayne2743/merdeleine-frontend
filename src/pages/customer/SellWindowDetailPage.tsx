@@ -221,6 +221,7 @@ export default function SellWindowDetailPage() {
 
       delivery = {
         deliveryMethod: "STORE_PICKUP",
+        pickupLocationId: selectedPickupLocationId,
         pickupLocationName: deliveryForm.pickupLocationName.trim() || undefined,
         pickupLocationAddress,
         pickupTime,
