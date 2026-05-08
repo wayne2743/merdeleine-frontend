@@ -90,7 +90,7 @@ const actionButtonDelete: CSSProperties = {
 };
 
 const HOME_FEATURED_LIMIT = 3;
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 5;
 type ProductStatusFilter = "ALL" | Product["status"];
 
 function fmtPrice(amount?: number | null, currency?: string | null): string {
@@ -104,6 +104,13 @@ function encodeDescriptionForDb(value: string): string {
 
 function decodeDescriptionFromDb(value?: string | null): string {
   return (value || "").replace(/\\n/g, "\n");
+}
+
+function truncateDescription(value?: string | null, maxLength = 56): string {
+  const normalized = decodeDescriptionFromDb(value).replace(/\s+/g, " ").trim();
+  if (!normalized) return "-";
+  if (normalized.length <= maxLength) return normalized;
+  return `${normalized.slice(0, maxLength)}...`;
 }
 
 function toForm(product: Product): ProductForm {
@@ -594,7 +601,7 @@ export default function ProductAdminPage() {
                     <td style={{ padding: 10, fontWeight: 600 }}>{p.name}</td>
                     <td style={{ padding: 10 }}>{p.status}</td>
                     <td style={{ padding: 10 }}>{fmtPrice(p.unitPriceCents, p.currency)}</td>
-                    <td style={{ padding: 10, whiteSpace: "pre-wrap" }}>{decodeDescriptionFromDb(p.description) || "-"}</td>
+                    <td style={{ padding: 10 }}>{truncateDescription(p.description)}</td>
                     <td style={{ padding: 10 }}>
                       <div style={{ display: "grid", gap: 6, justifyItems: "start" }}>
                         <span
