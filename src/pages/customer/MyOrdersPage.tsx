@@ -472,18 +472,18 @@ export default function MyOrdersPage() {
                       style={{ width: "100%", height: "100%", objectFit: "cover" }}
                     />
                   ) : (
-                    <span style={{ fontSize: 11, color: "#666" }}>暫無圖片</span>
+                    <span style={{ fontSize: 13, color: "#666" }}>暫無圖片</span>
                   )}
                 </div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
-                    <span style={{ fontSize: 16, fontWeight: 700, color: "#e7dfd2", flex: 1, minWidth: 0 }}>{productName}</span>
+                    <span style={{ fontSize: 22, lineHeight: 1.35, fontWeight: 700, color: "#e7dfd2", flex: 1, minWidth: 0 }}>{productName}</span>
                     <span className={`myorders-status ${getOrderStatusClassName(o.status)}`} style={{ flexShrink: 0 }}>
                       {getOrderStatusLabel(o.status)}
                     </span>
                   </div>
-                  <div style={{ fontSize: 11, color: "#666", fontFamily: "monospace", wordBreak: "break-all" }}>
+                  <div style={{ fontSize: 13, color: "#666", fontFamily: "monospace", wordBreak: "break-all" }}>
                     {o.orderId}
                   </div>
                 </div>
@@ -503,18 +503,18 @@ export default function MyOrdersPage() {
                 }}
               >
                 <div>
-                  <div style={{ fontSize: 11, color: "#888", marginBottom: 3 }}>下單金額</div>
-                  <div style={{ fontSize: 17, fontWeight: 700, color: "#f0c75c" }}>
+                  <div style={{ fontSize: 13, color: "#888", marginBottom: 4 }}>下單金額</div>
+                  <div style={{ fontSize: 30, fontWeight: 700, lineHeight: 1.2, color: "#f0c75c" }}>
                     {formatPrice(totalCents, currency)}
                   </div>
                   {unitPrice && (
-                    <div style={{ fontSize: 11, color: "#666", marginTop: 2 }}>
+                    <div style={{ fontSize: 13, color: "#666", marginTop: 3 }}>
                       單價 {formatPrice(unitPrice, currency)}
                     </div>
                   )}
                 </div>
                 <div>
-                  <div style={{ fontSize: 11, color: "#888", marginBottom: 3 }}>數量</div>
+                  <div style={{ fontSize: 13, color: "#888", marginBottom: 4 }}>數量</div>
                   {editingOrderId === o.orderId ? (
                     <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
                       <input
@@ -535,15 +535,15 @@ export default function MyOrdersPage() {
                     </div>
                   ) : (
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 17, fontWeight: 700, color: "#e7dfd2" }}>{getOrderQty(o)}</span>
+                      <span style={{ fontSize: 30, fontWeight: 700, lineHeight: 1.2, color: "#e7dfd2" }}>{getOrderQty(o)}</span>
                       {o.status === "RESERVED" && (
                         <button
                           type="button"
                           onClick={() => startEditQty(o)}
                           disabled={deletingOrderId === o.orderId || updatingOrderId === o.orderId}
                           style={{
-                            fontSize: 11,
-                            padding: "2px 8px",
+                            fontSize: 13,
+                            padding: "4px 10px",
                             borderRadius: 6,
                             border: "1px solid rgba(201,185,122,0.4)",
                             background: "transparent",
@@ -566,8 +566,8 @@ export default function MyOrdersPage() {
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
-                      fontSize: 13,
-                      padding: "8px 12px",
+                      fontSize: 15,
+                      padding: "10px 12px",
                       borderRadius: 8,
                       background: isPaymentUrgent ? "rgba(224,82,82,0.1)" : "rgba(255,255,255,0.03)",
                       border: isPaymentUrgent ? "1px solid rgba(224,82,82,0.3)" : "1px solid rgba(255,255,255,0.06)",
@@ -582,13 +582,13 @@ export default function MyOrdersPage() {
                   </div>
                 )}
                 {(swStart || swEnd) && (
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#666", padding: "0 2px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "#666", padding: "0 2px" }}>
                     <span>販售期間</span>
                     <span>{formatDateTime(swStart)} ～ {formatDateTime(swEnd)}</span>
                   </div>
                 )}
                 {createdAt && (
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#666", padding: "0 2px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "#666", padding: "0 2px" }}>
                     <span>下單時間</span>
                     <span>{formatDateTime(createdAt)}</span>
                   </div>
@@ -614,10 +614,10 @@ export default function MyOrdersPage() {
                       border: "1px solid rgba(201,185,122,0.18)",
                       display: "grid",
                       gap: 5,
-                      fontSize: 13,
+                      fontSize: 15,
                     }}
                   >
-                    <div style={{ fontWeight: 600, color: "#c9b97a", fontSize: 12, marginBottom: 2 }}>取貨資訊</div>
+                    <div style={{ fontWeight: 600, color: "#c9b97a", fontSize: 14, marginBottom: 2 }}>取貨資訊</div>
                     <DeliveryRow label="方式" value={methodLabel} />
                     {method === "STORE_PICKUP" && (
                       <>
@@ -873,8 +873,8 @@ export default function MyOrdersPage() {
 function DeliveryRow({ label, value }: { label: string; value: string }) {
   return (
     <div style={{ display: "flex", gap: 8 }}>
-      <span style={{ color: "#888", minWidth: 68, flexShrink: 0 }}>{label}</span>
-      <span style={{ color: "#e7dfd2" }}>{value}</span>
+      <span style={{ color: "#888", minWidth: 74, flexShrink: 0, fontSize: 14 }}>{label}</span>
+      <span style={{ color: "#e7dfd2", fontSize: 15, lineHeight: 1.5 }}>{value}</span>
     </div>
   );
 }
