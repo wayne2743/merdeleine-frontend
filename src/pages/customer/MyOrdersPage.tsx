@@ -435,202 +435,249 @@ export default function MyOrdersPage() {
       )}
 
       <div className="myorders-grid">
-        {filteredItems.map((o) => (
-          <article key={o.orderId} className="myorders-card">
-            <div className="myorders-card-main">
-              <div className="myorders-thumb-wrap">
-                {thumbnailByProductId[o.productId] ? (
-                  <img
-                    src={thumbnailByProductId[o.productId]}
-                    alt={`${o.productName}-thumbnail`}
-                    className="myorders-thumb"
-                  />
-                ) : (
-                  <span className="myorders-thumb-empty">暫無圖片</span>
-                )}
+        {filteredItems.map((o) => {
+          const productName = productById[o.productId]?.name || o.productName;
+          const currency = productById[o.productId]?.currency ?? "TWD";
+          const unitPrice = productById[o.productId]?.unitPriceCents;
+          const totalCents = getOrderTotalAmountCents(o);
+          const createdAt = getOrderCreatedAt(o);
+          const paymentDueAt = getOrderPaymentDueAt(o);
+          const swStart = sellWindowById[o.sellWindowId]?.startAt;
+          const swEnd = sellWindowById[o.sellWindowId]?.endAt;
+          const isPaymentUrgent = paymentDueAt
+            ? new Date(paymentDueAt).getTime() - Date.now() < 24 * 60 * 60 * 1000
+            : false;
+
+          return (
+            <article key={o.orderId} className="myorders-card">
+              {/* 縮圖 + 標題列 */}
+              <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+                <div
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 10,
+                    overflow: "hidden",
+                    flexShrink: 0,
+                    background: "rgba(0,0,0,0.25)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {thumbnailByProductId[o.productId] ? (
+                    <img
+                      src={thumbnailByProductId[o.productId]}
+                      alt={productName}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: 11, color: "#666" }}>暫無圖片</span>
+                  )}
+                </div>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
+                    <span style={{ fontSize: 16, fontWeight: 700, color: "#e7dfd2", flex: 1, minWidth: 0 }}>{productName}</span>
+                    <span className={`myorders-status ${getOrderStatusClassName(o.status)}`} style={{ flexShrink: 0 }}>
+                      {getOrderStatusLabel(o.status)}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 11, color: "#666", fontFamily: "monospace", wordBreak: "break-all" }}>
+                    {o.orderId}
+                  </div>
+                </div>
               </div>
 
-              <div className="myorders-content">
-                <div className="myorders-title-row">
-                  <div className="myorders-title">{productById[o.productId]?.name || o.productName}</div>
-                  <span className={`myorders-status ${getOrderStatusClassName(o.status)}`}>
-                    {getOrderStatusLabel(o.status)}
-                  </span>
-                </div>
-                <div className="myorders-id">orderId: {o.orderId}</div>
-
-                <div className="myorders-metrics">
-                  <div className="myorders-metric">
-                    <div className="myorders-metric-label">下單總金額</div>
-                    <div className="myorders-metric-value is-price">
-                      {formatPrice(getOrderTotalAmountCents(o), productById[o.productId]?.currency ?? "TWD")}
+              {/* 金額 + 數量 */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 10,
+                  marginTop: 14,
+                  padding: "12px 14px",
+                  borderRadius: 10,
+                  background: "rgba(255,255,255,0.035)",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 11, color: "#888", marginBottom: 3 }}>下單金額</div>
+                  <div style={{ fontSize: 17, fontWeight: 700, color: "#f0c75c" }}>
+                    {formatPrice(totalCents, currency)}
+                  </div>
+                  {unitPrice && (
+                    <div style={{ fontSize: 11, color: "#666", marginTop: 2 }}>
+                      單價 {formatPrice(unitPrice, currency)}
                     </div>
-                  </div>
-
-                  <div className="myorders-metric">
-                    <div className="myorders-metric-label">付款截止日期</div>
-                    <div className="myorders-metric-value">{formatDateTime(getOrderPaymentDueAt(o))}</div>
-                  </div>
-
-                  <div className="myorders-metric">
-                    <div className="myorders-metric-label">下單時間</div>
-                    <div className="myorders-metric-value">{formatDateTime(getOrderCreatedAt(o))}</div>
-                  </div>
+                  )}
                 </div>
-
-                <div className="myorders-meta-grid">
-                  {/* 貨運資訊 */}
-                  {o.delivery && (() => {
-                    const d = o.delivery!;
-                    const method = d.deliveryMethod;
-                    const methodLabel =
-                      method === "STORE_PICKUP" ? "門市定點取貨"
-                      : method === "CONVENIENCE_STORE_PICKUP" ? "超商取貨"
-                      : method === "HOME_DELIVERY" ? "宅配貨運"
-                      : method ?? "未知";
-                    return (
-                      <div style={{ display: "grid", gap: 4, padding: "8px 10px", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", fontSize: 13 }}>
-                        <div style={{ fontWeight: 600, color: "#c9b97a", marginBottom: 2 }}>貨運資訊</div>
-                        <div style={{ display: "flex", gap: 6 }}>
-                          <span style={{ color: "#888", minWidth: 72 }}>運送方式</span>
-                          <span style={{ color: "#e7dfd2" }}>{methodLabel}</span>
-                        </div>
-                        {method === "STORE_PICKUP" && (
-                          <>
-                            {d.pickupLocationName && (
-                              <div style={{ display: "flex", gap: 6 }}>
-                                <span style={{ color: "#888", minWidth: 72 }}>取貨門市</span>
-                                <span style={{ color: "#e7dfd2" }}>{d.pickupLocationName}</span>
-                              </div>
-                            )}
-                            {d.pickupLocationAddress && (
-                              <div style={{ display: "flex", gap: 6 }}>
-                                <span style={{ color: "#888", minWidth: 72 }}>門市地址</span>
-                                <span style={{ color: "#e7dfd2" }}>{d.pickupLocationAddress}</span>
-                              </div>
-                            )}
-                            {d.pickupTime && (
-                              <div style={{ display: "flex", gap: 6 }}>
-                                <span style={{ color: "#888", minWidth: 72 }}>預計取貨</span>
-                                <span style={{ color: "#e7dfd2" }}>{formatDateTime(String(d.pickupTime))}</span>
-                              </div>
-                            )}
-                          </>
-                        )}
-                        {method === "CONVENIENCE_STORE_PICKUP" && (
-                          <>
-                            {d.convenienceStoreName && (
-                              <div style={{ display: "flex", gap: 6 }}>
-                                <span style={{ color: "#888", minWidth: 72 }}>門市名稱</span>
-                                <span style={{ color: "#e7dfd2" }}>{d.convenienceStoreName}</span>
-                              </div>
-                            )}
-                            {d.convenienceStoreAddress && (
-                              <div style={{ display: "flex", gap: 6 }}>
-                                <span style={{ color: "#888", minWidth: 72 }}>門市地址</span>
-                                <span style={{ color: "#e7dfd2" }}>{d.convenienceStoreAddress}</span>
-                              </div>
-                            )}
-                          </>
-                        )}
-                        {method === "HOME_DELIVERY" && d.homeDeliveryAddress && (
-                          <div style={{ display: "flex", gap: 6 }}>
-                            <span style={{ color: "#888", minWidth: 72 }}>宅配地址</span>
-                            <span style={{ color: "#e7dfd2" }}>{d.homeDeliveryAddress}</span>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-                  <div className="myorders-qty-row">
-                    <span>數量：</span>
-                    {editingOrderId === o.orderId ? (
-                      <span className="myorders-qty-editor">
-                        <input
-                          type="number"
-                          min={1}
-                          max={getOrderMaxEditableQty(o, sellWindowById) ?? undefined}
-                          step={1}
-                          value={editingQty}
-                          onChange={(e) => setEditingQty(e.target.value)}
-                          className="myorders-qty-input"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => void onSaveQty(o)}
-                          disabled={updatingOrderId === o.orderId}
-                          className="myorders-qty-save-btn"
-                        >
-                          {updatingOrderId === o.orderId ? "儲存中..." : "儲存"}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={cancelEditQty}
-                          disabled={updatingOrderId === o.orderId}
-                          className="myorders-qty-cancel-btn"
-                        >
-                          取消
-                        </button>
-                      </span>
-                    ) : (
-                      <>
-                        <strong>{getOrderQty(o)}</strong>
+                <div>
+                  <div style={{ fontSize: 11, color: "#888", marginBottom: 3 }}>數量</div>
+                  {editingOrderId === o.orderId ? (
+                    <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                      <input
+                        type="number"
+                        min={1}
+                        max={getOrderMaxEditableQty(o, sellWindowById) ?? undefined}
+                        step={1}
+                        value={editingQty}
+                        onChange={(e) => setEditingQty(e.target.value)}
+                        className="myorders-qty-input"
+                      />
+                      <button type="button" onClick={() => void onSaveQty(o)} disabled={updatingOrderId === o.orderId} className="myorders-qty-save-btn">
+                        {updatingOrderId === o.orderId ? "..." : "儲存"}
+                      </button>
+                      <button type="button" onClick={cancelEditQty} disabled={updatingOrderId === o.orderId} className="myorders-qty-cancel-btn">
+                        取消
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 17, fontWeight: 700, color: "#e7dfd2" }}>{getOrderQty(o)}</span>
+                      {o.status === "RESERVED" && (
                         <button
                           type="button"
                           onClick={() => startEditQty(o)}
-                          disabled={o.status !== "RESERVED" || deletingOrderId === o.orderId || updatingOrderId === o.orderId}
-                          className="myorders-qty-edit-btn"
+                          disabled={deletingOrderId === o.orderId || updatingOrderId === o.orderId}
+                          style={{
+                            fontSize: 11,
+                            padding: "2px 8px",
+                            borderRadius: 6,
+                            border: "1px solid rgba(201,185,122,0.4)",
+                            background: "transparent",
+                            color: "#c9b97a",
+                            cursor: "pointer",
+                          }}
                         >
-                          修改數量
+                          修改
                         </button>
-                        {o.status !== "RESERVED" && <span className="myorders-qty-hint">僅已預約可修改</span>}
-                      </>
-                    )}
-                  </div>
-                  <div>商品價格：{formatPrice(productById[o.productId]?.unitPriceCents, productById[o.productId]?.currency)}</div>
-                  <div>
-                    販售起訖：
-                    {formatDateTime(sellWindowById[o.sellWindowId]?.startAt)} ~ {formatDateTime(sellWindowById[o.sellWindowId]?.endAt)}
-                  </div>
-                </div>
-
-                <div className="myorders-actions">
-                  {o.status === "PAYMENT_REQUESTED" && (
-                    <button
-                      type="button"
-                      onClick={() => void onPayOrder(o)}
-                      disabled={
-                        deletingOrderId === o.orderId
-                        || updatingOrderId === o.orderId
-                        || payingOrderId === o.orderId
-                        || payingOrderId === "__paypal_capture__"
-                      }
-                      className="myorders-pay-btn"
-                      title="選擇付款方式"
-                    >
-                      付款
-                    </button>
+                      )}
+                    </div>
                   )}
-
-                  {o.status === "PAID" && (
-                    <Link to={`/customer/orders/${o.orderId}/payment`} className="myorders-payment-link">
-                      查看付款資訊
-                    </Link>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={() => void onDeleteOrder(o)}
-                    disabled={deletingOrderId === o.orderId || updatingOrderId === o.orderId || payingOrderId === o.orderId}
-                    className="myorders-delete-btn"
-                  >
-                    {deletingOrderId === o.orderId ? "刪除中..." : "刪除訂單"}
-                  </button>
                 </div>
               </div>
-            </div>
-          </article>
-        ))}
+
+              {/* 時間資訊 */}
+              <div style={{ marginTop: 10, display: "grid", gap: 6 }}>
+                {paymentDueAt && (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      fontSize: 13,
+                      padding: "8px 12px",
+                      borderRadius: 8,
+                      background: isPaymentUrgent ? "rgba(224,82,82,0.1)" : "rgba(255,255,255,0.03)",
+                      border: isPaymentUrgent ? "1px solid rgba(224,82,82,0.3)" : "1px solid rgba(255,255,255,0.06)",
+                    }}
+                  >
+                    <span style={{ color: isPaymentUrgent ? "#e07070" : "#888" }}>
+                      {isPaymentUrgent ? "⚠ 付款截止" : "付款截止"}
+                    </span>
+                    <span style={{ color: isPaymentUrgent ? "#e07070" : "#c9b08a", fontWeight: isPaymentUrgent ? 600 : 400 }}>
+                      {formatDateTime(paymentDueAt)}
+                    </span>
+                  </div>
+                )}
+                {(swStart || swEnd) && (
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#666", padding: "0 2px" }}>
+                    <span>販售期間</span>
+                    <span>{formatDateTime(swStart)} ～ {formatDateTime(swEnd)}</span>
+                  </div>
+                )}
+                {createdAt && (
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#666", padding: "0 2px" }}>
+                    <span>下單時間</span>
+                    <span>{formatDateTime(createdAt)}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* 貨運資訊 */}
+              {o.delivery && (() => {
+                const d = o.delivery!;
+                const method = d.deliveryMethod;
+                const methodLabel =
+                  method === "STORE_PICKUP" ? "門市定點取貨"
+                  : method === "CONVENIENCE_STORE_PICKUP" ? "超商取貨"
+                  : method === "HOME_DELIVERY" ? "宅配貨運"
+                  : method ?? "未知";
+                return (
+                  <div
+                    style={{
+                      marginTop: 10,
+                      padding: "10px 12px",
+                      borderRadius: 10,
+                      background: "rgba(201,185,122,0.06)",
+                      border: "1px solid rgba(201,185,122,0.18)",
+                      display: "grid",
+                      gap: 5,
+                      fontSize: 13,
+                    }}
+                  >
+                    <div style={{ fontWeight: 600, color: "#c9b97a", fontSize: 12, marginBottom: 2 }}>取貨資訊</div>
+                    <DeliveryRow label="方式" value={methodLabel} />
+                    {method === "STORE_PICKUP" && (
+                      <>
+                        {d.pickupLocationName && <DeliveryRow label="取貨門市" value={String(d.pickupLocationName)} />}
+                        {d.pickupLocationAddress && <DeliveryRow label="門市地址" value={String(d.pickupLocationAddress)} />}
+                        {d.pickupTime && <DeliveryRow label="預計取貨" value={formatDateTime(String(d.pickupTime))} />}
+                      </>
+                    )}
+                    {method === "CONVENIENCE_STORE_PICKUP" && (
+                      <>
+                        {d.convenienceStoreName && <DeliveryRow label="門市名稱" value={String(d.convenienceStoreName)} />}
+                        {d.convenienceStoreAddress && <DeliveryRow label="門市地址" value={String(d.convenienceStoreAddress)} />}
+                      </>
+                    )}
+                    {method === "HOME_DELIVERY" && d.homeDeliveryAddress && (
+                      <DeliveryRow label="宅配地址" value={String(d.homeDeliveryAddress)} />
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* 操作按鈕 */}
+              <div style={{ marginTop: 14, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {o.status === "PAYMENT_REQUESTED" && (
+                  <button
+                    type="button"
+                    onClick={() => void onPayOrder(o)}
+                    disabled={
+                      deletingOrderId === o.orderId
+                      || updatingOrderId === o.orderId
+                      || payingOrderId === o.orderId
+                      || payingOrderId === "__paypal_capture__"
+                    }
+                    className="myorders-pay-btn"
+                    style={{ flex: 1 }}
+                  >
+                    {payingOrderId === o.orderId ? "處理中..." : "前往付款"}
+                  </button>
+                )}
+                {o.status === "PAID" && (
+                  <Link
+                    to={`/customer/orders/${o.orderId}/payment`}
+                    className="myorders-payment-link"
+                    style={{ flex: 1, textAlign: "center" }}
+                  >
+                    查看付款資訊
+                  </Link>
+                )}
+                <button
+                  type="button"
+                  onClick={() => void onDeleteOrder(o)}
+                  disabled={deletingOrderId === o.orderId || updatingOrderId === o.orderId || payingOrderId === o.orderId}
+                  className="myorders-delete-btn"
+                >
+                  {deletingOrderId === o.orderId ? "刪除中..." : "刪除"}
+                </button>
+              </div>
+            </article>
+          );
+        })}
       </div>
 
       {paymentMethodModal.open && paymentMethodModal.order && (
@@ -819,6 +866,15 @@ export default function MyOrdersPage() {
       <p className="myorders-note">
         ※ Order 收到 batch.confirmed 後會把 RESERVED → PAYMENT_REQUESTED，並設定 payment_due_at
       </p>
+    </div>
+  );
+}
+
+function DeliveryRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ display: "flex", gap: 8 }}>
+      <span style={{ color: "#888", minWidth: 68, flexShrink: 0 }}>{label}</span>
+      <span style={{ color: "#e7dfd2" }}>{value}</span>
     </div>
   );
 }
