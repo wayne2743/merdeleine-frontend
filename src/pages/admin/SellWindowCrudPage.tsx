@@ -925,10 +925,20 @@ export default function SellWindowCrudPage() {
                       {/* 批次欄 */}
                       <td style={{ padding: "10px 12px", verticalAlign: "top" }}>
                         {(() => {
-                          const resolvedSwId = batchBySellWindowId.has(item.sellWindowId)
-                            ? item.sellWindowId
-                            : (rawSwIdByName.get(item.sellWindowName) ?? item.sellWindowId);
-                          const rowBatches = batchBySellWindowId.get(resolvedSwId) ?? [];
+                          // 三層比對：① 直接 sellWindowId ② name fallback ③ 全掃描 name 符合
+                          let rowBatches = batchBySellWindowId.get(item.sellWindowId) ?? [];
+                          if (rowBatches.length === 0) {
+                            const nameId = rawSwIdByName.get(item.sellWindowName);
+                            if (nameId) rowBatches = batchBySellWindowId.get(nameId) ?? [];
+                          }
+                          if (rowBatches.length === 0) {
+                            // 終極 fallback：直接從 batches 找 sellWindowId 末段或名稱相符
+                            rowBatches = batches.filter((b) =>
+                              b.sellWindowId === item.sellWindowId ||
+                              b.sellWindowId.endsWith(item.sellWindowId) ||
+                              item.sellWindowId.endsWith(b.sellWindowId)
+                            );
+                          }
                           const activeBatch = rowBatches[0];
                           if (!activeBatch) return <span style={{ color: "#bbb", fontSize: 12 }}>-</span>;
                           const meta = BATCH_STATUS_META[activeBatch.status] ?? { label: activeBatch.status, color: "#666", bg: "#eee", border: "#ccc" };
