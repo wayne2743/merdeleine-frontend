@@ -90,6 +90,8 @@ const actionButtonDelete: CSSProperties = {
 };
 
 const HOME_FEATURED_LIMIT = 3;
+const PAGE_SIZE = 20;
+type ProductStatusFilter = "ALL" | Product["status"];
 
 function fmtPrice(amount?: number | null, currency?: string | null): string {
   if (!Number.isFinite(amount)) return "-";
@@ -141,38 +143,33 @@ export default function ProductAdminPage() {
   const [imageDraftById, setImageDraftById] = useState<Record<string, ImageEditDraft>>({});
   const [savingImageGroupKey, setSavingImageGroupKey] = useState<string | null>(null);
   const [homeFeaturedIds, setHomeFeaturedIds] = useState<string[]>(() => catalogApi.getHomeFeaturedProductIds());
-  const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "INACTIVE" | "DRAFT">("ALL");
+  const [statusFilter, setStatusFilter] = useState<ProductStatusFilter>("ALL");
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
 
   const isEditMode = Boolean(form.id);
 
-  const sortedItems = useMemo(() => {
-    return [...items].sort((a, b) => {
-      const rank = (status: Product["status"]) => (status === "ACTIVE" ? 0 : status === "DRAFT" ? 1 : 2);
-      const byStatus = rank(a.status) - rank(b.status);
-      if (byStatus !== 0) return byStatus;
-      return a.name.localeCompare(b.name, "zh-Hant");
-    });
-  }, [items]);
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(total / PAGE_SIZE)), [total]);
 
-  const filteredItems = useMemo(() => {
-    if (statusFilter === "ALL") return sortedItems;
-    return sortedItems.filter((p) => p.status === statusFilter);
-  }, [sortedItems, statusFilter]);
-
-  const statusCounts = useMemo(() => ({
-    ALL: items.length,
-    ACTIVE: items.filter((p) => p.status === "ACTIVE").length,
-    INACTIVE: items.filter((p) => p.status === "INACTIVE").length,
-    DRAFT: items.filter((p) => p.status === "DRAFT").length,
-  }), [items]);
-
-  async function loadProducts() {
+  async function loadProducts(nextPage: number, nextStatus: ProductStatusFilter) {
     setLoading(true);
     setError(null);
     try {
-      const data = await catalogApi.listProducts();
-      const nextItems = data ?? [];
+      const response = await catalogApi.pageProducts({
+        page: nextPage,
+        size: PAGE_SIZE,
+        status: nextStatus === "ALL" ? undefined : nextStatus,
+        sort: "createdAt,desc",
+      });
+
+      if (nextPage > 0 && response.items.length === 0 && response.total > 0) {
+        return await loadProducts(nextPage - 1, nextStatus);
+      }
+
+      const nextItems = response.items ?? [];
       setItems(nextItems);
+      setPage(response.page ?? nextPage);
+      setTotal(response.total ?? 0);
 
       const validFeaturedIds = catalogApi.getHomeFeaturedProductIds().filter((productId) => nextItems.some((item) => item.id === productId));
       catalogApi.saveHomeFeaturedProductIds(validFeaturedIds);
@@ -181,14 +178,15 @@ export default function ProductAdminPage() {
       console.error(e);
       setError(e?.message ?? "讀取商品失敗");
       setItems([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    void loadProducts();
-  }, []);
+    void loadProducts(page, statusFilter);
+  }, [page, statusFilter]);
 
   function updateForm<K extends keyof ProductForm>(key: K, value: ProductForm[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -346,7 +344,7 @@ export default function ProductAdminPage() {
 
       setMessage(imageForm.file ? "商品與圖片已儲存成功" : form.id ? "商品更新成功" : "商品新增成功");
       closeFormModal();
-      await loadProducts();
+      await loadProducts(page, statusFilter);
     } catch (e: any) {
       console.error(e);
       if (savedProduct) {
@@ -372,7 +370,7 @@ export default function ProductAdminPage() {
       await catalogApi.deleteProduct(product.id);
       if (form.id === product.id) closeFormModal();
       setMessage("商品刪除成功");
-      await loadProducts();
+      await loadProducts(page, statusFilter);
     } catch (e: any) {
       console.error(e);
       setMessage(e?.message ?? "刪除商品失敗");
@@ -537,36 +535,25 @@ export default function ProductAdminPage() {
         </div>
       )}
 
-      {/* 狀態篩選 */}
-      {!loading && !error && items.length > 0 && (
-        <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 13, color: "#c9b08a" }}>篩選狀態：</span>
-          {(["ALL", "ACTIVE", "INACTIVE", "DRAFT"] as const).map((s) => {
-            const label = s === "ALL" ? "全部" : s === "ACTIVE" ? "上架中" : s === "INACTIVE" ? "下架" : "草稿";
-            const isActive = statusFilter === s;
-            return (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setStatusFilter(s)}
-                style={{
-                  padding: "5px 14px",
-                  borderRadius: 999,
-                  fontSize: 13,
-                  fontWeight: isActive ? 700 : 400,
-                  border: isActive ? "1.5px solid #c9b97a" : "1px solid rgba(201,185,122,0.3)",
-                  background: isActive ? "rgba(201,185,122,0.18)" : "transparent",
-                  color: isActive ? "#f0dea8" : "#9a8866",
-                  cursor: "pointer",
-                }}
-              >
-                {label}
-                <span style={{ marginLeft: 5, fontSize: 11, opacity: 0.75 }}>({statusCounts[s]})</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
+      <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+        <label style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#c9b08a", fontSize: 13 }}>
+          商品狀態
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value as ProductStatusFilter);
+              setPage(0);
+            }}
+            disabled={loading || submitting}
+          >
+            <option value="ALL">全部</option>
+            <option value="ACTIVE">上架中</option>
+            <option value="INACTIVE">下架</option>
+            <option value="DRAFT">草稿</option>
+          </select>
+        </label>
+        <span style={{ color: "#c9b08a", fontSize: 13 }}>每頁 {PAGE_SIZE} 筆，排序：建立時間新到舊</span>
+      </div>
 
       <div style={{ marginTop: 14, borderRadius: 12, overflowX: "auto", border: "1px solid #eadfcd", background: "#fff" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", color: "#2f241b", minWidth: 920 }}>
@@ -589,7 +576,7 @@ export default function ProductAdminPage() {
               </tr>
             )}
 
-            {!loading && filteredItems.length === 0 && (
+            {!loading && items.length === 0 && (
               <tr>
                 <td colSpan={6} style={{ padding: 12 }}>
                   {statusFilter === "ALL" ? "目前沒有商品資料" : `沒有「${statusFilter === "ACTIVE" ? "上架中" : statusFilter === "INACTIVE" ? "下架" : "草稿"}」的商品`}
@@ -598,7 +585,7 @@ export default function ProductAdminPage() {
             )}
 
             {!loading &&
-              filteredItems.map((p) => {
+              items.map((p) => {
                 const featuredIndex = homeFeaturedIds.indexOf(p.id);
                 const isHomeFeatured = featuredIndex >= 0;
 
@@ -679,6 +666,26 @@ export default function ProductAdminPage() {
           </tbody>
         </table>
       </div>
+
+      {!error && (
+        <div style={{ marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+          <div style={{ color: "#c9b08a", fontSize: 13 }}>
+            共 {total} 筆，第 {Math.min(page + 1, totalPages)} / {totalPages} 頁
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button type="button" onClick={() => setPage(0)} disabled={loading || page <= 0}>第一頁</button>
+            <button type="button" onClick={() => setPage((prev) => Math.max(0, prev - 1))} disabled={loading || page <= 0}>上一頁</button>
+            <button
+              type="button"
+              onClick={() => setPage((prev) => Math.min(totalPages - 1, prev + 1))}
+              disabled={loading || page >= totalPages - 1}
+            >
+              下一頁
+            </button>
+            <button type="button" onClick={() => setPage(totalPages - 1)} disabled={loading || page >= totalPages - 1}>最後一頁</button>
+          </div>
+        </div>
+      )}
 
       {formModalOpen && (
         <div

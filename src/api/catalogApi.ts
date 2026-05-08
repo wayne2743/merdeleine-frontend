@@ -339,6 +339,33 @@ export const catalogApi = {
     return Array.isArray(data) ? data.map((item) => normalizeProduct(item)) : [];
   },
 
+  async pageProducts(params: {
+    page: number;
+    size: number;
+    status?: Product["status"];
+    sort?: string;
+  }): Promise<PageResponse<Product>> {
+    const query = new URLSearchParams({
+      page: String(params.page),
+      size: String(params.size),
+    });
+
+    if (params.status) query.set("status", params.status);
+    if (params.sort) query.set("sort", params.sort);
+
+    const { data } = await http.get<unknown>(`/api/catalog/products/page?${query.toString()}`);
+
+    if (typeof data === "string" && data.trim().startsWith("<!doctype html")) {
+      throw new Error("API returned HTML. Proxy/baseURL is wrong.");
+    }
+
+    const response = normalizePageResponse<unknown>(data, params.page, params.size);
+    return {
+      ...response,
+      items: response.items.map((item) => normalizeProduct(item)),
+    };
+  },
+
   async createProduct(req: ProductCreateRequest): Promise<Product> {
     const { data } = await http.post<unknown>("/api/catalog/products", req);
     return normalizeProduct(data);
