@@ -840,7 +840,7 @@ export default function SellWindowCrudPage() {
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 1100 }}>
             <thead>
               <tr style={{ background: "#f5f5f5", textAlign: "left" }}>
-                {["檔期名稱", "商品名稱", "商品售價", "開始", "結束", "時區", "狀態", "操作"].map((h) => (
+                {["檔期名稱", "商品", "售價", "開始", "結束", "狀態 / 名額", "批次", "付款", "操作"].map((h) => (
                   <th key={h} style={{ padding: "10px 12px", borderBottom: "2px solid #ddd" }}>{h}</th>
                 ))}
               </tr>
