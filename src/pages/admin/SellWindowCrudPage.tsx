@@ -1,11 +1,15 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { authApi } from "../../api/authApi";
 import { catalogApi } from "../../api/catalogApi";
 import { orderApi } from "../../api/orderApi";
+import { paymentApi } from "../../api/paymentApi";
+import { planningApi } from "../../api/planningApi";
 import type {
   OrderSummary,
+  PaymentInfo,
   Product,
   ProductSellWindowView,
+  ProductionBatch,
   SellWindowNextGroupOpenAtResponse,
   SellWindowResponse,
   SellWindowStatus,
@@ -26,6 +30,13 @@ const STATUS_LABEL: Record<SellWindowStatus, string> = {
   OPEN: "開放",
   CLOSED: "已關閉",
   FINISHED: "已完成",
+};
+
+const BATCH_STATUS_META: Record<string, { label: string; color: string; bg: string; border: string }> = {
+  CREATED:   { label: "已建立", color: "#8a5a14", bg: "#fff4db", border: "#f1d08e" },
+  CONFIRMED: { label: "已確認", color: "#0b6b57", bg: "#def8ef", border: "#9ad8c4" },
+  PAID:      { label: "已付款", color: "#2f5f2f", bg: "#e4f5e0", border: "#b9ddb1" },
+  CANCELLED: { label: "已取消", color: "#b13a2d", bg: "#ffe8e4", border: "#f0b4ac" },
 };
 
 function toInputDt(isoStr?: string | null): string {
@@ -280,6 +291,31 @@ export default function SellWindowCrudPage() {
   });
   const [customerById, setCustomerById] = useState<Record<string, { name: string; phone: string }>>({});
   const [formModalOpen, setFormModalOpen] = useState(false);
+  const [batches, setBatches] = useState<ProductionBatch[]>([]);
+  const [payments, setPayments] = useState<PaymentInfo[]>([]);
+  const [batchSubmitting, setBatchSubmitting] = useState<string | null>(null);
+  const [paymentApprovingId, setPaymentApprovingId] = useState<string | null>(null);
+
+  const batchByKey = useMemo(() => {
+    const map = new Map<string, ProductionBatch[]>();
+    batches.forEach((b) => {
+      const key = `${b.sellWindowId}::${b.productId}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(b);
+    });
+    return map;
+  }, [batches]);
+
+  const paymentsBySellWindowId = useMemo(() => {
+    const map = new Map<string, PaymentInfo[]>();
+    payments.forEach((p) => {
+      const swId = p.sellWindowId?.trim();
+      if (!swId) return;
+      if (!map.has(swId)) map.set(swId, []);
+      map.get(swId)!.push(p);
+    });
+    return map;
+  }, [payments]);
 
   async function load(targetPage = page) {
     setLoading(true);
@@ -355,6 +391,53 @@ export default function SellWindowCrudPage() {
   useEffect(() => {
     void loadProducts();
   }, []);
+
+  async function loadBatches() {
+    try {
+      const resp = await planningApi.pageBatches(0, 200);
+      setBatches(resp.items ?? []);
+    } catch (e) {
+      console.error("load batches failed", e);
+    }
+  }
+
+  async function loadPayments() {
+    try {
+      const resp = await paymentApi.pagePayments(0, 200);
+      setPayments(resp.items ?? []);
+    } catch (e) {
+      console.error("load payments failed", e);
+    }
+  }
+
+  useEffect(() => { void loadBatches(); }, []);
+  useEffect(() => { void loadPayments(); }, []);
+
+  async function onConfirmBatch(batch: ProductionBatch) {
+    if (batchSubmitting) return;
+    setBatchSubmitting(batch.id);
+    try {
+      await planningApi.confirmBatch(batch.id);
+      void loadBatches();
+    } catch (e: any) {
+      alert(e?.response?.data?.message ?? e?.message ?? "Confirm 失敗");
+    } finally {
+      setBatchSubmitting(null);
+    }
+  }
+
+  async function onApprovePayment(payment: PaymentInfo) {
+    if (paymentApprovingId) return;
+    setPaymentApprovingId(payment.paymentId);
+    try {
+      await paymentApi.approvePayment(payment.paymentId);
+      void loadPayments();
+    } catch (e: any) {
+      alert(e?.response?.data?.message ?? e?.message ?? "確認收款失敗");
+    } finally {
+      setPaymentApprovingId(null);
+    }
+  }
 
   function startEdit(item: SellWindowResponse) {
     setEditingId(item.id);
@@ -642,7 +725,7 @@ export default function SellWindowCrudPage() {
   });
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: "24px 16px" }}>
+    <div style={{ maxWidth: 1400, margin: "0 auto", padding: "24px 16px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
         <h2 style={{ margin: 0 }}>檔期 CRUD 管理</h2>
         <button
@@ -753,7 +836,8 @@ export default function SellWindowCrudPage() {
             </div>
           </div>
 
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+          <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 1100 }}>
             <thead>
               <tr style={{ background: "#f5f5f5", textAlign: "left" }}>
                 {["檔期名稱", "商品名稱", "商品售價", "開始", "結束", "時區", "狀態", "操作"].map((h) => (
@@ -764,7 +848,7 @@ export default function SellWindowCrudPage() {
             <tbody>
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ padding: 16, color: "#888", textAlign: "center" }}>
+                  <td colSpan={9} style={{ padding: 16, color: "#888", textAlign: "center" }}>
                     {items.length === 0 ? "目前沒有任何資料。" : "查無符合篩選條件的資料。"}
                   </td>
                 </tr>
@@ -790,7 +874,6 @@ export default function SellWindowCrudPage() {
                       <td style={{ padding: "10px 12px" }}>{formatMoney(item.unitPriceCents, item.currency)}</td>
                       <td style={{ padding: "10px 12px" }}>{fmt(item.startAt)}</td>
                       <td style={{ padding: "10px 12px" }}>{fmt(item.endAt)}</td>
-                      <td style={{ padding: "10px 12px", color: "#666" }}>{item.timezone}</td>
                       <td style={{ padding: "10px 12px" }}>
                         <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-start" }}>
                           <span
@@ -817,6 +900,61 @@ export default function SellWindowCrudPage() {
                           </span>
                           <span style={{ fontSize: 12, color: "#777" }}>名額：{item.quotaStatus}</span>
                         </div>
+                      </td>
+                      {/* 批次欄 */}
+                      <td style={{ padding: "10px 12px", verticalAlign: "top" }}>
+                        {(() => {
+                          const rowBatches = batchByKey.get(`${item.sellWindowId}::${item.productId}`) ?? [];
+                          const activeBatch = rowBatches[0];
+                          if (!activeBatch) return <span style={{ color: "#bbb", fontSize: 12 }}>-</span>;
+                          const meta = BATCH_STATUS_META[activeBatch.status] ?? { label: activeBatch.status, color: "#666", bg: "#eee", border: "#ccc" };
+                          return (
+                            <div style={{ display: "grid", gap: 5 }}>
+                              <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 12, background: meta.bg, color: meta.color, border: `1px solid ${meta.border}`, whiteSpace: "nowrap", display: "inline-block" }}>
+                                {meta.label}
+                              </span>
+                              <div style={{ fontSize: 12, color: "#666" }}>目標：{activeBatch.targetQty}</div>
+                              {activeBatch.status === "CREATED" && (
+                                <button
+                                  type="button"
+                                  onClick={() => void onConfirmBatch(activeBatch)}
+                                  disabled={Boolean(batchSubmitting)}
+                                  style={{ ...btnSmall, background: "#e5faf0", color: "#0f6c52", borderColor: "#9ad8c4", fontSize: 12, padding: "5px 10px", minWidth: 68, boxShadow: "none" }}
+                                >
+                                  {batchSubmitting === activeBatch.id ? "處理中..." : "Confirm"}
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </td>
+                      {/* 付款欄 */}
+                      <td style={{ padding: "10px 12px", verticalAlign: "top" }}>
+                        {(() => {
+                          const rowPayments = paymentsBySellWindowId.get(item.sellWindowId) ?? [];
+                          if (rowPayments.length === 0) return <span style={{ color: "#bbb", fontSize: 12 }}>-</span>;
+                          const initCount = rowPayments.filter((p) => p.status === "INIT").length;
+                          const succeededCount = rowPayments.filter((p) => p.status === "SUCCEEDED").length;
+                          const expiredCount = rowPayments.filter((p) => p.status === "EXPIRED").length;
+                          const firstApprovable = rowPayments.find((p) => p.status === "INIT" && p.provider === "BANK_TRANSFER");
+                          return (
+                            <div style={{ display: "grid", gap: 5 }}>
+                              {succeededCount > 0 && <div style={{ fontSize: 12, color: "#2f6d47" }}>已付款 {succeededCount} 筆</div>}
+                              {initCount > 0 && <div style={{ fontSize: 12, color: "#8a5a14" }}>待付款 {initCount} 筆</div>}
+                              {expiredCount > 0 && <div style={{ fontSize: 12, color: "#b13a2d" }}>已逾期 {expiredCount} 筆</div>}
+                              {firstApprovable && (
+                                <button
+                                  type="button"
+                                  onClick={() => void onApprovePayment(firstApprovable)}
+                                  disabled={Boolean(paymentApprovingId)}
+                                  style={{ ...btnSmall, background: "#e8f5e9", color: "#2f6d47", borderColor: "#9ad8c4", fontSize: 12, padding: "5px 10px", minWidth: 68, boxShadow: "none" }}
+                                >
+                                  {paymentApprovingId === firstApprovable.paymentId ? "處理中..." : "確認收款"}
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td style={{ padding: "10px 12px" }}>
                         <div style={{ display: "grid", gap: 8, justifyItems: "start" }}>
@@ -851,6 +989,7 @@ export default function SellWindowCrudPage() {
               )}
             </tbody>
           </table>
+          </div>
         </>
       )}
 
