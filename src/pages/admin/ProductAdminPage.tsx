@@ -141,6 +141,7 @@ export default function ProductAdminPage() {
   const [imageDraftById, setImageDraftById] = useState<Record<string, ImageEditDraft>>({});
   const [savingImageGroupKey, setSavingImageGroupKey] = useState<string | null>(null);
   const [homeFeaturedIds, setHomeFeaturedIds] = useState<string[]>(() => catalogApi.getHomeFeaturedProductIds());
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "INACTIVE" | "DRAFT">("ALL");
 
   const isEditMode = Boolean(form.id);
 
@@ -152,6 +153,18 @@ export default function ProductAdminPage() {
       return a.name.localeCompare(b.name, "zh-Hant");
     });
   }, [items]);
+
+  const filteredItems = useMemo(() => {
+    if (statusFilter === "ALL") return sortedItems;
+    return sortedItems.filter((p) => p.status === statusFilter);
+  }, [sortedItems, statusFilter]);
+
+  const statusCounts = useMemo(() => ({
+    ALL: items.length,
+    ACTIVE: items.filter((p) => p.status === "ACTIVE").length,
+    INACTIVE: items.filter((p) => p.status === "INACTIVE").length,
+    DRAFT: items.filter((p) => p.status === "DRAFT").length,
+  }), [items]);
 
   async function loadProducts() {
     setLoading(true);
@@ -524,6 +537,37 @@ export default function ProductAdminPage() {
         </div>
       )}
 
+      {/* 狀態篩選 */}
+      {!loading && !error && items.length > 0 && (
+        <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 13, color: "#c9b08a" }}>篩選狀態：</span>
+          {(["ALL", "ACTIVE", "INACTIVE", "DRAFT"] as const).map((s) => {
+            const label = s === "ALL" ? "全部" : s === "ACTIVE" ? "上架中" : s === "INACTIVE" ? "下架" : "草稿";
+            const isActive = statusFilter === s;
+            return (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setStatusFilter(s)}
+                style={{
+                  padding: "5px 14px",
+                  borderRadius: 999,
+                  fontSize: 13,
+                  fontWeight: isActive ? 700 : 400,
+                  border: isActive ? "1.5px solid #c9b97a" : "1px solid rgba(201,185,122,0.3)",
+                  background: isActive ? "rgba(201,185,122,0.18)" : "transparent",
+                  color: isActive ? "#f0dea8" : "#9a8866",
+                  cursor: "pointer",
+                }}
+              >
+                {label}
+                <span style={{ marginLeft: 5, fontSize: 11, opacity: 0.75 }}>({statusCounts[s]})</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       <div style={{ marginTop: 14, borderRadius: 12, overflowX: "auto", border: "1px solid #eadfcd", background: "#fff" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", color: "#2f241b", minWidth: 920 }}>
           <thead>
@@ -545,16 +589,16 @@ export default function ProductAdminPage() {
               </tr>
             )}
 
-            {!loading && sortedItems.length === 0 && (
+            {!loading && filteredItems.length === 0 && (
               <tr>
                 <td colSpan={6} style={{ padding: 12 }}>
-                  目前沒有商品資料
+                  {statusFilter === "ALL" ? "目前沒有商品資料" : `沒有「${statusFilter === "ACTIVE" ? "上架中" : statusFilter === "INACTIVE" ? "下架" : "草稿"}」的商品`}
                 </td>
               </tr>
             )}
 
             {!loading &&
-              sortedItems.map((p) => {
+              filteredItems.map((p) => {
                 const featuredIndex = homeFeaturedIds.indexOf(p.id);
                 const isHomeFeatured = featuredIndex >= 0;
 
