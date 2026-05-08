@@ -296,10 +296,11 @@ export default function SellWindowCrudPage() {
   const [batchSubmitting, setBatchSubmitting] = useState<string | null>(null);
   const [paymentApprovingId, setPaymentApprovingId] = useState<string | null>(null);
 
-  const batchByKey = useMemo(() => {
+  const batchBySellWindowId = useMemo(() => {
     const map = new Map<string, ProductionBatch[]>();
     batches.forEach((b) => {
-      const key = `${b.sellWindowId}::${b.productId}`;
+      const key = b.sellWindowId;
+      if (!key) return;
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(b);
     });
@@ -904,7 +905,7 @@ export default function SellWindowCrudPage() {
                       {/* 批次欄 */}
                       <td style={{ padding: "10px 12px", verticalAlign: "top" }}>
                         {(() => {
-                          const rowBatches = batchByKey.get(`${item.sellWindowId}::${item.productId}`) ?? [];
+                          const rowBatches = batchBySellWindowId.get(item.sellWindowId) ?? [];
                           const activeBatch = rowBatches[0];
                           if (!activeBatch) return <span style={{ color: "#bbb", fontSize: 12 }}>-</span>;
                           const meta = BATCH_STATUS_META[activeBatch.status] ?? { label: activeBatch.status, color: "#666", bg: "#eee", border: "#ccc" };
