@@ -479,6 +479,69 @@ export default function MyOrdersPage() {
                 </div>
 
                 <div className="myorders-meta-grid">
+                  {/* 貨運資訊 */}
+                  {o.delivery && (() => {
+                    const d = o.delivery!;
+                    const method = d.deliveryMethod;
+                    const methodLabel =
+                      method === "STORE_PICKUP" ? "門市定點取貨"
+                      : method === "CONVENIENCE_STORE_PICKUP" ? "超商取貨"
+                      : method === "HOME_DELIVERY" ? "宅配貨運"
+                      : method ?? "未知";
+                    return (
+                      <div style={{ display: "grid", gap: 4, padding: "8px 10px", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", fontSize: 13 }}>
+                        <div style={{ fontWeight: 600, color: "#c9b97a", marginBottom: 2 }}>貨運資訊</div>
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <span style={{ color: "#888", minWidth: 72 }}>運送方式</span>
+                          <span style={{ color: "#e7dfd2" }}>{methodLabel}</span>
+                        </div>
+                        {method === "STORE_PICKUP" && (
+                          <>
+                            {d.pickupLocationName && (
+                              <div style={{ display: "flex", gap: 6 }}>
+                                <span style={{ color: "#888", minWidth: 72 }}>取貨門市</span>
+                                <span style={{ color: "#e7dfd2" }}>{d.pickupLocationName}</span>
+                              </div>
+                            )}
+                            {d.pickupLocationAddress && (
+                              <div style={{ display: "flex", gap: 6 }}>
+                                <span style={{ color: "#888", minWidth: 72 }}>門市地址</span>
+                                <span style={{ color: "#e7dfd2" }}>{d.pickupLocationAddress}</span>
+                              </div>
+                            )}
+                            {d.pickupTime && (
+                              <div style={{ display: "flex", gap: 6 }}>
+                                <span style={{ color: "#888", minWidth: 72 }}>預計取貨</span>
+                                <span style={{ color: "#e7dfd2" }}>{formatDateTime(String(d.pickupTime))}</span>
+                              </div>
+                            )}
+                          </>
+                        )}
+                        {method === "CONVENIENCE_STORE_PICKUP" && (
+                          <>
+                            {d.convenienceStoreName && (
+                              <div style={{ display: "flex", gap: 6 }}>
+                                <span style={{ color: "#888", minWidth: 72 }}>門市名稱</span>
+                                <span style={{ color: "#e7dfd2" }}>{d.convenienceStoreName}</span>
+                              </div>
+                            )}
+                            {d.convenienceStoreAddress && (
+                              <div style={{ display: "flex", gap: 6 }}>
+                                <span style={{ color: "#888", minWidth: 72 }}>門市地址</span>
+                                <span style={{ color: "#e7dfd2" }}>{d.convenienceStoreAddress}</span>
+                              </div>
+                            )}
+                          </>
+                        )}
+                        {method === "HOME_DELIVERY" && d.homeDeliveryAddress && (
+                          <div style={{ display: "flex", gap: 6 }}>
+                            <span style={{ color: "#888", minWidth: 72 }}>宅配地址</span>
+                            <span style={{ color: "#e7dfd2" }}>{d.homeDeliveryAddress}</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                   <div className="myorders-qty-row">
                     <span>數量：</span>
                     {editingOrderId === o.orderId ? (

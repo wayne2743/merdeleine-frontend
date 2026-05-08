@@ -87,6 +87,18 @@ export interface OrderSummary {
   totalAmountCents?: number;
 
   paymentDueAt?: string; // equals paymentCloseAt after batch.confirmed
+  delivery?: {
+    deliveryMethod?: string;
+    pickupLocationId?: string;
+    pickupLocationName?: string;
+    pickupLocationAddress?: string;
+    pickupTime?: string;
+    convenienceStoreCode?: string;
+    convenienceStoreName?: string;
+    convenienceStoreAddress?: string;
+    homeDeliveryAddress?: string;
+    [key: string]: unknown;
+  } | null;
 }
 
 export type PaymentStatus = "INIT" | "SUCCEEDED" | "FAILED" | "EXPIRED";
