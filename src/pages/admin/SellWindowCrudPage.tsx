@@ -293,6 +293,7 @@ export default function SellWindowCrudPage() {
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [batches, setBatches] = useState<ProductionBatch[]>([]);
   const [payments, setPayments] = useState<PaymentInfo[]>([]);
+  const [rawSellWindows, setRawSellWindows] = useState<SellWindowResponse[]>([]);
   const [batchSubmitting, setBatchSubmitting] = useState<string | null>(null);
   const [paymentApprovingId, setPaymentApprovingId] = useState<string | null>(null);
 
@@ -306,6 +307,15 @@ export default function SellWindowCrudPage() {
     });
     return map;
   }, [batches]);
+
+  // name → canonical sellWindowId from raw sell windows (fallback for ID mismatch)
+  const rawSwIdByName = useMemo(() => {
+    const map = new Map<string, string>();
+    rawSellWindows.forEach((sw) => {
+      if (sw.name && sw.id) map.set(sw.name, sw.id);
+    });
+    return map;
+  }, [rawSellWindows]);
 
   const paymentsBySellWindowId = useMemo(() => {
     const map = new Map<string, PaymentInfo[]>();
@@ -402,6 +412,15 @@ export default function SellWindowCrudPage() {
     }
   }
 
+  async function loadRawSellWindows() {
+    try {
+      const data = await catalogApi.listRawSellWindows();
+      setRawSellWindows(data);
+    } catch (e) {
+      console.error("load raw sell windows failed", e);
+    }
+  }
+
   async function loadPayments() {
     try {
       const resp = await paymentApi.pagePayments(0, 200);
@@ -413,6 +432,7 @@ export default function SellWindowCrudPage() {
 
   useEffect(() => { void loadBatches(); }, []);
   useEffect(() => { void loadPayments(); }, []);
+  useEffect(() => { void loadRawSellWindows(); }, []);
 
   async function onConfirmBatch(batch: ProductionBatch) {
     if (batchSubmitting) return;
@@ -905,7 +925,10 @@ export default function SellWindowCrudPage() {
                       {/* 批次欄 */}
                       <td style={{ padding: "10px 12px", verticalAlign: "top" }}>
                         {(() => {
-                          const rowBatches = batchBySellWindowId.get(item.sellWindowId) ?? [];
+                          const resolvedSwId = batchBySellWindowId.has(item.sellWindowId)
+                            ? item.sellWindowId
+                            : (rawSwIdByName.get(item.sellWindowName) ?? item.sellWindowId);
+                          const rowBatches = batchBySellWindowId.get(resolvedSwId) ?? [];
                           const activeBatch = rowBatches[0];
                           if (!activeBatch) return <span style={{ color: "#bbb", fontSize: 12 }}>-</span>;
                           const meta = BATCH_STATUS_META[activeBatch.status] ?? { label: activeBatch.status, color: "#666", bg: "#eee", border: "#ccc" };
