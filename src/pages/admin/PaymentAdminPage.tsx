@@ -114,7 +114,7 @@ export default function PaymentAdminPage() {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
-  const [sellWindowKeyword, setSellWindowKeyword] = useState("");
+  const [sellWindowFilter, setSellWindowFilter] = useState<"ALL" | string>("ALL");
   const [customerNameKeyword, setCustomerNameKeyword] = useState("");
   const [customerPhoneKeyword, setCustomerPhoneKeyword] = useState("");
   const [providerFilter, setProviderFilter] = useState<"ALL" | PaymentProvider>("ALL");
@@ -129,6 +129,20 @@ export default function PaymentAdminPage() {
       return (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "");
     });
   }, [items]);
+
+  const sellWindowOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    sortedItems.forEach((item) => {
+      const id = (item.sellWindowId || item.sellWindowName || "").trim();
+      if (!id) return;
+      const label = (item.sellWindowName || item.sellWindowId || "").trim();
+      map.set(id, label || id);
+    });
+
+    return Array.from(map.entries())
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.label.localeCompare(b.label, "zh-Hant"));
+  }, [sortedItems]);
 
   async function loadPayments(targetPage: number, append = false) {
     if (append) {
@@ -326,17 +340,16 @@ export default function PaymentAdminPage() {
     }
   }
 
-  const normalizedSellWindowKeyword = sellWindowKeyword.trim().toLowerCase();
   const normalizedCustomerNameKeyword = customerNameKeyword.trim().toLowerCase();
   const normalizedCustomerPhoneKeyword = customerPhoneKeyword.trim().toLowerCase();
-  const hasActiveFilters = providerFilter !== "ALL" || statusFilter !== "ALL" || normalizedSellWindowKeyword.length > 0 || normalizedCustomerNameKeyword.length > 0 || normalizedCustomerPhoneKeyword.length > 0;
+  const hasActiveFilters = providerFilter !== "ALL" || statusFilter !== "ALL" || sellWindowFilter !== "ALL" || normalizedCustomerNameKeyword.length > 0 || normalizedCustomerPhoneKeyword.length > 0;
 
   const filteredItems = sortedItems.filter((item) => {
-    const sellWindowName = (item.sellWindowName || "").toLowerCase();
     const customerName = (item.customerName || "").toLowerCase();
     const customerPhone = (item.customerPhone || "").toLowerCase();
+    const sellWindowValue = (item.sellWindowId || item.sellWindowName || "").trim();
 
-    const matchesSellWindow = !normalizedSellWindowKeyword || sellWindowName.includes(normalizedSellWindowKeyword);
+    const matchesSellWindow = sellWindowFilter === "ALL" || sellWindowValue === sellWindowFilter;
     const matchesCustomerName = !normalizedCustomerNameKeyword || customerName.includes(normalizedCustomerNameKeyword);
     const matchesCustomerPhone = !normalizedCustomerPhoneKeyword || customerPhone.includes(normalizedCustomerPhoneKeyword);
     const matchesProvider = providerFilter === "ALL" || item.provider === providerFilter;
@@ -382,7 +395,12 @@ export default function PaymentAdminPage() {
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", flex: 1 }}>
           <label style={{ display: "grid", gap: 4, minWidth: 180, color: "#4f3927", fontSize: 13 }}>
             檔期名稱
-            <input value={sellWindowKeyword} onChange={(e) => setSellWindowKeyword(e.target.value)} placeholder="輸入檔期名稱" />
+            <select value={sellWindowFilter} onChange={(e) => setSellWindowFilter(e.target.value)}>
+              <option value="ALL">全部檔期</option>
+              {sellWindowOptions.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
           </label>
 
           <label style={{ display: "grid", gap: 4, minWidth: 160, color: "#4f3927", fontSize: 13 }}>
@@ -420,7 +438,7 @@ export default function PaymentAdminPage() {
           <button
             type="button"
             onClick={() => {
-              setSellWindowKeyword("");
+              setSellWindowFilter("ALL");
               setCustomerNameKeyword("");
               setCustomerPhoneKeyword("");
               setProviderFilter("ALL");
