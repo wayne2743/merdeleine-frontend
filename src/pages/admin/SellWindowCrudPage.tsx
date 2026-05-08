@@ -925,39 +925,51 @@ export default function SellWindowCrudPage() {
                       {/* 批次欄 */}
                       <td style={{ padding: "10px 12px", verticalAlign: "top" }}>
                         {(() => {
-                          // 三層比對：① 直接 sellWindowId ② name fallback ③ 全掃描 name 符合
+                          // 三層比對：① sellWindowId ② name fallback ③ 包含 productSellWindowId 的全掃描
                           let rowBatches = batchBySellWindowId.get(item.sellWindowId) ?? [];
                           if (rowBatches.length === 0) {
                             const nameId = rawSwIdByName.get(item.sellWindowName);
                             if (nameId) rowBatches = batchBySellWindowId.get(nameId) ?? [];
                           }
                           if (rowBatches.length === 0) {
-                            // 終極 fallback：直接從 batches 找 sellWindowId 末段或名稱相符
+                            // 終極 fallback：處理 sellWindowId / productSellWindowId 混用
                             rowBatches = batches.filter((b) =>
                               b.sellWindowId === item.sellWindowId ||
+                              b.sellWindowId === item.productSellWindowId ||
                               b.sellWindowId.endsWith(item.sellWindowId) ||
-                              item.sellWindowId.endsWith(b.sellWindowId)
+                              item.sellWindowId.endsWith(b.sellWindowId) ||
+                              b.sellWindowId.endsWith(item.productSellWindowId) ||
+                              item.productSellWindowId.endsWith(b.sellWindowId)
                             );
                           }
                           const activeBatch = rowBatches[0];
                           if (!activeBatch) return <span style={{ color: "#bbb", fontSize: 12 }}>-</span>;
                           const meta = BATCH_STATUS_META[activeBatch.status] ?? { label: activeBatch.status, color: "#666", bg: "#eee", border: "#ccc" };
+                          const canConfirm = activeBatch.status === "CREATED";
                           return (
                             <div style={{ display: "grid", gap: 5 }}>
                               <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 12, background: meta.bg, color: meta.color, border: `1px solid ${meta.border}`, whiteSpace: "nowrap", display: "inline-block" }}>
                                 {meta.label}
                               </span>
                               <div style={{ fontSize: 12, color: "#666" }}>目標：{activeBatch.targetQty}</div>
-                              {activeBatch.status === "CREATED" && (
-                                <button
-                                  type="button"
-                                  onClick={() => void onConfirmBatch(activeBatch)}
-                                  disabled={Boolean(batchSubmitting)}
-                                  style={{ ...btnSmall, background: "#e5faf0", color: "#0f6c52", borderColor: "#9ad8c4", fontSize: 12, padding: "5px 10px", minWidth: 68, boxShadow: "none" }}
-                                >
-                                  {batchSubmitting === activeBatch.id ? "處理中..." : "Confirm"}
-                                </button>
-                              )}
+                              <button
+                                type="button"
+                                onClick={() => void onConfirmBatch(activeBatch)}
+                                disabled={!canConfirm || Boolean(batchSubmitting)}
+                                style={{
+                                  ...btnSmall,
+                                  background: canConfirm ? "#e5faf0" : "#f0f0f0",
+                                  color: canConfirm ? "#0f6c52" : "#7a7a7a",
+                                  borderColor: canConfirm ? "#9ad8c4" : "#d0d0d0",
+                                  fontSize: 12,
+                                  padding: "5px 10px",
+                                  minWidth: 68,
+                                  boxShadow: "none",
+                                }}
+                                title={canConfirm ? `確認批次 ${activeBatch.id}` : `目前狀態 ${activeBatch.status}，不可 Confirm`}
+                              >
+                                {batchSubmitting === activeBatch.id ? "處理中..." : "Confirm"}
+                              </button>
                             </div>
                           );
                         })()}
