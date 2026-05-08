@@ -34,9 +34,7 @@ const actionButtonBase: CSSProperties = {
 const statusMeta: Record<string, { label: string; color: string; background: string; border: string }> = {
   CREATED: { label: "已建立", color: "#8a5a14", background: "#fff4db", border: "#f1d08e" },
   CONFIRMED: { label: "已確認", color: "#0b6b57", background: "#def8ef", border: "#9ad8c4" },
-  SCHEDULED: { label: "已排程", color: "#1557a0", background: "#e4f0ff", border: "#a9c6f6" },
-  IN_PRODUCTION: { label: "生產中", color: "#6f3cc3", background: "#efe6ff", border: "#cbb4f5" },
-  COMPLETED: { label: "已完成", color: "#2f5f2f", background: "#e4f5e0", border: "#b9ddb1" },
+  PAID: { label: "已付款", color: "#2f5f2f", background: "#e4f5e0", border: "#b9ddb1" },
   CANCELLED: { label: "已取消", color: "#b13a2d", background: "#ffe8e4", border: "#f0b4ac" },
 };
 
