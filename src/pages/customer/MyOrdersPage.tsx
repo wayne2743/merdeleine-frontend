@@ -265,6 +265,11 @@ export default function MyOrdersPage() {
   async function onDeleteOrder(order: OrderSummary) {
     if (deletingOrderId || updatingOrderId || payingOrderId) return;
 
+    if (order.status === "PAID") {
+      setActionMessage("已付款訂單不可刪除");
+      return;
+    }
+
     const ok = window.confirm(`確定要刪除訂單 ${order.orderId} 嗎？`);
     if (!ok) return;
 
@@ -666,14 +671,16 @@ export default function MyOrdersPage() {
                     查看付款資訊
                   </Link>
                 )}
-                <button
-                  type="button"
-                  onClick={() => void onDeleteOrder(o)}
-                  disabled={deletingOrderId === o.orderId || updatingOrderId === o.orderId || payingOrderId === o.orderId}
-                  className="myorders-delete-btn"
-                >
-                  {deletingOrderId === o.orderId ? "刪除中..." : "刪除"}
-                </button>
+                {o.status !== "PAID" && (
+                  <button
+                    type="button"
+                    onClick={() => void onDeleteOrder(o)}
+                    disabled={deletingOrderId === o.orderId || updatingOrderId === o.orderId || payingOrderId === o.orderId}
+                    className="myorders-delete-btn"
+                  >
+                    {deletingOrderId === o.orderId ? "刪除中..." : "刪除"}
+                  </button>
+                )}
               </div>
             </article>
           );
