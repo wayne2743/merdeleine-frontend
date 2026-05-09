@@ -884,8 +884,10 @@ export default function SellWindowCrudPage() {
                       <td style={{ padding: "10px 12px", fontWeight: 500 }}>{item.sellWindowName}</td>
                       <td style={{ padding: "10px 12px" }}>
                         <div>{item.productName || "-"}</div>
-                        <div style={{ marginTop: 4, fontSize: 12, color: "#777" }}>
-                          已售 {item.soldQty} / {item.maxQty ?? "-"}，最低成團 {item.minQty}
+                        <div style={{ marginTop: 4, display: "grid", gap: 2, fontSize: 12, color: "#777" }}>
+                          <span>最低預約數量：{item.minQty}</span>
+                          <span>最大預約數量：{item.maxQty ?? "-"}</span>
+                          <span>已預約數量：{item.soldQty}</span>
                         </div>
                       </td>
                       <td style={{ padding: "10px 12px" }}>{formatMoney(item.unitPriceCents, item.currency)}</td>
