@@ -259,6 +259,24 @@ export type AutoGroupOrderRequest = {
   predictedGroupEndAt: string;
   leadsDay: number;
   shipDay: number;
+  delivery:
+    | {
+        deliveryMethod: "STORE_PICKUP";
+        pickupLocationId: string;
+        pickupLocationName?: string;
+        pickupLocationAddress: string;
+        pickupTime: string;
+      }
+    | {
+        deliveryMethod: "CONVENIENCE_STORE_PICKUP";
+        convenienceStoreCode: string;
+        convenienceStoreName: string;
+        convenienceStoreAddress: string;
+      }
+    | {
+        deliveryMethod: "HOME_DELIVERY";
+        homeDeliveryAddress: string;
+      };
   contactName?: string;
   contactPhone?: string;
   contactEmail?: string;

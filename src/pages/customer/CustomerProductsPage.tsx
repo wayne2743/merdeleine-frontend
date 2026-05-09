@@ -79,6 +79,32 @@ type DetailPreviewItem = {
   originalUrl: string | null;
 };
 
+type DeliveryMethod = "STORE_PICKUP" | "CONVENIENCE_STORE_PICKUP" | "HOME_DELIVERY";
+
+type DeliveryForm = {
+  deliveryMethod: DeliveryMethod;
+  pickupLocationId: string;
+  pickupLocationName: string;
+  pickupLocationAddress: string;
+  pickupTime: string;
+  convenienceStoreCode: string;
+  convenienceStoreName: string;
+  convenienceStoreAddress: string;
+  homeDeliveryAddress: string;
+};
+
+const INITIAL_DELIVERY_FORM: DeliveryForm = {
+  deliveryMethod: "STORE_PICKUP",
+  pickupLocationId: "store-main",
+  pickupLocationName: "Merdeleine 本店",
+  pickupLocationAddress: "台北市信義區虎林街120巷179號1樓",
+  pickupTime: "",
+  convenienceStoreCode: "UNSET",
+  convenienceStoreName: "未指定超商",
+  convenienceStoreAddress: "未指定地址",
+  homeDeliveryAddress: "",
+};
+
 function getImageGroupKey(image: ProductImage): string | null {
   if (!image.cdnUrl) return null;
   try {
@@ -218,6 +244,7 @@ export default function CustomerProductsPage() {
   const [orderOpen, setOrderOpen] = useState(false);
   const [orderSelected, setOrderSelected] = useState<Product | null>(null);
   const [qty, setQty] = useState(1);
+  const [deliveryForm, setDeliveryForm] = useState<DeliveryForm>(INITIAL_DELIVERY_FORM);
   const [reserveSuccess, setReserveSuccess] = useState(false);
   const [nextGroupInfo, setNextGroupInfo] = useState<NextGroupOpenAtResponse | null>(null);
   const [nextSellWindowOpenAt, setNextSellWindowOpenAt] = useState<string | null>(null);
@@ -346,6 +373,53 @@ export default function CustomerProductsPage() {
 
     const predictedGroupOpenAt = nextSellWindowOpenAt ?? nextGroupInfo.next_group_open_at;
     const predictedGroupEndAt = addDays(predictedGroupOpenAt, getGroupOpenDays(nextGroupInfo, orderSelected));
+    const predictedPickupAt = addDays(
+      predictedGroupEndAt,
+      nextGroupInfo.default_leads_day + nextGroupInfo.default_ship_day
+    );
+
+    let delivery: AutoGroupOrderRequest["delivery"];
+    if (deliveryForm.deliveryMethod === "STORE_PICKUP") {
+      const pickupAddress = deliveryForm.pickupLocationAddress.trim();
+      if (!pickupAddress) {
+        alert("請填寫門市地址");
+        return;
+      }
+
+      delivery = {
+        deliveryMethod: "STORE_PICKUP",
+        pickupLocationId: deliveryForm.pickupLocationId.trim() || "store-main",
+        pickupLocationName: deliveryForm.pickupLocationName.trim() || "Merdeleine 本店",
+        pickupLocationAddress: pickupAddress,
+        pickupTime: new Date(deliveryForm.pickupTime || predictedPickupAt).toISOString(),
+      };
+    } else if (deliveryForm.deliveryMethod === "CONVENIENCE_STORE_PICKUP") {
+      const storeCode = deliveryForm.convenienceStoreCode.trim();
+      const storeName = deliveryForm.convenienceStoreName.trim();
+      const storeAddress = deliveryForm.convenienceStoreAddress.trim();
+      if (!storeCode || !storeName || !storeAddress) {
+        alert("請完整填寫超商代碼、門市名稱與地址");
+        return;
+      }
+
+      delivery = {
+        deliveryMethod: "CONVENIENCE_STORE_PICKUP",
+        convenienceStoreCode: storeCode,
+        convenienceStoreName: storeName,
+        convenienceStoreAddress: storeAddress,
+      };
+    } else {
+      const homeAddress = deliveryForm.homeDeliveryAddress.trim();
+      if (!homeAddress) {
+        alert("請填寫宅配地址");
+        return;
+      }
+
+      delivery = {
+        deliveryMethod: "HOME_DELIVERY",
+        homeDeliveryAddress: homeAddress,
+      };
+    }
 
     setReserving(orderSelected.id);
     try {
@@ -357,6 +431,7 @@ export default function CustomerProductsPage() {
         predictedGroupEndAt,
         leadsDay: nextGroupInfo.default_leads_day,
         shipDay: nextGroupInfo.default_ship_day,
+        delivery,
         contactName: user?.displayName || undefined,
         contactEmail: user?.email || undefined,
       };
@@ -375,6 +450,7 @@ export default function CustomerProductsPage() {
     setReserveSuccess(false);
     setOrderSelected(p);
     setQty(1);
+    setDeliveryForm(INITIAL_DELIVERY_FORM);
     setOrderOpen(true);
     setNextGroupLoading(true);
     setNextGroupError(null);
@@ -387,7 +463,16 @@ export default function CustomerProductsPage() {
         catalogApi.getNextSellWindowOpenAt(),
       ]);
       setNextGroupInfo(info);
-      setNextSellWindowOpenAt(extractNextSellWindowOpenAt(sellWindowOpenAtPayload));
+      const openAt = extractNextSellWindowOpenAt(sellWindowOpenAtPayload);
+      setNextSellWindowOpenAt(openAt);
+
+      const predictedGroupOpenAt = openAt ?? info.next_group_open_at;
+      const predictedGroupEndAt = addDays(predictedGroupOpenAt, getGroupOpenDays(info, p));
+      const predictedPickupAt = addDays(predictedGroupEndAt, info.default_leads_day + info.default_ship_day);
+      setDeliveryForm((prev) => ({
+        ...prev,
+        pickupTime: predictedPickupAt,
+      }));
     } catch (e: unknown) {
       const err = e as { message?: string };
       console.error(e);
@@ -1015,6 +1100,93 @@ export default function CustomerProductsPage() {
                     style={{ fontSize: 15, padding: "10px 14px" }}
                   />
                 </label>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gap: 8,
+                    marginBottom: 20,
+                    padding: "10px 12px",
+                    borderRadius: 12,
+                    border: "1px solid #e7d6bd",
+                    background: "#fffaf2",
+                  }}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#5f4b3a" }}>貨運方式</span>
+                  <select
+                    value={deliveryForm.deliveryMethod}
+                    onChange={(e) => setDeliveryForm((prev) => ({ ...prev, deliveryMethod: e.target.value as DeliveryMethod }))}
+                    style={{ fontSize: 14, padding: "8px 10px" }}
+                  >
+                    <option value="STORE_PICKUP">門市定點取貨</option>
+                    <option value="CONVENIENCE_STORE_PICKUP">超商取貨</option>
+                    <option value="HOME_DELIVERY">宅配</option>
+                  </select>
+
+                  {deliveryForm.deliveryMethod === "STORE_PICKUP" && (
+                    <>
+                      <input
+                        value={deliveryForm.pickupLocationName}
+                        onChange={(e) => setDeliveryForm((prev) => ({ ...prev, pickupLocationName: e.target.value }))}
+                        placeholder="門市名稱"
+                        style={{ fontSize: 13, padding: "8px 10px" }}
+                      />
+                      <input
+                        value={deliveryForm.pickupLocationAddress}
+                        onChange={(e) => setDeliveryForm((prev) => ({ ...prev, pickupLocationAddress: e.target.value }))}
+                        placeholder="門市地址"
+                        style={{ fontSize: 13, padding: "8px 10px" }}
+                      />
+                      <input
+                        type="datetime-local"
+                        value={deliveryForm.pickupTime ? deliveryForm.pickupTime.slice(0, 16) : ""}
+                        onChange={(e) => {
+                          const nextValue = e.target.value;
+                          if (!nextValue) {
+                            setDeliveryForm((prev) => ({ ...prev, pickupTime: "" }));
+                            return;
+                          }
+                          const parsed = new Date(nextValue);
+                          if (Number.isNaN(parsed.getTime())) return;
+                          setDeliveryForm((prev) => ({ ...prev, pickupTime: parsed.toISOString() }));
+                        }}
+                        style={{ fontSize: 13, padding: "8px 10px" }}
+                      />
+                    </>
+                  )}
+
+                  {deliveryForm.deliveryMethod === "CONVENIENCE_STORE_PICKUP" && (
+                    <>
+                      <input
+                        value={deliveryForm.convenienceStoreCode}
+                        onChange={(e) => setDeliveryForm((prev) => ({ ...prev, convenienceStoreCode: e.target.value }))}
+                        placeholder="超商代碼"
+                        style={{ fontSize: 13, padding: "8px 10px" }}
+                      />
+                      <input
+                        value={deliveryForm.convenienceStoreName}
+                        onChange={(e) => setDeliveryForm((prev) => ({ ...prev, convenienceStoreName: e.target.value }))}
+                        placeholder="門市名稱"
+                        style={{ fontSize: 13, padding: "8px 10px" }}
+                      />
+                      <input
+                        value={deliveryForm.convenienceStoreAddress}
+                        onChange={(e) => setDeliveryForm((prev) => ({ ...prev, convenienceStoreAddress: e.target.value }))}
+                        placeholder="門市地址"
+                        style={{ fontSize: 13, padding: "8px 10px" }}
+                      />
+                    </>
+                  )}
+
+                  {deliveryForm.deliveryMethod === "HOME_DELIVERY" && (
+                    <input
+                      value={deliveryForm.homeDeliveryAddress}
+                      onChange={(e) => setDeliveryForm((prev) => ({ ...prev, homeDeliveryAddress: e.target.value }))}
+                      placeholder="宅配地址"
+                      style={{ fontSize: 13, padding: "8px 10px" }}
+                    />
+                  )}
+                </div>
 
                 <div className="customer-order-modal-actions" style={{ display: "flex", gap: 10 }}>
                   <button
