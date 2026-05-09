@@ -89,7 +89,6 @@ const actionButtonDelete: CSSProperties = {
   borderColor: "#f1b8b0",
 };
 
-const HOME_FEATURED_LIMIT = 3;
 const PAGE_SIZE = 5;
 type ProductStatusFilter = "ALL" | Product["status"];
 
@@ -149,7 +148,6 @@ export default function ProductAdminPage() {
   const [selectedOriginalUrl, setSelectedOriginalUrl] = useState<string | null>(null);
   const [imageDraftById, setImageDraftById] = useState<Record<string, ImageEditDraft>>({});
   const [savingImageGroupKey, setSavingImageGroupKey] = useState<string | null>(null);
-  const [homeFeaturedIds, setHomeFeaturedIds] = useState<string[]>(() => catalogApi.getHomeFeaturedProductIds());
   const [statusFilter, setStatusFilter] = useState<ProductStatusFilter>("ALL");
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
@@ -178,9 +176,6 @@ export default function ProductAdminPage() {
       setPage(response.page ?? nextPage);
       setTotal(response.total ?? 0);
 
-      const validFeaturedIds = catalogApi.getHomeFeaturedProductIds().filter((productId) => nextItems.some((item) => item.id === productId));
-      catalogApi.saveHomeFeaturedProductIds(validFeaturedIds);
-      setHomeFeaturedIds(validFeaturedIds);
     } catch (e: any) {
       console.error(e);
       setError(e?.message ?? "讀取商品失敗");
@@ -229,31 +224,6 @@ export default function ProductAdminPage() {
     setForm(toForm(product));
     resetImageForm();
     setFormModalOpen(true);
-  }
-
-  function toggleHomeFeatured(product: Product) {
-    setMessage(null);
-
-    setHomeFeaturedIds((prev) => {
-      const exists = prev.includes(product.id);
-      let next = prev;
-
-      if (exists) {
-        next = prev.filter((item) => item !== product.id);
-        setMessage(`已將「${product.name}」自首頁本週熱賣移除`);
-      } else {
-        if (prev.length >= HOME_FEATURED_LIMIT) {
-          setMessage(`首頁本週熱賣最多只能設定 ${HOME_FEATURED_LIMIT} 個商品`);
-          return prev;
-        }
-
-        next = [...prev, product.id];
-        setMessage(`已將「${product.name}」加入首頁本週熱賣`);
-      }
-
-      catalogApi.saveHomeFeaturedProductIds(next);
-      return next;
-    });
   }
 
   async function onSubmit(e: FormEvent) {
@@ -526,7 +496,7 @@ export default function ProductAdminPage() {
         <div>
           <h2>商品管理（CRUD）</h2>
           <p style={{ color: "#eadfbd", marginTop: -4 }}>
-            可新增、編輯、刪除目前商品，並指定最多 3 個商品顯示於首頁「本週熱賣」。
+            可新增、編輯、刪除目前商品。
           </p>
         </div>
         <button type="button" onClick={openCreateModal} disabled={submitting}>
@@ -536,11 +506,6 @@ export default function ProductAdminPage() {
 
       {message && <div style={{ marginTop: 10, color: "#f4e1bf" }}>{message}</div>}
       {error && <div style={{ marginTop: 8, color: "#ffd3c8" }}>讀取錯誤：{error}</div>}
-      {!error && (
-        <div style={{ marginTop: 8, color: "#eadfbd", fontSize: 13 }}>
-          首頁本週熱賣目前已選 {homeFeaturedIds.length} / {HOME_FEATURED_LIMIT} 個商品。
-        </div>
-      )}
 
       <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
         <label style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#c9b08a", fontSize: 13 }}>
@@ -570,14 +535,13 @@ export default function ProductAdminPage() {
               <th style={{ padding: 10 }}>狀態</th>
               <th style={{ padding: 10 }}>單價</th>
               <th style={{ padding: 10 }}>描述</th>
-              <th style={{ padding: 10 }}>首頁熱賣</th>
               <th style={{ padding: 10, width: 220 }}>操作</th>
             </tr>
           </thead>
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={6} style={{ padding: 12 }}>
+                <td colSpan={5} style={{ padding: 12 }}>
                   載入中...
                 </td>
               </tr>
@@ -585,7 +549,7 @@ export default function ProductAdminPage() {
 
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={6} style={{ padding: 12 }}>
+                <td colSpan={5} style={{ padding: 12 }}>
                   {statusFilter === "ALL" ? "目前沒有商品資料" : `沒有「${statusFilter === "ACTIVE" ? "上架中" : statusFilter === "INACTIVE" ? "下架" : "草稿"}」的商品`}
                 </td>
               </tr>
@@ -593,50 +557,12 @@ export default function ProductAdminPage() {
 
             {!loading &&
               items.map((p) => {
-                const featuredIndex = homeFeaturedIds.indexOf(p.id);
-                const isHomeFeatured = featuredIndex >= 0;
-
                 return (
                   <tr key={p.id} style={{ borderBottom: "1px solid #f1ebe2" }}>
                     <td style={{ padding: 10, fontWeight: 600 }}>{p.name}</td>
                     <td style={{ padding: 10 }}>{p.status}</td>
                     <td style={{ padding: 10 }}>{fmtPrice(p.unitPriceCents, p.currency)}</td>
                     <td style={{ padding: 10 }}>{truncateDescription(p.description)}</td>
-                    <td style={{ padding: 10 }}>
-                      <div style={{ display: "grid", gap: 6, justifyItems: "start" }}>
-                        <span
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            padding: "4px 10px",
-                            borderRadius: 999,
-                            background: isHomeFeatured ? "#eef8ef" : "#f3f4f6",
-                            color: isHomeFeatured ? "#2f6d47" : "#6b7280",
-                            fontSize: 12,
-                            fontWeight: 700,
-                          }}
-                        >
-                          {isHomeFeatured ? `第 ${featuredIndex + 1} 位熱賣` : "未顯示於首頁"}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => toggleHomeFeatured(p)}
-                          disabled={submitting || (!isHomeFeatured && homeFeaturedIds.length >= HOME_FEATURED_LIMIT)}
-                          style={{
-                            ...actionButtonBase,
-                            minWidth: 126,
-                            background: isHomeFeatured
-                              ? "linear-gradient(180deg, #f5f5f5 0%, #e5e7eb 100%)"
-                              : "linear-gradient(180deg, #eef8ef 0%, #d6f0db 100%)",
-                            color: isHomeFeatured ? "#4b5563" : "#2f6d47",
-                            borderColor: isHomeFeatured ? "#d1d5db" : "#9fd0ad",
-                          }}
-                          title={!isHomeFeatured && homeFeaturedIds.length >= HOME_FEATURED_LIMIT ? `最多只能選 ${HOME_FEATURED_LIMIT} 個商品` : undefined}
-                        >
-                          {isHomeFeatured ? "移除熱賣" : "設為熱賣"}
-                        </button>
-                      </div>
-                    </td>
                     <td style={{ padding: 10 }}>
                       <div style={{ display: "grid", gap: 8, justifyItems: "start" }}>
                         <button
