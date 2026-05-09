@@ -79,9 +79,6 @@ export default function NavBar() {
                 {/* <NavLink to="/admin/confirm" className={navLinkClass}>
                   後台：Confirm 成團
                 </NavLink> */}
-                <NavLink to="/admin/production-planning" className={navLinkClass}>
-                  生產規劃管理
-                </NavLink>
               </>
             )}
           </div>

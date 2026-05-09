@@ -13,7 +13,6 @@ import HomePage from "./pages/HomePage.tsx";
 // admin pages
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import ConfirmBatchPage from "./pages/admin/ConfirmBatchPage";
-import ProductionPage from "./pages/admin/ProductionPage";
 import ProductAdminPage from "./pages/admin/ProductAdminPage";
 import PaymentAdminPage from "./pages/admin/PaymentAdminPage";
 import SellWindowCrudPage from "./pages/admin/SellWindowCrudPage";
@@ -59,8 +58,8 @@ export default function App() {
             <Route path="/admin/sell-window-crud" element={<SellWindowCrudPage />} />
             <Route path="/admin/store-pickup-locations" element={<StorePickupLocationAdminPage />} />
             <Route path="/admin/confirm" element={<ConfirmBatchPage />} />
-            <Route path="/admin/production" element={<ProductionPage />} />
-            <Route path="/admin/production-planning" element={<ProductionPage />} />
+            <Route path="/admin/production" element={<Navigate to="/admin/sell-window-crud" replace />} />
+            <Route path="/admin/production-planning" element={<Navigate to="/admin/sell-window-crud" replace />} />
           </Route>
         </Route>
       </Route>
