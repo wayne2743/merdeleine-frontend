@@ -376,6 +376,7 @@ export default function CustomerProductsPage() {
         leadsDay: nextGroupInfo.default_leads_day,
         shipDay: nextGroupInfo.default_ship_day,
         delivery,
+        shippingAddress: STORE_PICKUP_INFO.pickupLocationAddress,
         contactName: user?.displayName || undefined,
         contactEmail: user?.email || undefined,
       };
