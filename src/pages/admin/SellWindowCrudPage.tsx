@@ -333,7 +333,7 @@ export default function SellWindowCrudPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await catalogApi.pageProductSellWindows(targetPage, pageSize);
+      const response = await catalogApi.pageProductSellWindowViews(targetPage, pageSize);
       const pageItems = Array.isArray(response.items) ? response.items : [];
       setItems(
         pageItems.slice().sort((a, b) => {
