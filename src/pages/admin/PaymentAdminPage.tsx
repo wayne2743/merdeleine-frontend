@@ -100,6 +100,56 @@ const actionBtnBase: CSSProperties = {
   boxShadow: "0 6px 16px rgba(56, 33, 8, 0.14)",
 };
 
+const filterLabelStyle: CSSProperties = {
+  display: "grid",
+  gap: 6,
+  minWidth: 180,
+  color: "#4f3927",
+  fontSize: 13,
+  fontWeight: 600,
+};
+
+const filterInputStyle: CSSProperties = {
+  height: 36,
+  borderRadius: 8,
+  border: "1px solid #d8c8b4",
+  padding: "0 10px",
+  fontSize: 14,
+  color: "#3f2d20",
+  background: "#fffdf9",
+};
+
+const tableHeaderStyle: CSSProperties = {
+  padding: "12px 10px",
+  fontSize: 14,
+  fontWeight: 700,
+  color: "#4d3826",
+  whiteSpace: "nowrap",
+  borderBottom: "1px solid #eee",
+  background: "#fff7ec",
+};
+
+const tableCellStyle: CSSProperties = {
+  padding: "12px 10px",
+  verticalAlign: "top",
+  fontSize: 14,
+  lineHeight: 1.6,
+  color: "#2f241b",
+};
+
+function getStatusBadgeStyle(status: PaymentStatus): CSSProperties {
+  if (status === "SUCCEEDED") {
+    return { background: "#e6f5eb", color: "#2f7f49", border: "1px solid #b9e2c7" };
+  }
+  if (status === "INIT") {
+    return { background: "#fff1d8", color: "#8a5300", border: "1px solid #ebca8c" };
+  }
+  if (status === "FAILED") {
+    return { background: "#fde8e8", color: "#983333", border: "1px solid #efbcbc" };
+  }
+  return { background: "#f1f1f1", color: "#666", border: "1px solid #ddd" };
+}
+
 export default function PaymentAdminPage() {
   const [items, setItems] = useState<PaymentInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -359,11 +409,11 @@ export default function PaymentAdminPage() {
   });
 
   return (
-    <div style={{ display: "grid", gap: 14 }}>
+    <div style={{ display: "grid", gap: 16 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <div>
           <h2 style={{ marginBottom: 6 }}>Payment 資訊管理（CRUD）</h2>
-          <div style={{ color: "#eadfbd", fontSize: 13 }}>
+          <div style={{ color: "#eadfbd", fontSize: 14, lineHeight: 1.7 }}>
             payment list 目前改由 `GET /payments/enriched` 載入，並顯示支付方式、狀態、到期時間、匯款後五碼與匯款時間等資訊。
           </div>
         </div>
@@ -372,12 +422,12 @@ export default function PaymentAdminPage() {
         </button>
       </div>
 
-      <div style={{ color: "#eadfbd", fontSize: 13 }}>
+      <div style={{ color: "#eadfbd", fontSize: 14 }}>
         向下滑動頁面時會自動載入更多 payment 資料。
       </div>
 
-      {message && <div style={{ color: "#f4e1bf", fontSize: 13 }}>{message}</div>}
-      {error && <div style={{ color: "#ffd3c8", fontSize: 13 }}>讀取錯誤：{error}</div>}
+      {message && <div style={{ color: "#f4e1bf", fontSize: 14 }}>{message}</div>}
+      {error && <div style={{ color: "#ffd3c8", fontSize: 14 }}>讀取錯誤：{error}</div>}
 
       <div
         style={{
@@ -393,9 +443,9 @@ export default function PaymentAdminPage() {
         }}
       >
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", flex: 1 }}>
-          <label style={{ display: "grid", gap: 4, minWidth: 180, color: "#4f3927", fontSize: 13 }}>
+          <label style={filterLabelStyle}>
             檔期名稱
-            <select value={sellWindowFilter} onChange={(e) => setSellWindowFilter(e.target.value)}>
+            <select value={sellWindowFilter} onChange={(e) => setSellWindowFilter(e.target.value)} style={filterInputStyle}>
               <option value="ALL">全部檔期</option>
               {sellWindowOptions.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
@@ -403,9 +453,9 @@ export default function PaymentAdminPage() {
             </select>
           </label>
 
-          <label style={{ display: "grid", gap: 4, minWidth: 160, color: "#4f3927", fontSize: 13 }}>
+          <label style={{ ...filterLabelStyle, minWidth: 150 }}>
             支付方式
-            <select value={providerFilter} onChange={(e) => setProviderFilter(e.target.value as "ALL" | PaymentProvider)}>
+            <select value={providerFilter} onChange={(e) => setProviderFilter(e.target.value as "ALL" | PaymentProvider)} style={filterInputStyle}>
               <option value="ALL">全部方式</option>
               {PROVIDER_OPTIONS.map((provider) => (
                 <option key={provider} value={provider}>{formatProviderLabel(provider)}</option>
@@ -413,9 +463,9 @@ export default function PaymentAdminPage() {
             </select>
           </label>
 
-          <label style={{ display: "grid", gap: 4, minWidth: 150, color: "#4f3927", fontSize: 13 }}>
+          <label style={{ ...filterLabelStyle, minWidth: 130 }}>
             狀態
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as "ALL" | PaymentStatus)}>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as "ALL" | PaymentStatus)} style={filterInputStyle}>
               <option value="ALL">全部狀態</option>
               {STATUS_OPTIONS.map((status) => (
                 <option key={status} value={status}>{formatStatusLabel(status)}</option>
@@ -423,18 +473,19 @@ export default function PaymentAdminPage() {
             </select>
           </label>
 
-          <label style={{ display: "grid", gap: 4, minWidth: 170, color: "#4f3927", fontSize: 13 }}>
+          <label style={filterLabelStyle}>
             客戶姓名
-            <input value={customerNameKeyword} onChange={(e) => setCustomerNameKeyword(e.target.value)} placeholder="輸入客戶姓名" />
+            <input value={customerNameKeyword} onChange={(e) => setCustomerNameKeyword(e.target.value)} placeholder="輸入客戶姓名" style={filterInputStyle} />
           </label>
 
-          <label style={{ display: "grid", gap: 4, minWidth: 170, color: "#4f3927", fontSize: 13 }}>
+          <label style={filterLabelStyle}>
             客戶電話
-            <input value={customerPhoneKeyword} onChange={(e) => setCustomerPhoneKeyword(e.target.value)} placeholder="輸入客戶電話" />
+            <input value={customerPhoneKeyword} onChange={(e) => setCustomerPhoneKeyword(e.target.value)} placeholder="輸入客戶電話" style={filterInputStyle} />
           </label>
         </div>
 
         <div style={{ display: "grid", gap: 8, justifyItems: "end" }}>
+          <div style={{ color: "#6b5a47", fontSize: 13 }}>篩選結果：{filteredItems.length} 筆</div>
           <button
             type="button"
             onClick={() => {
@@ -452,31 +503,28 @@ export default function PaymentAdminPage() {
       </div>
 
       <div style={{ borderRadius: 14, overflowX: "auto", border: "1px solid #eadfcd", background: "#fff" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", color: "#2f241b", minWidth: 920 }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", color: "#2f241b", minWidth: 1120 }}>
           <thead>
-            <tr style={{ textAlign: "left", borderBottom: "1px solid #eee" }}>
-              <th style={{ padding: 10 }}>檔期名稱</th>
-              <th style={{ padding: 10 }}>支付方式</th>
-              <th style={{ padding: 10 }}>狀態</th>
-              <th style={{ padding: 10 }}>到期時間</th>
-              <th style={{ padding: 10 }}>匯款後五碼</th>
-              <th style={{ padding: 10 }}>匯款時間</th>
-              <th style={{ padding: 10 }}>客戶姓名</th>
-              <th style={{ padding: 10 }}>客戶電話</th>
-              <th style={{ padding: 10 }}>客戶 Email</th>
-              <th style={{ padding: 10, width: 280 }}>操作</th>
+            <tr style={{ textAlign: "left" }}>
+              <th style={tableHeaderStyle}>檔期</th>
+              <th style={tableHeaderStyle}>客戶資訊</th>
+              <th style={tableHeaderStyle}>付款方式</th>
+              <th style={tableHeaderStyle}>狀態</th>
+              <th style={tableHeaderStyle}>付款時程</th>
+              <th style={tableHeaderStyle}>匯款末五碼</th>
+              <th style={{ ...tableHeaderStyle, width: 290 }}>操作</th>
             </tr>
           </thead>
           <tbody>
             {loading && items.length === 0 && (
               <tr>
-                <td colSpan={10} style={{ padding: 12 }}>載入中...</td>
+                <td colSpan={7} style={{ padding: 14, fontSize: 14 }}>載入中...</td>
               </tr>
             )}
 
             {!loading && filteredItems.length === 0 && (
               <tr>
-                <td colSpan={10} style={{ padding: 12 }}>
+                <td colSpan={7} style={{ padding: 14, fontSize: 14 }}>
                   {items.length === 0 ? "目前沒有 payment 資料" : "查無符合篩選條件的 payment 資料"}
                 </td>
               </tr>
@@ -484,18 +532,35 @@ export default function PaymentAdminPage() {
 
             {!loading && filteredItems.map((item) => (
               <tr key={item.paymentId} style={{ borderBottom: "1px solid #f1ebe2" }}>
-                <td style={{ padding: 10 }}>
-                  <div style={{ fontWeight: 600 }}>{item.sellWindowName || "-"}</div>
+                <td style={tableCellStyle}>
+                  <div style={{ fontWeight: 700 }}>{item.sellWindowName || "-"}</div>
+                  <div style={{ marginTop: 2, fontSize: 12, color: "#7e6957" }}>{item.sellWindowId || "-"}</div>
                 </td>
-                <td style={{ padding: 10 }}>{formatProviderLabel(item.provider)}</td>
-                <td style={{ padding: 10 }}>{formatStatusLabel(item.status)}</td>
-                <td style={{ padding: 10 }}>{formatDateTime(item.expireAt)}</td>
-                <td style={{ padding: 10 }}>{item.bankAccountLast5 || "-"}</td>
-                <td style={{ padding: 10 }}>{formatDateTime(item.remittedAt)}</td>
-                <td style={{ padding: 10 }}>{item.customerName || "-"}</td>
-                <td style={{ padding: 10 }}>{item.customerPhone || "-"}</td>
-                <td style={{ padding: 10 }}>{item.customerEmail || "-"}</td>
-                <td style={{ padding: 10 }}>
+                <td style={tableCellStyle}>
+                  <div style={{ fontWeight: 600 }}>{item.customerName || "-"}</div>
+                  <div style={{ marginTop: 2, color: "#5f4a38" }}>{item.customerPhone || "-"}</div>
+                  <div style={{ marginTop: 2, color: "#7e6957", fontSize: 13, wordBreak: "break-all" }}>{item.customerEmail || "-"}</div>
+                </td>
+                <td style={{ ...tableCellStyle, whiteSpace: "nowrap" }}>{formatProviderLabel(item.provider)}</td>
+                <td style={tableCellStyle}>
+                  <span style={{
+                    ...getStatusBadgeStyle(item.status),
+                    display: "inline-block",
+                    borderRadius: 999,
+                    padding: "2px 10px",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    whiteSpace: "nowrap",
+                  }}>
+                    {formatStatusLabel(item.status)}
+                  </span>
+                </td>
+                <td style={tableCellStyle}>
+                  <div style={{ whiteSpace: "nowrap" }}>到期：{formatDateTime(item.expireAt)}</div>
+                  <div style={{ marginTop: 2, color: "#7e6957", whiteSpace: "nowrap" }}>匯款：{formatDateTime(item.remittedAt)}</div>
+                </td>
+                <td style={{ ...tableCellStyle, whiteSpace: "nowrap", textAlign: "center", fontWeight: 700 }}>{item.bankAccountLast5 || "-"}</td>
+                <td style={tableCellStyle}>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     {item.provider === "BANK_TRANSFER" && item.status !== "SUCCEEDED" && (
                       <button
