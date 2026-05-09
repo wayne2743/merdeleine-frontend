@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { useLocation } from "react-router-dom";
 import { paymentApi } from "../../api/paymentApi";
 import type {
   PaymentCreateRequest,
@@ -151,6 +152,7 @@ function getStatusBadgeStyle(status: PaymentStatus): CSSProperties {
 }
 
 export default function PaymentAdminPage() {
+  const location = useLocation();
   const [items, setItems] = useState<PaymentInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -169,6 +171,20 @@ export default function PaymentAdminPage() {
   const [customerPhoneKeyword, setCustomerPhoneKeyword] = useState("");
   const [providerFilter, setProviderFilter] = useState<"ALL" | PaymentProvider>("ALL");
   const [statusFilter, setStatusFilter] = useState<"ALL" | PaymentStatus>("ALL");
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const targetSellWindowId = params.get("sellWindowId");
+    const targetStatus = params.get("status");
+
+    if (targetSellWindowId) {
+      setSellWindowFilter(targetSellWindowId);
+    }
+
+    if (targetStatus && (STATUS_OPTIONS as readonly string[]).includes(targetStatus)) {
+      setStatusFilter(targetStatus as PaymentStatus);
+    }
+  }, [location.search]);
 
   const isEditMode = Boolean(form.paymentId);
 

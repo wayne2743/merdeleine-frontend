@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import { authApi } from "../../api/authApi";
 import { catalogApi } from "../../api/catalogApi";
 import { orderApi } from "../../api/orderApi";
@@ -265,6 +266,7 @@ type OrderModalState = {
 };
 
 export default function SellWindowCrudPage() {
+  const navigate = useNavigate();
   const [items, setItems] = useState<ProductSellWindowView[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -295,7 +297,6 @@ export default function SellWindowCrudPage() {
   const [payments, setPayments] = useState<PaymentInfo[]>([]);
   const [rawSellWindows, setRawSellWindows] = useState<SellWindowResponse[]>([]);
   const [batchSubmitting, setBatchSubmitting] = useState<string | null>(null);
-  const [paymentApprovingId, setPaymentApprovingId] = useState<string | null>(null);
 
   const batchBySellWindowId = useMemo(() => {
     const map = new Map<string, ProductionBatch[]>();
@@ -447,17 +448,12 @@ export default function SellWindowCrudPage() {
     }
   }
 
-  async function onApprovePayment(payment: PaymentInfo) {
-    if (paymentApprovingId) return;
-    setPaymentApprovingId(payment.paymentId);
-    try {
-      await paymentApi.approvePayment(payment.paymentId);
-      void loadPayments();
-    } catch (e: any) {
-      alert(e?.response?.data?.message ?? e?.message ?? "確認收款失敗");
-    } finally {
-      setPaymentApprovingId(null);
-    }
+  function goToPaymentManagementForSellWindow(sellWindowId: string) {
+    const params = new URLSearchParams({
+      sellWindowId,
+      status: "INIT",
+    });
+    navigate(`/admin/payments?${params.toString()}`);
   }
 
   function startEdit(item: SellWindowResponse) {
@@ -982,20 +978,19 @@ export default function SellWindowCrudPage() {
                           const initCount = rowPayments.filter((p) => p.status === "INIT").length;
                           const succeededCount = rowPayments.filter((p) => p.status === "SUCCEEDED").length;
                           const expiredCount = rowPayments.filter((p) => p.status === "EXPIRED").length;
-                          const firstApprovable = rowPayments.find((p) => p.status === "INIT" && p.provider === "BANK_TRANSFER");
+                          const hasPendingPayment = initCount > 0;
                           return (
                             <div style={{ display: "grid", gap: 5 }}>
                               {succeededCount > 0 && <div style={{ fontSize: 12, color: "#2f6d47" }}>已付款 {succeededCount} 筆</div>}
                               {initCount > 0 && <div style={{ fontSize: 12, color: "#8a5a14" }}>待付款 {initCount} 筆</div>}
                               {expiredCount > 0 && <div style={{ fontSize: 12, color: "#b13a2d" }}>已逾期 {expiredCount} 筆</div>}
-                              {firstApprovable && (
+                              {hasPendingPayment && (
                                 <button
                                   type="button"
-                                  onClick={() => void onApprovePayment(firstApprovable)}
-                                  disabled={Boolean(paymentApprovingId)}
+                                  onClick={() => goToPaymentManagementForSellWindow(item.sellWindowId)}
                                   style={{ ...btnSmall, background: "#e8f5e9", color: "#2f6d47", borderColor: "#9ad8c4", fontSize: 12, padding: "5px 10px", minWidth: 68, boxShadow: "none" }}
                                 >
-                                  {paymentApprovingId === firstApprovable.paymentId ? "處理中..." : "確認收款"}
+                                  確認收款
                                 </button>
                               )}
                             </div>
