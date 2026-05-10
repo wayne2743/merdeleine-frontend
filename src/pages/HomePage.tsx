@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { catalogApi } from "../api/catalogApi";
 import type { Product, ProductImage } from "../types/domain";
@@ -7,9 +7,15 @@ type FeaturedProductCard = {
   id: string;
   name: string;
   desc: string;
+  fullDesc: string;
   price: string;
   image: string;
   actionTo: string;
+};
+
+type DetailPreviewItem = {
+  detailUrl: string;
+  originalUrl: string | null;
 };
 
 function pickHomeImage(images: ProductImage[]): string | null {
@@ -36,6 +42,52 @@ function decodeDescription(value?: string | null): string {
 function trimDescription(value: string, maxLength = 34): string {
   if (value.length <= maxLength) return value;
   return `${value.slice(0, maxLength).trim()}…`;
+}
+
+function getImageGroupKey(image: ProductImage): string | null {
+  if (!image.cdnUrl) return null;
+  try {
+    const pathname = new URL(image.cdnUrl).pathname;
+    const parts = pathname.split("/").filter(Boolean);
+    if (parts.length < 4) return null;
+    return parts[2] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function buildDetailPreviewItems(images: ProductImage[]): DetailPreviewItem[] {
+  const originalByGroup = new Map<string, string>();
+
+  images
+    .filter((image) => image.isActive && image.imageType === "ORIGINAL")
+    .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary) || a.sortOrder - b.sortOrder)
+    .forEach((image) => {
+      const groupKey = getImageGroupKey(image);
+      if (!groupKey) return;
+      if (!originalByGroup.has(groupKey)) {
+        originalByGroup.set(groupKey, image.cdnUrl);
+      }
+    });
+
+  return images
+    .filter((image) => image.isActive && image.imageType === "DETAIL")
+    .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary) || a.sortOrder - b.sortOrder)
+    .map((image) => {
+      const groupKey = getImageGroupKey(image);
+      return {
+        detailUrl: image.cdnUrl,
+        originalUrl: groupKey ? originalByGroup.get(groupKey) ?? null : null,
+      };
+    });
+}
+
+function pickOriginalImage(images: ProductImage[]): string | null {
+  const originalImage = [...images]
+    .filter((image) => image.isActive && image.imageType === "ORIGINAL")
+    .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary) || a.sortOrder - b.sortOrder)[0];
+
+  return originalImage?.cdnUrl ?? null;
 }
 
 function formatPrice(product: Product): string {
@@ -89,6 +141,39 @@ export default function HomePage() {
   const hero = seasonalHero[season];
   const [featuredProducts, setFeaturedProducts] = useState<FeaturedProductCard[]>([]);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
+  const [featuredDetail, setFeaturedDetail] = useState<FeaturedProductCard | null>(null);
+  const [detailImageByProductId, setDetailImageByProductId] = useState<Record<string, DetailPreviewItem[]>>({});
+  const [originalImageByProductId, setOriginalImageByProductId] = useState<Record<string, string>>({});
+  const [originalModalUrl, setOriginalModalUrl] = useState<string | null>(null);
+  const detailStripRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const shouldLockScroll = Boolean(featuredDetail) || Boolean(originalModalUrl);
+    if (shouldLockScroll) {
+      document.documentElement.classList.add("modal-scroll-lock");
+      document.body.classList.add("modal-scroll-lock");
+    }
+
+    return () => {
+      document.documentElement.classList.remove("modal-scroll-lock");
+      document.body.classList.remove("modal-scroll-lock");
+    };
+  }, [featuredDetail, originalModalUrl]);
+
+  function openDetailModal(item: FeaturedProductCard) {
+    setFeaturedDetail(item);
+    setOriginalModalUrl(null);
+
+    if (detailStripRef.current) {
+      detailStripRef.current.scrollLeft = 0;
+    }
+  }
+
+  function scrollDetailImages(direction: "left" | "right") {
+    if (!detailStripRef.current) return;
+    const delta = direction === "left" ? -220 : 220;
+    detailStripRef.current.scrollBy({ left: delta, behavior: "smooth" });
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -130,6 +215,7 @@ export default function HomePage() {
               id: product.id,
               name: product.name,
               desc,
+              fullDesc: decodeDescription(product.description) || "（無描述）",
               price: formatPrice(product),
               image,
               actionTo: `/customer/products?action=group&productId=${encodeURIComponent(product.id)}`,
@@ -137,11 +223,33 @@ export default function HomePage() {
           })
           .filter((item): item is FeaturedProductCard => item !== null);
 
+        const nextDetailImageByProductId = finalProducts.reduce<Record<string, DetailPreviewItem[]>>((acc, product, index) => {
+          const images = imageResults[index]?.status === "fulfilled" ? imageResults[index].value : [];
+          const detailItems = buildDetailPreviewItems(images);
+          if (detailItems.length > 0) {
+            acc[product.id] = detailItems;
+          }
+          return acc;
+        }, {});
+
+        const nextOriginalImageByProductId = finalProducts.reduce<Record<string, string>>((acc, product, index) => {
+          const images = imageResults[index]?.status === "fulfilled" ? imageResults[index].value : [];
+          const originalUrl = pickOriginalImage(images);
+          if (originalUrl) {
+            acc[product.id] = originalUrl;
+          }
+          return acc;
+        }, {});
+
         setFeaturedProducts(nextCards);
+        setDetailImageByProductId(nextDetailImageByProductId);
+        setOriginalImageByProductId(nextOriginalImageByProductId);
       } catch (error) {
         console.error(error);
         if (!cancelled) {
           setFeaturedProducts([]);
+          setDetailImageByProductId({});
+          setOriginalImageByProductId({});
         }
       } finally {
         if (!cancelled) {
@@ -218,20 +326,27 @@ export default function HomePage() {
         </div>
 
         {loadingFeatured && featuredProducts.length === 0 ? (
-          <div style={{ color: "#eadfbd", fontSize: 14 }}>熱門商品載入中...</div>
+          <div style={{ color: "#6f5f50", fontSize: 14 }}>熱門商品載入中...</div>
         ) : featuredProducts.length === 0 ? (
-          <div style={{ color: "#eadfbd", fontSize: 14 }}>目前尚未設定首頁熱賣商品。</div>
+          <div style={{ color: "#6f5f50", fontSize: 14 }}>目前尚未設定首頁熱賣商品。</div>
         ) : (
           <div className="featured-grid">
             {featuredProducts.map((item) => (
-              <article key={item.id} className="featured-card">
-                <img src={item.image} alt={item.name} />
+              <article key={item.id} className="featured-card customer-product-card" onClick={() => openDetailModal(item)}>
+                <img src={item.image} alt={item.name} style={{ cursor: "zoom-in" }} />
                 <div className="featured-body">
                   <h3>{item.name}</h3>
                   <p>{item.desc}</p>
                   <div className="featured-row">
                     <strong>{item.price}</strong>
-                    <Link to={item.actionTo}>加入清單</Link>
+                    <Link
+                      to={item.actionTo}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                    >
+                      加入清單
+                    </Link>
                   </div>
                 </div>
               </article>
@@ -247,7 +362,7 @@ export default function HomePage() {
             flexWrap: "wrap",
             gap: 14,
             fontSize: 13,
-            color: "#eadfbd",
+            color: "#6f5f50",
           }}
         >
           <Link to="/privacy-policy">隱私權政策</Link>
@@ -255,6 +370,251 @@ export default function HomePage() {
           <Link to="/data-deletion">資料刪除說明</Link>
         </div>
       </section>
+
+      {featuredDetail && (
+        <div
+          className="customer-modal-backdrop home-featured-detail-modal-backdrop"
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.35)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+            overflowY: "auto",
+            zIndex: 120,
+          }}
+          onClick={() => {
+            setFeaturedDetail(null);
+            setOriginalModalUrl(null);
+          }}
+        >
+          <div
+            className="customer-modal-panel home-featured-detail-modal"
+            style={{
+              width: "100%",
+              maxWidth: 680,
+              maxHeight: "calc(100dvh - 32px)",
+              overflowY: "auto",
+              background: "#fff",
+              borderRadius: 12,
+              padding: 16,
+              position: "relative",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setFeaturedDetail(null);
+                setOriginalModalUrl(null);
+              }}
+              aria-label="關閉視窗"
+              title="關閉"
+              className="modal-close-btn"
+            >
+              ×
+            </button>
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <div style={{ fontWeight: 800, fontSize: 16, color: "#4a321f" }}>商品詳細</div>
+            </div>
+
+            <div
+              style={{
+                width: "100%",
+                height: 220,
+                borderRadius: 12,
+                overflow: "hidden",
+                background: "#f4f4f4",
+                border: "1px solid #eee",
+                position: "relative",
+              }}
+            >
+              {detailImageByProductId[featuredDetail.id]?.length ? (
+                <>
+                  <button
+                    onClick={() => scrollDetailImages("left")}
+                    style={{
+                      position: "absolute",
+                      left: 8,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      zIndex: 2,
+                      width: 30,
+                      height: 30,
+                      borderRadius: "50%",
+                      border: "1px solid #ddd",
+                      background: "rgba(255,255,255,0.95)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    ◀
+                  </button>
+
+                  <div
+                    ref={detailStripRef}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      overflowX: "auto",
+                      overflowY: "hidden",
+                      display: "flex",
+                      gap: 8,
+                      padding: "14px 46px",
+                      boxSizing: "border-box",
+                      scrollBehavior: "smooth",
+                    }}
+                  >
+                    {detailImageByProductId[featuredDetail.id].map((item, index) => (
+                      <div
+                        key={`${featuredDetail.id}-${index}`}
+                        style={{
+                          width: 190,
+                          height: 190,
+                          borderRadius: 10,
+                          overflow: "hidden",
+                          border: "1px solid #eee",
+                          background: "#fff",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <img
+                          src={item.detailUrl}
+                          alt={`${featuredDetail.name}-detail-${index + 1}`}
+                          onClick={() => {
+                            setOriginalModalUrl(item.originalUrl || originalImageByProductId[featuredDetail.id] || null);
+                          }}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            display: "block",
+                            cursor: "zoom-in",
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => scrollDetailImages("right")}
+                    style={{
+                      position: "absolute",
+                      right: 8,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      zIndex: 2,
+                      width: 30,
+                      height: 30,
+                      borderRadius: "50%",
+                      border: "1px solid #ddd",
+                      background: "rgba(255,255,255,0.95)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    ▶
+                  </button>
+                </>
+              ) : (
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 13,
+                    color: "#999",
+                  }}
+                >
+                  暫無 DETAIL 圖片
+                </div>
+              )}
+            </div>
+
+            {originalModalUrl && (
+              <div
+                className="customer-modal-backdrop customer-original-modal-backdrop"
+                style={{
+                  position: "fixed",
+                  left: 0,
+                  top: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: "rgba(0,0,0,0.65)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 16,
+                  zIndex: 130,
+                }}
+                onClick={() => setOriginalModalUrl(null)}
+              >
+                <div
+                  className="customer-modal-panel customer-original-modal"
+                  style={{
+                    width: "min(92vw, 1200px)",
+                    height: "min(88vh, 860px)",
+                    borderRadius: 12,
+                    overflow: "hidden",
+                    background: "#111",
+                    border: "1px solid rgba(255,255,255,0.18)",
+                    position: "relative",
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOriginalModalUrl(null)}
+                    aria-label="關閉視窗"
+                    title="關閉"
+                    className="modal-close-btn modal-close-btn-dark"
+                  >
+                    ×
+                  </button>
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: 8,
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    <img
+                      src={originalModalUrl}
+                      alt={`${featuredDetail.name}-original`}
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        width: "auto",
+                        height: "auto",
+                        objectFit: "contain",
+                        display: "block",
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div style={{ marginTop: 14, fontSize: 18, fontWeight: 700, color: "#4a321f" }}>{featuredDetail.name}</div>
+            <div style={{ marginTop: 8, fontSize: 14, color: "#5b442f" }}>售價：{featuredDetail.price}</div>
+            <div style={{ marginTop: 8, fontSize: 13, color: "#6c5642", whiteSpace: "pre-wrap" }}>
+              {featuredDetail.fullDesc}
+            </div>
+            <div style={{ marginTop: 14 }}>
+              <Link to={featuredDetail.actionTo} className="hero-btn hero-btn-primary" onClick={() => setFeaturedDetail(null)}>
+                加入清單
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

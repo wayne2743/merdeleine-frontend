@@ -277,7 +277,7 @@ export default function SellWindowDetailPage() {
     }
   }
 
-  if (!data) return <div style={{ padding: "40px 20px", textAlign: "center", color: "#e7dfd2" }}>載入中...</div>;
+  if (!data) return <div style={{ padding: "40px 20px", textAlign: "center", color: "#6f5f50" }}>載入中...</div>;
 
   const quotaPercent = data.maxQty ? Math.min(100, Math.round((data.soldQty / data.maxQty) * 100)) : 0;
   const statusLabel = isSoldOut ? "名額已滿" : data.quotaStatus === "OPEN" ? "開放預約" : "暫停預約";
@@ -290,7 +290,7 @@ export default function SellWindowDetailPage() {
         style={{
           background: "none",
           border: "none",
-          color: "#c9b97a",
+          color: "#8a6948",
           fontSize: 14,
           cursor: "pointer",
           padding: "0 0 16px 0",
@@ -305,8 +305,8 @@ export default function SellWindowDetailPage() {
       {/* 商品卡片：圖片 + 資訊 */}
       <div
         style={{
-          background: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(255,255,255,0.15)",
+          background: "linear-gradient(180deg, #fffdf9 0%, #fbf4ea 100%)",
+          border: "1px solid #e6d8c6",
           borderRadius: 16,
           overflow: "hidden",
           display: "flex",
@@ -318,15 +318,15 @@ export default function SellWindowDetailPage() {
           style={{
             width: "100%",
             aspectRatio: "4 / 3",
-            background: "rgba(0,0,0,0.25)",
+            background: "#f2ece4",
             flexShrink: 0,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          {imageLoading && <span style={{ color: "#e7dfd2", fontSize: 13 }}>圖片載入中...</span>}
-          {!imageLoading && !thumbnailUrl && <span style={{ color: "#e7dfd2", fontSize: 13 }}>暫無圖片</span>}
+          {imageLoading && <span style={{ color: "#746352", fontSize: 13 }}>圖片載入中...</span>}
+          {!imageLoading && !thumbnailUrl && <span style={{ color: "#746352", fontSize: 13 }}>暫無圖片</span>}
           {!imageLoading && thumbnailUrl && (
             <img
               src={thumbnailUrl}
@@ -358,16 +358,16 @@ export default function SellWindowDetailPage() {
 
           {/* 名額進度 */}
           <div style={{ marginTop: 16 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6, color: "#e7dfd2" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6, color: "#6e5d4d" }}>
               <span>已預約名額</span>
               <span style={{ fontWeight: 600 }}>
                 {data.soldQty} / {data.maxQty ?? "無上限"}
-                {data.minQty ? <span style={{ color: "#aaa", marginLeft: 6, fontWeight: 400 }}>（最少到量 {data.minQty}）</span> : null}
+                {data.minQty ? <span style={{ color: "#8f7f70", marginLeft: 6, fontWeight: 400 }}>（最少到量 {data.minQty}）</span> : null}
               </span>
             </div>
             {data.maxQty && (
-              <div style={{ height: 6, borderRadius: 4, background: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${quotaPercent}%`, background: isSoldOut ? "#e05252" : "#c9b97a", borderRadius: 4, transition: "width 0.3s" }} />
+              <div style={{ height: 6, borderRadius: 4, background: "#e6dacb", overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${quotaPercent}%`, background: isSoldOut ? "#cf5a5a" : "#b58e60", borderRadius: 4, transition: "width 0.3s" }} />
               </div>
             )}
           </div>
@@ -390,16 +390,16 @@ export default function SellWindowDetailPage() {
       <div
         style={{
           marginTop: 20,
-          background: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(255,255,255,0.12)",
+          background: "linear-gradient(180deg, #fffdf9 0%, #faf2e8 100%)",
+          border: "1px solid #e6d8c6",
           borderRadius: 16,
           padding: "20px 24px",
         }}
       >
-        <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 14, color: "#e7dfd2" }}>預約下單</div>
+        <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 14, color: "#5f4c3b" }}>預約下單</div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          <label style={{ fontSize: 14, color: "#c9b97a", whiteSpace: "nowrap" }}>數量</label>
+          <label style={{ fontSize: 14, color: "#8a6948", whiteSpace: "nowrap" }}>數量</label>
           <input
             type="number"
             min={1}
@@ -410,9 +410,9 @@ export default function SellWindowDetailPage() {
               width: 100,
               padding: "8px 12px",
               borderRadius: 8,
-              border: "1px solid rgba(255,255,255,0.2)",
-              background: "rgba(255,255,255,0.05)",
-              color: "#e7dfd2",
+              border: "1px solid #d8c8b5",
+              background: "#fff",
+              color: "#3f3228",
               fontSize: 15,
               boxSizing: "border-box",
             }}
@@ -428,7 +428,7 @@ export default function SellWindowDetailPage() {
         </div>
 
         {msg && (
-          <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 8, background: "rgba(224,82,82,0.12)", color: "#e07070", fontSize: 13, border: "1px solid rgba(224,82,82,0.25)" }}>
+          <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 8, background: "#fff1ef", color: "#a04646", fontSize: 13, border: "1px solid #efc1c1" }}>
             {msg}
           </div>
         )}
@@ -440,7 +440,7 @@ export default function SellWindowDetailPage() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0, 0, 0, 0.5)",
+            background: "rgba(43, 31, 20, 0.42)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -451,13 +451,13 @@ export default function SellWindowDetailPage() {
         >
           <div
             style={{
-              background: "#2f3a34",
-              border: "1px solid rgba(255, 255, 255, 0.12)",
+              background: "linear-gradient(180deg, #fffdfa 0%, #f8f0e5 100%)",
+              border: "1px solid #e5d5c2",
               borderRadius: 16,
               padding: "32px 24px",
               maxWidth: 400,
               width: "100%",
-              boxShadow: "0 10px 40px rgba(0, 0, 0, 0.5)",
+              boxShadow: "0 14px 36px rgba(73, 52, 33, 0.24)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -466,7 +466,7 @@ export default function SellWindowDetailPage() {
                 margin: "0 0 8px 0",
                 fontSize: 20,
                 fontWeight: 700,
-                color: "#e7dfd2",
+                color: "#4b392a",
               }}
             >
               確認預約
@@ -474,7 +474,7 @@ export default function SellWindowDetailPage() {
             <p
               style={{
                 margin: "0 0 24px 0",
-                color: "#c9b97a",
+                color: "#8a6948",
                 fontSize: 14,
                 lineHeight: 1.6,
               }}
@@ -484,25 +484,25 @@ export default function SellWindowDetailPage() {
 
             <div
               style={{
-                background: "rgba(255, 255, 255, 0.04)",
-                border: "1px solid rgba(255, 255, 255, 0.08)",
+                background: "#f8f2e9",
+                border: "1px solid #e6d7c3",
                 borderRadius: 12,
                 padding: "16px",
                 marginBottom: 24,
                 fontSize: 14,
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, color: "#aaa" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, color: "#857461" }}>
                 <span>商品數量</span>
-                <span style={{ color: "#e7dfd2", fontWeight: 600 }}>{qty}</span>
+                <span style={{ color: "#4b392a", fontWeight: 600 }}>{qty}</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", color: "#aaa" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#857461" }}>
                 <span>單價</span>
-                <span style={{ color: "#c9b97a", fontWeight: 600 }}>TWD {(data?.unitPriceCents || 0).toLocaleString()}</span>
+                <span style={{ color: "#8a6948", fontWeight: 600 }}>TWD {(data?.unitPriceCents || 0).toLocaleString()}</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, color: "#aaa" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, color: "#857461" }}>
                 <span>運送方式</span>
-                <span style={{ color: "#e7dfd2", fontWeight: 600 }}>
+                <span style={{ color: "#4b392a", fontWeight: 600 }}>
                   {deliveryForm.deliveryMethod === "STORE_PICKUP"
                     ? "門市定點取貨"
                     : deliveryForm.deliveryMethod === "CONVENIENCE_STORE_PICKUP"
@@ -510,10 +510,10 @@ export default function SellWindowDetailPage() {
                       : "宅配貨運"}
                 </span>
               </div>
-              <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", margin: "8px 0" }} />
+              <div style={{ height: "1px", background: "#e5d7c4", margin: "8px 0" }} />
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#aaa" }}>小計</span>
-                <span style={{ color: "#f0c75c", fontWeight: 700, fontSize: 16 }}>
+                <span style={{ color: "#857461" }}>小計</span>
+                <span style={{ color: "#9a6b38", fontWeight: 700, fontSize: 16 }}>
                   TWD {((data?.unitPriceCents || 0) * qty).toLocaleString()}
                 </span>
               </div>
@@ -533,9 +533,9 @@ export default function SellWindowDetailPage() {
                   style={{
                     width: "100%",
                     borderRadius: 8,
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    background: "rgba(255,255,255,0.06)",
-                    color: "#e7dfd2",
+                    border: "1px solid #d8c8b5",
+                    background: "#fff",
+                    color: "#3f3228",
                     padding: "10px 12px",
                     boxSizing: "border-box",
                   }}
@@ -559,9 +559,9 @@ export default function SellWindowDetailPage() {
                     style={{
                       width: "100%",
                       borderRadius: 8,
-                      border: "1px solid rgba(255,255,255,0.2)",
-                      background: "rgba(255,255,255,0.06)",
-                      color: selectedPickupLocationId ? "#e7dfd2" : "#888",
+                      border: "1px solid #d8c8b5",
+                      background: "#fff",
+                      color: selectedPickupLocationId ? "#3f3228" : "#8c7b6a",
                       padding: "10px 12px",
                       boxSizing: "border-box",
                     }}
@@ -578,9 +578,9 @@ export default function SellWindowDetailPage() {
                       style={{
                         padding: "10px 12px",
                         borderRadius: 8,
-                        border: "1px solid rgba(255,255,255,0.12)",
-                        background: "rgba(255,255,255,0.03)",
-                        color: "#aaa",
+                        border: "1px solid #e2d3bf",
+                        background: "#fcf8f2",
+                        color: "#7b6a59",
                         fontSize: 13,
                       }}
                     >
@@ -591,16 +591,16 @@ export default function SellWindowDetailPage() {
                     style={{
                       padding: "10px 12px",
                       borderRadius: 8,
-                      border: "1px solid rgba(255,255,255,0.12)",
-                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid #e2d3bf",
+                      background: "#fcf8f2",
                       fontSize: 13,
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
                     }}
                   >
-                    <span style={{ color: "#888" }}>預計取貨時間</span>
-                    <span style={{ color: "#e7dfd2" }}>
+                    <span style={{ color: "#8c7b6a" }}>預計取貨時間</span>
+                    <span style={{ color: "#4b392a" }}>
                       {data?.predictedShipDate
                         ? new Date(data.predictedShipDate).toLocaleString("zh-TW")
                         : "未設定"}
@@ -622,9 +622,9 @@ export default function SellWindowDetailPage() {
                     style={{
                       width: "100%",
                       borderRadius: 8,
-                      border: "1px solid rgba(255,255,255,0.2)",
-                      background: "rgba(255,255,255,0.06)",
-                      color: "#e7dfd2",
+                      border: "1px solid #d8c8b5",
+                      background: "#fff",
+                      color: "#3f3228",
                       padding: "10px 12px",
                       boxSizing: "border-box",
                     }}
@@ -640,9 +640,9 @@ export default function SellWindowDetailPage() {
                     style={{
                       width: "100%",
                       borderRadius: 8,
-                      border: "1px solid rgba(255,255,255,0.2)",
-                      background: "rgba(255,255,255,0.06)",
-                      color: "#e7dfd2",
+                      border: "1px solid #d8c8b5",
+                      background: "#fff",
+                      color: "#3f3228",
                       padding: "10px 12px",
                       boxSizing: "border-box",
                     }}
@@ -658,9 +658,9 @@ export default function SellWindowDetailPage() {
                     style={{
                       width: "100%",
                       borderRadius: 8,
-                      border: "1px solid rgba(255,255,255,0.2)",
-                      background: "rgba(255,255,255,0.06)",
-                      color: "#e7dfd2",
+                      border: "1px solid #d8c8b5",
+                      background: "#fff",
+                      color: "#3f3228",
                       padding: "10px 12px",
                       boxSizing: "border-box",
                     }}
@@ -672,7 +672,7 @@ export default function SellWindowDetailPage() {
             <p
               style={{
                 margin: "0 0 24px 0",
-                color: "#8b7562",
+                color: "#7c6a58",
                 fontSize: 12,
                 lineHeight: 1.5,
               }}
@@ -693,19 +693,19 @@ export default function SellWindowDetailPage() {
                   flex: 1,
                   padding: "10px 16px",
                   borderRadius: 8,
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                  background: "transparent",
-                  color: "#c9b97a",
+                  border: "1px solid #d9c8b1",
+                  background: "#fffdf9",
+                  color: "#6a543f",
                   fontSize: 14,
                   fontWeight: 600,
                   cursor: "pointer",
                   transition: "all 0.2s ease",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background = "rgba(201, 185, 122, 0.1)";
+                  (e.currentTarget as HTMLButtonElement).style.background = "#f3e9dc";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+                  (e.currentTarget as HTMLButtonElement).style.background = "#fffdf9";
                 }}
               >
                 取消
@@ -744,8 +744,8 @@ export default function SellWindowDetailPage() {
 function InfoRow({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div style={{ display: "flex", gap: 8, alignItems: "baseline", flexWrap: "wrap" }}>
-      <span style={{ color: "#aaa", minWidth: 90, fontSize: 12.5 }}>{label}</span>
-      <span style={{ color: highlight ? "#c9b97a" : "#e7dfd2", fontWeight: highlight ? 700 : 400, fontSize: highlight ? 16 : 13.5 }}>{value}</span>
+      <span style={{ color: "#867564", minWidth: 90, fontSize: 12.5 }}>{label}</span>
+      <span style={{ color: highlight ? "#8a6948" : "#4a3b2d", fontWeight: highlight ? 700 : 500, fontSize: highlight ? 16 : 13.5 }}>{value}</span>
     </div>
   );
 }
