@@ -1378,14 +1378,14 @@ const inputStyle: React.CSSProperties = {
 
 const btnPrimary: React.CSSProperties = {
   padding: "10px 20px",
-  background: "linear-gradient(180deg, #deb981 0%, #ca9659 100%)",
-  color: "#2f241b",
-  border: "1px solid #d2a86f",
+  background: "linear-gradient(180deg, #94b87f 0%, #6f945a 100%)",
+  color: "#1f2d24",
+  border: "1px solid #7ea66a",
   borderRadius: 999,
   cursor: "pointer",
   fontWeight: 700,
   fontSize: 14,
-  boxShadow: "0 6px 16px rgba(56, 33, 8, 0.22)",
+  boxShadow: "0 6px 16px rgba(29, 47, 37, 0.26)",
 };
 
 const btnSecondary: React.CSSProperties = {

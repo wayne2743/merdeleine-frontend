@@ -349,8 +349,7 @@ export default function SellWindowDetailPage() {
                 borderRadius: 20,
                 background: statusColor + "22",
                 color: statusColor,
-                border: `1px solid ${statusColor}55`,
-                whiteSpace: "nowrap",
+                border: `1px solid ${statusColor}44`,
               }}
             >
               {statusLabel}
