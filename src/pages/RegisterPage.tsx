@@ -58,11 +58,6 @@ export default function RegisterPage() {
       setError("請輸入聯絡 Email");
       return;
     }
-    if (!form.shippingAddress.trim()) {
-      setError("請輸入收貨地址");
-      return;
-    }
-
     setSubmitting(true);
     try {
       const meResponse = tempToken
@@ -92,7 +87,7 @@ export default function RegisterPage() {
           <p className="register-kicker">Welcome</p>
           <h1 className="register-title">完成您的資料</h1>
           <p className="register-subtitle">
-            首次登入需填寫以下資料，之後下單時將自動帶入。
+            首次登入需填寫以下資料（地址可選填），之後下單時將自動帶入。
           </p>
         </div>
 
@@ -140,7 +135,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="register-field">
-            <label htmlFor="shippingAddress">預設收貨地址 *</label>
+            <label htmlFor="shippingAddress">預設收貨地址（選填）</label>
             <textarea
               id="shippingAddress"
               name="shippingAddress"
