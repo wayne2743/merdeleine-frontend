@@ -154,15 +154,15 @@ export default function StorePickupLocationAdminPage() {
         style={{
           marginTop: 16,
           borderRadius: 18,
-          border: "1px solid rgba(233, 210, 176, 0.2)",
-          background: "rgba(255, 255, 255, 0.04)",
+          border: "1px solid #e6d8c6",
+          background: "linear-gradient(180deg, #fffdf9 0%, #faf3e9 100%)",
           padding: "22px",
           display: "grid",
           gap: 14,
         }}
       >
         <label style={{ display: "grid", gap: 6 }}>
-          <span style={{ fontSize: 13, color: "#e7dfd2" }}>門市名稱</span>
+          <span style={{ fontSize: 13, color: "#5f4c3b", fontWeight: 700 }}>門市名稱</span>
           <input
             name="name"
             value={form.name}
@@ -174,7 +174,7 @@ export default function StorePickupLocationAdminPage() {
         </label>
 
         <label style={{ display: "grid", gap: 6 }}>
-          <span style={{ fontSize: 13, color: "#e7dfd2" }}>門市地址</span>
+          <span style={{ fontSize: 13, color: "#5f4c3b", fontWeight: 700 }}>門市地址</span>
           <textarea
             name="address"
             value={form.address}
@@ -187,7 +187,7 @@ export default function StorePickupLocationAdminPage() {
         </label>
 
         <label style={{ display: "grid", gap: 6 }}>
-          <span style={{ fontSize: 13, color: "#e7dfd2" }}>聯絡電話（選填）</span>
+          <span style={{ fontSize: 13, color: "#5f4c3b", fontWeight: 700 }}>聯絡電話（選填）</span>
           <input
             name="contactPhone"
             value={form.contactPhone}
@@ -198,7 +198,7 @@ export default function StorePickupLocationAdminPage() {
           />
         </label>
 
-        <label style={{ display: "inline-flex", gap: 8, alignItems: "center", color: "#e7dfd2", fontSize: 14 }}>
+        <label style={{ display: "inline-flex", gap: 8, alignItems: "center", color: "#5f4c3b", fontSize: 14, fontWeight: 600 }}>
           <input
             type="checkbox"
             checked={form.active}
@@ -216,9 +216,9 @@ export default function StorePickupLocationAdminPage() {
             style={{
               margin: 0,
               fontSize: 13,
-              color: "#f8b7ad",
-              background: "rgba(173, 60, 48, 0.22)",
-              border: "1px solid rgba(248, 183, 173, 0.26)",
+              color: "#9f3e3e",
+              background: "#fff1ef",
+              border: "1px solid #efc1c1",
               borderRadius: 10,
               padding: "10px 12px",
             }}
@@ -232,9 +232,9 @@ export default function StorePickupLocationAdminPage() {
             style={{
               margin: 0,
               fontSize: 13,
-              color: "#bde9c8",
-              background: "rgba(43, 112, 64, 0.28)",
-              border: "1px solid rgba(189, 233, 200, 0.3)",
+              color: "#2f7f49",
+              background: "#e9f7ee",
+              border: "1px solid #b9e2c7",
               borderRadius: 10,
               padding: "10px 12px",
             }}
@@ -255,8 +255,8 @@ export default function StorePickupLocationAdminPage() {
         style={{
           marginTop: 24,
           borderRadius: 18,
-          border: "1px solid rgba(233, 210, 176, 0.2)",
-          background: "rgba(255, 255, 255, 0.04)",
+          border: "1px solid #e6d8c6",
+          background: "linear-gradient(180deg, #fffdf9 0%, #faf3e9 100%)",
           padding: "22px",
         }}
       >
@@ -270,7 +270,7 @@ export default function StorePickupLocationAdminPage() {
             gap: 8,
           }}
         >
-          <h2 style={{ margin: 0, fontSize: 17, color: "#f1dfbb" }}>目前門市列表</h2>
+          <h2 style={{ margin: 0, fontSize: 17, color: "#4a3829" }}>目前門市列表</h2>
           <button
             type="button"
             onClick={() => void loadLocations()}
@@ -291,9 +291,9 @@ export default function StorePickupLocationAdminPage() {
             style={{
               margin: 0,
               fontSize: 13,
-              color: "#f8b7ad",
-              background: "rgba(173, 60, 48, 0.22)",
-              border: "1px solid rgba(248, 183, 173, 0.26)",
+              color: "#9f3e3e",
+              background: "#fff1ef",
+              border: "1px solid #efc1c1",
               borderRadius: 10,
               padding: "10px 12px",
             }}
@@ -313,8 +313,8 @@ export default function StorePickupLocationAdminPage() {
                 key={loc.id ?? index}
                 style={{
                   borderRadius: 12,
-                  border: "1px solid rgba(233, 210, 176, 0.18)",
-                  background: "rgba(255, 255, 255, 0.04)",
+                  border: "1px solid #e5d6c2",
+                  background: "#fff",
                   padding: "14px 16px",
                   display: "grid",
                   gap: 4,
@@ -329,7 +329,7 @@ export default function StorePickupLocationAdminPage() {
                   }}
                 >
                   <span
-                    style={{ fontSize: 15, fontWeight: 600, color: "#f1dfbb" }}
+                    style={{ fontSize: 15, fontWeight: 700, color: "#4b392a" }}
                   >
                     {loc.name ?? "-"}
                   </span>
@@ -340,22 +340,22 @@ export default function StorePickupLocationAdminPage() {
                       padding: "2px 8px",
                       borderRadius: 999,
                       background: loc.active
-                        ? "rgba(43, 112, 64, 0.35)"
-                        : "rgba(100, 90, 80, 0.35)",
-                      color: loc.active ? "#9dedb4" : "#bba898",
+                        ? "#e9f7ee"
+                        : "#f4f0ea",
+                      color: loc.active ? "#2f7f49" : "#7b6d60",
                       border: loc.active
-                        ? "1px solid rgba(157, 237, 180, 0.3)"
-                        : "1px solid rgba(187, 168, 152, 0.3)",
+                        ? "1px solid #b9e2c7"
+                        : "1px solid #d9cec0",
                     }}
                   >
                     {loc.active ? "啟用中" : "已停用"}
                   </span>
                 </div>
-                <div style={{ fontSize: 13, color: "#c9b08a" }}>
+                <div style={{ fontSize: 13, color: "#5f4c3b" }}>
                   {loc.address ?? "-"}
                 </div>
                 {loc.contactPhone && (
-                  <div style={{ fontSize: 12, color: "#8b7562" }}>
+                  <div style={{ fontSize: 12, color: "#7b6a59" }}>
                     {loc.contactPhone}
                   </div>
                 )}
