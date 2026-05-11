@@ -95,6 +95,37 @@ function normalizeProductSellWindowView(data: unknown): ProductSellWindowView {
   };
 }
 
+function normalizeProductSellWindowCombined(data: unknown): ProductSellWindowView {
+  const combined = asRecord(data) ?? {};
+  const productSellWindow = asRecord(combined.productSellWindow) ?? {};
+  const sellWindow = asRecord(combined.sellWindow) ?? {};
+  const quota = asRecord(productSellWindow.quota ?? productSellWindow.sellWindowQuota ?? productSellWindow.sell_window_quota) ?? {};
+
+  return {
+    productSellWindowId: pickString(productSellWindow.id, productSellWindow.productSellWindowId, productSellWindow.product_sell_window_id),
+    sellWindowId: pickString(sellWindow.id, sellWindow.sellWindowId, sellWindow.sell_window_id),
+    sellWindowName: pickString(sellWindow.name, sellWindow.sellWindowName, sellWindow.sell_window_name),
+    startAt: pickString(sellWindow.startAt, sellWindow.start_at),
+    endAt: pickString(sellWindow.endAt, sellWindow.end_at),
+    predictedShipDate: pickNullableString(sellWindow.predictedShipDate, sellWindow.predicted_ship_date),
+    shipDays: pickNullableNumber(sellWindow.shipDays, sellWindow.ship_days),
+    timezone: pickString(sellWindow.timezone) || "Asia/Taipei",
+    paymentCloseAt: pickNullableString(sellWindow.paymentCloseAt, sellWindow.payment_close_at),
+    status: (pickNullableString(sellWindow.status) as ProductSellWindowView["status"]) ?? null,
+    sellWindowStatus: (pickNullableString(sellWindow.status) as ProductSellWindowView["sellWindowStatus"]) ?? null,
+    sell_window_status: (pickNullableString(sellWindow.status) as ProductSellWindowView["sell_window_status"]) ?? null,
+    productId: pickString(productSellWindow.productId, productSellWindow.product_id),
+    productName: pickString(productSellWindow.productName, productSellWindow.product_name),
+    unitPriceCents: pickNumber(productSellWindow.unitPriceCents, productSellWindow.unit_price_cents),
+    currency: pickString(productSellWindow.currency) || "TWD",
+    minQty: pickNumber(productSellWindow.minQty, productSellWindow.min_qty, quota.minQty, quota.min_qty),
+    maxQty: pickNullableNumber(productSellWindow.maxQty, productSellWindow.max_qty, quota.maxQty, quota.max_qty),
+    soldQty: pickNumber(productSellWindow.soldQty, productSellWindow.sold_qty, quota.soldQty, quota.sold_qty, quota.reservedQty, quota.reserved_qty),
+    quotaStatus: pickString(productSellWindow.quotaStatus, productSellWindow.quota_status, quota.status) || "OPEN",
+    quotaUpdatedAt: pickNullableString(productSellWindow.quotaUpdatedAt, productSellWindow.quota_updated_at, quota.updatedAt, quota.updated_at),
+  };
+}
+
 function normalizeSellWindowResponse(data: unknown): SellWindowResponse {
   const raw = asRecord(data) ?? {};
   const sellWindow = asRecord(raw.sellWindow ?? raw.sell_window) ?? {};
@@ -273,6 +304,20 @@ export const catalogApi = {
     return {
       ...response,
       items: response.items.map((item) => normalizeProductSellWindowView(item)),
+    };
+  },
+
+  async pageProductSellWindowsCombined(page: number, size: number): Promise<PageResponse<ProductSellWindowView>> {
+    const { data } = await http.get(`/product-sell-windows/combined/page?page=${page}&size=${size}`);
+
+    if (typeof data === "string" && data.trim().startsWith("<!doctype html")) {
+      throw new Error("API returned HTML. Proxy/baseURL is wrong.");
+    }
+
+    const response = normalizePageResponse<unknown>(data, page, size);
+    return {
+      ...response,
+      items: response.items.map((item) => normalizeProductSellWindowCombined(item)),
     };
   },
 
