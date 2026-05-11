@@ -329,6 +329,14 @@ export default function SellWindowCrudPage() {
     return map;
   }, [payments]);
 
+  const productById = useMemo(() => {
+    const map = new Map<string, Product>();
+    products.forEach((product) => {
+      if (product.id) map.set(product.id, product);
+    });
+    return map;
+  }, [products]);
+
   async function load(targetPage = page) {
     setLoading(true);
     setError(null);
@@ -864,6 +872,11 @@ export default function SellWindowCrudPage() {
                 filteredItems.map((item) => {
                   const sellWindow = toSellWindowResponse(item);
                   const status = getSellWindowStatus(item);
+                  const product = productById.get(item.productId);
+                  const unitPriceCents = typeof product?.unitPriceCents === "number"
+                    ? product.unitPriceCents
+                    : item.unitPriceCents;
+                  const currency = product?.currency ?? item.currency;
 
                   return (
                     <tr
@@ -881,7 +894,7 @@ export default function SellWindowCrudPage() {
                           <span>已預約數量：{item.soldQty}</span>
                         </div>
                       </td>
-                      <td style={{ padding: "10px 12px" }}>{formatMoney(item.unitPriceCents, item.currency)}</td>
+                      <td style={{ padding: "10px 12px" }}>{formatMoney(unitPriceCents, currency)}</td>
                       <td style={{ padding: "10px 12px" }}>{fmt(item.startAt)}</td>
                       <td style={{ padding: "10px 12px" }}>{fmt(item.endAt)}</td>
                       <td style={{ padding: "10px 12px" }}>
