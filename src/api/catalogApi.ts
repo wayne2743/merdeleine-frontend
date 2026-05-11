@@ -308,7 +308,7 @@ export const catalogApi = {
   },
 
   async pageProductSellWindowsCombined(page: number, size: number): Promise<PageResponse<ProductSellWindowView>> {
-    const { data } = await http.get(`/api/product-sell-windows/combined/page?page=${page}&size=${size}`);
+    const { data } = await http.get(`/api/catalog/product-sell-windows/combined/page?page=${page}&size=${size}`);
 
     if (typeof data === "string" && data.trim().startsWith("<!doctype html")) {
       throw new Error("API returned HTML. Proxy/baseURL is wrong.");
