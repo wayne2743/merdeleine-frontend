@@ -335,6 +335,7 @@ export default function SellWindowCrudPage() {
     try {
       const response = await catalogApi.pageProductSellWindowsCombined(targetPage, pageSize);
       const pageItems = Array.isArray(response.items) ? response.items : [];
+      setRawSellWindows(pageItems.map((item) => toSellWindowResponse(item)));
       setItems(
         pageItems.slice().sort((a, b) => {
           const aStart = typeof a.startAt === "string" ? a.startAt : "";
@@ -413,15 +414,6 @@ export default function SellWindowCrudPage() {
     }
   }
 
-  async function loadRawSellWindows() {
-    try {
-      const data = await catalogApi.listRawSellWindows();
-      setRawSellWindows(data);
-    } catch (e) {
-      console.error("load raw sell windows failed", e);
-    }
-  }
-
   async function loadPayments() {
     try {
       const resp = await paymentApi.pagePayments(0, 200);
@@ -433,7 +425,6 @@ export default function SellWindowCrudPage() {
 
   useEffect(() => { void loadBatches(); }, []);
   useEffect(() => { void loadPayments(); }, []);
-  useEffect(() => { void loadRawSellWindows(); }, []);
 
   async function onConfirmBatch(batch: ProductionBatch) {
     if (batchSubmitting) return;
