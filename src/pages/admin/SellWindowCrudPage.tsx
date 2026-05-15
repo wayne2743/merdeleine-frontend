@@ -297,6 +297,8 @@ export default function SellWindowCrudPage() {
   const [payments, setPayments] = useState<PaymentInfo[]>([]);
   const [rawSellWindows, setRawSellWindows] = useState<SellWindowResponse[]>([]);
   const [batchSubmitting, setBatchSubmitting] = useState<string | null>(null);
+  // 新增：確認 Modal 狀態，記錄要確認的 batch
+  const [confirmModal, setConfirmModal] = useState<{ open: boolean; batch: ProductionBatch | null }>({ open: false, batch: null });
 
   const batchBySellWindowId = useMemo(() => {
     const map = new Map<string, ProductionBatch[]>();
@@ -434,7 +436,8 @@ export default function SellWindowCrudPage() {
   useEffect(() => { void loadBatches(); }, []);
   useEffect(() => { void loadPayments(); }, []);
 
-  async function onConfirmBatch(batch: ProductionBatch) {
+  // 原本的 confirmBatch 執行邏輯，僅供 Modal 確認後呼叫
+  async function doConfirmBatch(batch: ProductionBatch) {
     if (batchSubmitting) return;
     setBatchSubmitting(batch.id);
     try {
@@ -444,7 +447,13 @@ export default function SellWindowCrudPage() {
       alert(e?.response?.data?.message ?? e?.message ?? "Confirm 失敗");
     } finally {
       setBatchSubmitting(null);
+      setConfirmModal({ open: false, batch: null });
     }
+  }
+
+  // 按下 Confirm 時，先開啟 Modal
+  function onConfirmBatch(batch: ProductionBatch) {
+    setConfirmModal({ open: true, batch });
   }
 
   function goToPaymentManagementForSellWindow(sellWindowId: string) {
@@ -958,7 +967,7 @@ export default function SellWindowCrudPage() {
                               <div style={{ fontSize: 12, color: "#666" }}>目標：{activeBatch.targetQty}</div>
                               <button
                                 type="button"
-                                onClick={() => void onConfirmBatch(activeBatch)}
+                                onClick={() => onConfirmBatch(activeBatch)}
                                 disabled={!canConfirm || Boolean(batchSubmitting)}
                                 style={{
                                   ...btnSmall,
@@ -974,6 +983,59 @@ export default function SellWindowCrudPage() {
                               >
                                 {batchSubmitting === activeBatch.id ? "處理中..." : "Confirm"}
                               </button>
+                                  {/* ── 批次確認 Modal ── */}
+                                  {confirmModal.open && confirmModal.batch && (
+                                    <div
+                                      role="dialog"
+                                      aria-modal="true"
+                                      style={{
+                                        position: "fixed",
+                                        inset: 0,
+                                        background: "rgba(0,0,0,0.42)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        zIndex: 1200,
+                                        padding: 16,
+                                      }}
+                                    >
+                                      <div
+                                        onClick={e => e.stopPropagation()}
+                                        style={{
+                                          width: "min(400px, 100%)",
+                                          background: "#fff",
+                                          borderRadius: 10,
+                                          boxShadow: "0 20px 50px rgba(0,0,0,0.2)",
+                                          padding: 28,
+                                          textAlign: "center",
+                                        }}
+                                      >
+                                        <h3 style={{ margin: 0, marginBottom: 16 }}>確認批次</h3>
+                                        <div style={{ marginBottom: 18, fontSize: 15 }}>
+                                          確定要確認批次 <b>{confirmModal.batch.id}</b>？<br />
+                                          此操作將無法還原。
+                                        </div>
+                                        <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
+                                          <button
+                                            type="button"
+                                            style={{ ...btnSmall, background: "#e5faf0", color: "#0f6c52", borderColor: "#9ad8c4", minWidth: 72 }}
+                                            disabled={Boolean(batchSubmitting)}
+                                            onClick={() => confirmModal.batch && doConfirmBatch(confirmModal.batch)}
+                                          >
+                                            {batchSubmitting === confirmModal.batch.id ? "處理中..." : "確定"}
+                                          </button>
+                                          <button
+                                            type="button"
+                                            style={{ ...btnSmall, background: "#f0f0f0", color: "#7a7a7a", borderColor: "#d0d0d0", minWidth: 72 }}
+                                            disabled={Boolean(batchSubmitting)}
+                                            onClick={() => setConfirmModal({ open: false, batch: null })}
+                                          >
+                                            取消
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
                             </div>
                           );
                         })()}
