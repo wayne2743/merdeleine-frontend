@@ -2,6 +2,7 @@ import { http } from "./http";
 import type { AuthMeResponse } from "../types/auth";
 
 const OAUTH_BASE_URL = import.meta.env.VITE_OAUTH_BASE_URL ?? "http://localhost:8089";
+const LOGIN_FALLBACK_DELAY_MS = 2000;
 
 export type RegisterPayload = {
   contactName: string;
@@ -86,14 +87,41 @@ export const authApi = {
   },
 
   startGoogleLogin() {
-    window.location.href = `${OAUTH_BASE_URL}/oauth2/authorization/google`;
+    startOAuthLogin("/oauth2/authorization/google");
   },
 
   startFacebookLogin() {
-    window.location.href = `${OAUTH_BASE_URL}/oauth2/authorization/facebook`;
+    startOAuthLogin("/oauth2/authorization/facebook");
   },
 
   startLineLogin() {
-    window.location.href = `${OAUTH_BASE_URL}/oauth2/authorization/line`;
+    startOAuthLogin("/oauth2/authorization/line");
   },
 };
+
+function startOAuthLogin(path: string) {
+  let shouldRedirectHome = true;
+
+  const timer = window.setTimeout(() => {
+    if (shouldRedirectHome) {
+      window.location.replace("/");
+    }
+  }, LOGIN_FALLBACK_DELAY_MS);
+
+  window.addEventListener(
+    "pagehide",
+    () => {
+      shouldRedirectHome = false;
+      window.clearTimeout(timer);
+    },
+    { once: true }
+  );
+
+  try {
+    window.location.href = `${OAUTH_BASE_URL}${path}`;
+  } catch {
+    shouldRedirectHome = false;
+    window.clearTimeout(timer);
+    window.location.replace("/");
+  }
+}
