@@ -2395,6 +2395,36 @@ table {
   color: #88552c;
 }
 
+.sellwindow-quota-percent-row {
+  margin-top: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.sellwindow-quota-percent.is-right {
+  margin-top: 0;
+  text-align: right;
+  color: #7d603f;
+}
+
+.sellwindow-quota-benchmark-label {
+  position: absolute;
+  top: -24px;
+  transform: translateX(-50%);
+  background: #ecfbf2;
+  color: #0f754a;
+  border: 1px solid #8ad6af;
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(24, 94, 60, 0.2);
+}
+
 .sellwindow-price {
   margin-top: 0;
   margin-left: auto;
@@ -2807,6 +2837,16 @@ table {
 
   .sellwindow-quota-value {
     font-size: 24px;
+  }
+
+  .sellwindow-quota-percent-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .sellwindow-quota-percent.is-right {
+    text-align: left;
   }
 
   .sellwindow-link {

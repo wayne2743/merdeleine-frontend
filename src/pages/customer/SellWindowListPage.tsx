@@ -155,12 +155,17 @@ export default function SellWindowListPage() {
           const minQty = Number(it.minQty ?? 0);
           const remainingQty = maxQty != null ? Math.max(maxQty - soldQty, 0) : null;
           const achievementPercent = minQty > 0 ? Math.round((soldQty / minQty) * 100) : null;
+          const minAchievementPercent = achievementPercent != null ? Math.max(0, achievementPercent) : null;
           const barPercent =
             maxQty != null && maxQty > 0
               ? Math.min(Math.round((soldQty / maxQty) * 100), 100)
               : achievementPercent != null
                 ? Math.min(achievementPercent, 100)
                 : null;
+          const upperRemainingPercent =
+            maxQty != null && maxQty > 0 && barPercent != null
+              ? Math.max(0, 100 - barPercent)
+              : null;
           const benchmarkPercent =
             maxQty != null && maxQty > 0 && minQty > 0
               ? Math.min(Math.max((minQty / maxQty) * 100, 0), 100)
@@ -249,13 +254,26 @@ export default function SellWindowListPage() {
                               }}
                             />
                           )}
+                          {benchmarkPercent != null && isReachedAchievement && (
+                            <div
+                              className="sellwindow-quota-benchmark-label"
+                              style={{ left: `${benchmarkPercent}%` }}
+                            >
+                              已達成最低量
+                            </div>
+                          )}
                         </div>
-                        <div
-                          className="sellwindow-quota-percent"
-                          style={isReachedAchievement ? { color: "#168f5d", fontWeight: 700 } : undefined}
-                        >
-                          已達成率 {achievementPercent}%
-                          {isOverAchieved ? "（超標）" : ""}
+                        <div className="sellwindow-quota-percent-row">
+                          <div
+                            className="sellwindow-quota-percent"
+                            style={isReachedAchievement ? { color: "#168f5d", fontWeight: 700 } : undefined}
+                          >
+                            最低達成率：{minAchievementPercent}%
+                            {isOverAchieved ? "（超標）" : ""}
+                          </div>
+                          <div className="sellwindow-quota-percent is-right">
+                            上限剩餘率：{upperRemainingPercent != null ? `${upperRemainingPercent}%` : "無上限"}
+                          </div>
                         </div>
                       </>
                     )}
