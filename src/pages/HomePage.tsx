@@ -396,6 +396,7 @@ export default function HomePage() {
             </div>
 
             <div
+              className="home-detail-gallery"
               style={{
                 width: "100%",
                 height: 220,
@@ -409,26 +410,19 @@ export default function HomePage() {
               {detailImageByProductId[featuredDetail.id]?.length ? (
                 <>
                   <button
+                    type="button"
+                    aria-label="上一張"
                     onClick={() => scrollDetailImages("left")}
-                    style={{
-                      position: "absolute",
-                      left: 8,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      zIndex: 2,
-                      width: 30,
-                      height: 30,
-                      borderRadius: "50%",
-                      border: "1px solid #ddd",
-                      background: "rgba(255,255,255,0.95)",
-                      cursor: "pointer",
-                    }}
+                    className="home-detail-gallery-nav home-detail-gallery-nav-left"
                   >
-                    ◀
+                    <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                      <path d="M12.5 4.5 7 10l5.5 5.5" />
+                    </svg>
                   </button>
 
                   <div
                     ref={detailStripRef}
+                    className="home-detail-gallery-strip"
                     style={{
                       width: "100%",
                       height: "100%",
@@ -473,22 +467,14 @@ export default function HomePage() {
                   </div>
 
                   <button
+                    type="button"
+                    aria-label="下一張"
                     onClick={() => scrollDetailImages("right")}
-                    style={{
-                      position: "absolute",
-                      right: 8,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      zIndex: 2,
-                      width: 30,
-                      height: 30,
-                      borderRadius: "50%",
-                      border: "1px solid #ddd",
-                      background: "rgba(255,255,255,0.95)",
-                      cursor: "pointer",
-                    }}
+                    className="home-detail-gallery-nav home-detail-gallery-nav-right"
                   >
-                    ▶
+                    <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                      <path d="M7.5 4.5 13 10l-5.5 5.5" />
+                    </svg>
                   </button>
                 </>
               ) : (
