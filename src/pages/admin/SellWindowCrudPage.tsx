@@ -892,6 +892,8 @@ export default function SellWindowCrudPage() {
                           <span>最低預約數量：{item.minQty}</span>
                           <span>最大預約數量：{item.maxQty ?? "-"}</span>
                           <span>已預約數量：{item.soldQty}</span>
+                          <span>已保留數量：{item.reservedQty}</span>
+                          <span>已付款數量：{item.paidQty}</span>
                         </div>
                       </td>
                       <td style={{ padding: "10px 12px" }}>{formatMoney(unitPriceCents, currency)}</td>

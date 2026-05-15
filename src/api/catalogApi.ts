@@ -90,6 +90,8 @@ function normalizeProductSellWindowView(data: unknown): ProductSellWindowView {
     minQty: pickNumber(raw.minQty, raw.min_qty, quota.minQty, quota.min_qty),
     maxQty: pickNullableNumber(raw.maxQty, raw.max_qty, quota.maxQty, quota.max_qty),
     soldQty: pickNumber(raw.soldQty, raw.sold_qty, quota.soldQty, quota.sold_qty, quota.reservedQty, quota.reserved_qty),
+    reservedQty: pickNumber(raw.reservedQty, raw.reserved_qty, quota.reservedQty, quota.reserved_qty, raw.soldQty, raw.sold_qty, quota.soldQty, quota.sold_qty),
+    paidQty: pickNumber(raw.paidQty, raw.paid_qty, quota.paidQty, quota.paid_qty),
     quotaStatus: pickString(raw.quotaStatus, raw.quota_status, quota.status) || "OPEN",
     quotaUpdatedAt: pickNullableString(raw.quotaUpdatedAt, raw.quota_updated_at, quota.updatedAt, quota.updated_at),
   };
@@ -139,6 +141,17 @@ function normalizeProductSellWindowCombined(data: unknown): ProductSellWindowVie
       quota.max_total_qty,
     ),
     soldQty: pickNumber(productSellWindow.soldQty, productSellWindow.sold_qty, quota.soldQty, quota.sold_qty, quota.reservedQty, quota.reserved_qty),
+    reservedQty: pickNumber(
+      productSellWindow.reservedQty,
+      productSellWindow.reserved_qty,
+      quota.reservedQty,
+      quota.reserved_qty,
+      productSellWindow.soldQty,
+      productSellWindow.sold_qty,
+      quota.soldQty,
+      quota.sold_qty,
+    ),
+    paidQty: pickNumber(productSellWindow.paidQty, productSellWindow.paid_qty, quota.paidQty, quota.paid_qty),
     quotaStatus: pickString(productSellWindow.quotaStatus, productSellWindow.quota_status, quota.status) || "OPEN",
     quotaUpdatedAt: pickNullableString(productSellWindow.quotaUpdatedAt, productSellWindow.quota_updated_at, quota.updatedAt, quota.updated_at),
   };

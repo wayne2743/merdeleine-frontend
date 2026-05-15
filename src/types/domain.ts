@@ -41,6 +41,8 @@ export type ProductSellWindowView = {
   maxQty?: number | null;
 
   soldQty: number;
+  reservedQty: number;
+  paidQty: number;
   quotaStatus: string; // OPEN/CLOSED
   quotaUpdatedAt?: string | null;
 };
