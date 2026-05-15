@@ -297,8 +297,8 @@ export default function SellWindowCrudPage() {
   const [payments, setPayments] = useState<PaymentInfo[]>([]);
   const [rawSellWindows, setRawSellWindows] = useState<SellWindowResponse[]>([]);
   const [batchSubmitting, setBatchSubmitting] = useState<string | null>(null);
-  // 新增：確認 Modal 狀態，記錄要確認的 batch
-  const [confirmModal, setConfirmModal] = useState<{ open: boolean; batch: ProductionBatch | null }>({ open: false, batch: null });
+  // 新增：確認 Modal 狀態，記錄要確認的 batch 及檔期名稱
+  const [confirmModal, setConfirmModal] = useState<{ open: boolean; batch: ProductionBatch | null; sellWindowName: string }>({ open: false, batch: null, sellWindowName: "" });
 
   const batchBySellWindowId = useMemo(() => {
     const map = new Map<string, ProductionBatch[]>();
@@ -447,13 +447,16 @@ export default function SellWindowCrudPage() {
       alert(e?.response?.data?.message ?? e?.message ?? "Confirm 失敗");
     } finally {
       setBatchSubmitting(null);
-      setConfirmModal({ open: false, batch: null });
+      setConfirmModal({ open: false, batch: null, sellWindowName: "" });
     }
   }
 
   // 按下 Confirm 時，先開啟 Modal
   function onConfirmBatch(batch: ProductionBatch) {
-    setConfirmModal({ open: true, batch });
+    // 根據 batch.sellWindowId 查找對應的檔期名稱
+    const sellWindow = items.find((item) => item.sellWindowId === batch.sellWindowId);
+    const sellWindowName = sellWindow?.sellWindowName || "未知檔期";
+    setConfirmModal({ open: true, batch, sellWindowName });
   }
 
   function goToPaymentManagementForSellWindow(sellWindowId: string) {
@@ -1012,6 +1015,9 @@ export default function SellWindowCrudPage() {
                                       >
                                         <h3 style={{ margin: 0, marginBottom: 16 }}>確認批次</h3>
                                         <div style={{ marginBottom: 18, fontSize: 15 }}>
+                                          <div style={{ marginBottom: 8, fontWeight: 500 }}>
+                                            檔期名稱：<span style={{ color: "#0f6c52" }}>{confirmModal.sellWindowName}</span>
+                                          </div>
                                           確定要確認批次 <b>{confirmModal.batch.id}</b>？<br />
                                           此操作將無法還原。
                                         </div>
@@ -1028,7 +1034,7 @@ export default function SellWindowCrudPage() {
                                             type="button"
                                             style={{ ...btnSmall, background: "#f0f0f0", color: "#7a7a7a", borderColor: "#d0d0d0", minWidth: 72 }}
                                             disabled={Boolean(batchSubmitting)}
-                                            onClick={() => setConfirmModal({ open: false, batch: null })}
+                                            onClick={() => setConfirmModal({ open: false, batch: null, sellWindowName: "" })}
                                           >
                                             取消
                                           </button>
