@@ -56,6 +56,15 @@ http.interceptors.response.use(
       unauthorizedHandler();
     }
 
+    // 後端無法連線（502/503/504 或網路完全無回應）→ 自動登出
+    const isServerDown =
+      status === 502 || status === 503 || status === 504 ||
+      (!err?.response && err?.code !== "ECONNABORTED" && !requestUrl.includes("/auth/login"));
+    if (isServerDown) {
+      console.warn("後端無法連線，自動登出", status ?? err?.code);
+      unauthorizedHandler();
+    }
+
     // 先簡單吐出訊息，之後可改 toast
     console.error("API error:", status, err?.message);
     return Promise.reject(err);
