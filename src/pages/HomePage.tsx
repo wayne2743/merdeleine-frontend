@@ -145,6 +145,7 @@ export default function HomePage() {
   const [detailImageByProductId, setDetailImageByProductId] = useState<Record<string, DetailPreviewItem[]>>({});
   const [originalImageByProductId, setOriginalImageByProductId] = useState<Record<string, string>>({});
   const [originalModalUrl, setOriginalModalUrl] = useState<string | null>(null);
+  const [openModal, setOpenModal] = useState<string | null>(null);
   const detailStripRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -425,9 +426,57 @@ export default function HomePage() {
             color: "#6f5f50",
           }}
         >
-          <Link to="/privacy-policy">隱私權政策</Link>
-          <Link to="/terms">服務條款</Link>
-          <Link to="/data-deletion">資料刪除說明</Link>
+          <button
+            type="button"
+            onClick={() => setOpenModal("privacy")}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#6f5f50",
+              fontSize: 13,
+              cursor: "pointer",
+              padding: 0,
+              textDecoration: "none",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+            onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+          >
+            隱私權政策
+          </button>
+          <button
+            type="button"
+            onClick={() => setOpenModal("terms")}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#6f5f50",
+              fontSize: 13,
+              cursor: "pointer",
+              padding: 0,
+              textDecoration: "none",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+            onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+          >
+            服務條款
+          </button>
+          <button
+            type="button"
+            onClick={() => setOpenModal("data-deletion")}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#6f5f50",
+              fontSize: 13,
+              cursor: "pointer",
+              padding: 0,
+              textDecoration: "none",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+            onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+          >
+            資料刪除說明
+          </button>
         </div>
       </section>
 
@@ -657,6 +706,212 @@ export default function HomePage() {
               <Link to={featuredDetail.actionTo} className="hero-btn hero-btn-primary" onClick={() => setFeaturedDetail(null)}>
                 加入清單
               </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 隱私權政策 Modal ── */}
+      {openModal === "privacy" && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.42)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1100,
+            padding: 16,
+          }}
+          onClick={() => setOpenModal(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "min(600px, 100%)",
+              maxHeight: "80vh",
+              overflow: "auto",
+              background: "#fff",
+              borderRadius: 10,
+              boxShadow: "0 20px 50px rgba(0,0,0,0.2)",
+              padding: 24,
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#4a321f" }}>隱私權政策</h3>
+              <button
+                type="button"
+                onClick={() => setOpenModal(null)}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  fontSize: 24,
+                  cursor: "pointer",
+                  color: "#999",
+                }}
+                aria-label="close"
+              >
+                ×
+              </button>
+            </div>
+            <div style={{ fontSize: 14, lineHeight: 1.8, color: "#5b442f" }}>
+              <p>歡迎使用 Merdeleine（以下簡稱「本網站」）。</p>
+              <p>當您使用本網站（包含透過 Google、LINE 登入）時，我們可能會收集以下資訊：</p>
+              <h4>1. 收集的資料</h4>
+              <ul>
+                <li>基本資料：姓名、Email、頭像（由第三方登入提供）</li>
+                <li>訂單資訊：購買商品、配送地址、聯絡電話</li>
+                <li>系統資料：IP、裝置資訊（用於安全與分析）</li>
+              </ul>
+              <h4>2. 資料用途</h4>
+              <p>我們會將您的資料用於：</p>
+              <ul>
+                <li>建立與管理會員帳號</li>
+                <li>訂單處理與客服聯繫</li>
+                <li>系統安全與防詐騙</li>
+              </ul>
+              <h4>3. 第三方服務</h4>
+              <p>我們可能使用以下服務：</p>
+              <ul>
+                <li>Google / LINE（登入驗證）</li>
+              </ul>
+              <p>這些服務可能依其政策處理您的資料。</p>
+              <h4>4. 資料保護</h4>
+              <p>我們採取合理技術措施保護您的個人資料。</p>
+              <h4>5. 資料刪除</h4>
+              <p>您可以隨時聯繫我們要求刪除資料。</p>
+              <h4>6. 聯絡方式</h4>
+              <p>Email: merdeleine.tw@gmail.com</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 服務條款 Modal ── */}
+      {openModal === "terms" && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.42)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1100,
+            padding: 16,
+          }}
+          onClick={() => setOpenModal(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "min(600px, 100%)",
+              maxHeight: "80vh",
+              overflow: "auto",
+              background: "#fff",
+              borderRadius: 10,
+              boxShadow: "0 20px 50px rgba(0,0,0,0.2)",
+              padding: 24,
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#4a321f" }}>服務條款</h3>
+              <button
+                type="button"
+                onClick={() => setOpenModal(null)}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  fontSize: 24,
+                  cursor: "pointer",
+                  color: "#999",
+                }}
+                aria-label="close"
+              >
+                ×
+              </button>
+            </div>
+            <div style={{ fontSize: 14, lineHeight: 1.8, color: "#5b442f" }}>
+              <p>歡迎使用 Merdeleine。</p>
+              <h4>1. 帳號使用</h4>
+              <p>您可以透過 Google、LINE 登入本網站。</p>
+              <p>您需確保帳號資訊正確。</p>
+              <h4>2. 訂單與付款</h4>
+              <p>所有訂單須經付款完成後才成立。</p>
+              <p>本網站保留訂單審核與取消權利。</p>
+              <h4>3. 商品與配送</h4>
+              <p>商品為手工製作，可能略有差異。</p>
+              <p>配送時間依實際狀況為準。</p>
+              <h4>4. 責任限制</h4>
+              <p>本網站不對以下情況負責：</p>
+              <ul>
+                <li>不可抗力（天災、物流延誤）</li>
+                <li>第三方服務問題（如 PayPal）</li>
+              </ul>
+              <h4>5. 修改權利</h4>
+              <p>本網站保留修改服務內容與條款之權利。</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 資料刪除說明 Modal ── */}
+      {openModal === "data-deletion" && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.42)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1100,
+            padding: 16,
+          }}
+          onClick={() => setOpenModal(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "min(600px, 100%)",
+              maxHeight: "80vh",
+              overflow: "auto",
+              background: "#fff",
+              borderRadius: 10,
+              boxShadow: "0 20px 50px rgba(0,0,0,0.2)",
+              padding: 24,
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#4a321f" }}>資料刪除說明</h3>
+              <button
+                type="button"
+                onClick={() => setOpenModal(null)}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  fontSize: 24,
+                  cursor: "pointer",
+                  color: "#999",
+                }}
+                aria-label="close"
+              >
+                ×
+              </button>
+            </div>
+            <div style={{ fontSize: 14, lineHeight: 1.8, color: "#5b442f" }}>
+              <p>如需刪除透過 Facebook 登入所建立的帳號資料，請來信：</p>
+              <p>
+                <strong>merdeleine.tw@gmail.com</strong>
+              </p>
+              <p>請提供你的登入 Email，我們會協助刪除帳號與相關個人資料。</p>
             </div>
           </div>
         </div>
