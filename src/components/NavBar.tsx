@@ -30,10 +30,6 @@ export default function NavBar() {
         {/* ── Collapsible links (desktop: always visible; mobile: controlled by hamburger) ── */}
         <div id="main-nav-menu" className={`nav-menu${isMenuOpen ? " is-open" : ""}`}>
           <div className="nav-links">
-            <NavLink to="/" className={navLinkClass}>
-              首頁
-            </NavLink>
-
             <NavLink to="/customer/products" className={navLinkClass}>
               商品列表
             </NavLink>
