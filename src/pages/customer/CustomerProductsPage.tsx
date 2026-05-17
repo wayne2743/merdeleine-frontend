@@ -652,6 +652,7 @@ export default function CustomerProductsPage() {
                   <button
                     onClick={() => scrollDetailImages("left")}
                     aria-label="上一張"
+                    type="button"
                     style={{
                       position: "absolute",
                       left: 8,
@@ -670,9 +671,17 @@ export default function CustomerProductsPage() {
                       justifyContent: "center",
                     }}
                   >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" width="16" height="16" aria-hidden="true">
-                      <path d="m15 5-7 7 7 7" />
-                    </svg>
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        width: 10,
+                        height: 10,
+                        borderTop: "2.5px solid #8f6640",
+                        borderLeft: "2.5px solid #8f6640",
+                        transform: "rotate(-45deg)",
+                        marginLeft: 3,
+                      }}
+                    />
                   </button>
 
                   <div
@@ -725,6 +734,7 @@ export default function CustomerProductsPage() {
                   <button
                     onClick={() => scrollDetailImages("right")}
                     aria-label="下一張"
+                    type="button"
                     style={{
                       position: "absolute",
                       right: 8,
@@ -743,9 +753,17 @@ export default function CustomerProductsPage() {
                       justifyContent: "center",
                     }}
                   >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" width="16" height="16" aria-hidden="true">
-                      <path d="m9 5 7 7-7 7" />
-                    </svg>
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        width: 10,
+                        height: 10,
+                        borderTop: "2.5px solid #8f6640",
+                        borderRight: "2.5px solid #8f6640",
+                        transform: "rotate(45deg)",
+                        marginRight: 3,
+                      }}
+                    />
                   </button>
                 </>
               ) : (
