@@ -1,0 +1,244 @@
+/* ==========================================================================
+   Merdeleine — Brand Theme Overlay
+   ==========================================================================
+   Drop-in CSS override that re-skins the existing UI with the new
+   warm-cinnamon / caramel / butter palette + brand mark.
+
+   USAGE
+   ─────
+     1. Drop this file at `src/merdeleine-theme.css`.
+     2. In `src/main.tsx` (or wherever you import index.css), add:
+
+          import "./index.css";
+          import "./merdeleine-theme.css";   // ← AFTER index.css
+
+   It overrides the `:root` palette tokens that index.css already exposes,
+   so most of the existing component CSS reflows automatically. A handful
+   of common hardcoded hex literals are also overridden below.
+   ========================================================================== */
+
+:root {
+  /* ===== Original token slots — kept by name, repointed to new palette ===== */
+  --bg-deep:        #F9EDE4; /* page bg (was warm beige) */
+  --bg-soft:        #FBF1E8; /* page bg lighter */
+  --surface:        #FFFAF3; /* card / surface */
+  --surface-strong: #FFFFFF; /* pure card */
+  --ink-primary:    #4A2E1A; /* primary text */
+  --ink-secondary:  #6E4B30; /* secondary */
+  --ink-muted:      #9B7F62; /* muted */
+  --accent:         #C99070; /* caramel — was old gold */
+  --accent-strong:  #9B5D2E; /* cinnamon — was deep gold */
+  --accent-soft:    #F8E8D2; /* butter-soft — was pale gold */
+  --border:         #EBDCC4; /* warm hairline */
+  --shadow-soft:    0 10px 28px rgba(90, 51, 26, 0.12);
+
+  /* ===== New tokens (also exposed for any future component) ===== */
+  --md-cinnamon:        #9B5D2E;
+  --md-cinnamon-deep:   #7A4520;
+  --md-cinnamon-ink:    #5A331A;
+  --md-caramel:         #C99070;
+  --md-caramel-soft:    #E8C896;
+  --md-butter:          #F0D9B5;
+  --md-butter-soft:     #F8E8D2;
+  --md-gold:            #D9B86A;
+  --md-gold-deep:       #B8954A;
+  --md-sage:            #8B9472;
+  --md-blush:           #FBF1E8;
+  --md-shell-pink:      #F9EDE4;
+  --md-ivory:           #FFFAF3;
+  --md-border:          #EBDCC4;
+  --md-border-strong:   #D7C19F;
+  --md-ink-1:           #4A2E1A;
+  --md-ink-2:           #6E4B30;
+  --md-ink-3:           #9B7F62;
+  --md-ink-on-dark:     #FBF1E8;
+}
+
+/* ===== Body + page wash ===== */
+body {
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(232, 200, 150, 0.55), transparent 62%),
+    radial-gradient(980px 520px at 92% 8%,    rgba(240, 217, 181, 0.50), transparent 62%),
+    radial-gradient(1100px 540px at 50% 108%, rgba(217, 184, 106, 0.30), transparent 66%),
+    linear-gradient(180deg, var(--bg-soft) 0%, var(--bg-deep) 58%) !important;
+  color: var(--ink-primary);
+}
+
+/* ===== Anchor color (the original had brown-gold #9a7751) ===== */
+a { color: var(--md-cinnamon); }
+a:hover { color: var(--md-cinnamon-deep); }
+
+/* ===== Headings: warm dark brown rather than near-black ===== */
+h1, h2, h3 { color: var(--md-cinnamon-ink); }
+
+/* ===== Buttons: gold gradient → cinnamon gradient ===== */
+button {
+  background: linear-gradient(180deg, var(--md-caramel) 0%, var(--md-cinnamon) 100%);
+  border-color: var(--md-cinnamon-deep);
+  color: var(--md-ink-on-dark);
+  box-shadow: 0 6px 16px rgba(155, 93, 46, 0.22);
+}
+button:focus, button:focus-visible {
+  outline-color: var(--md-caramel-soft);
+}
+
+/* ===== Inputs: warmer outline ===== */
+input, textarea, select {
+  border-color: var(--md-border-strong);
+  background: var(--md-ivory);
+  color: var(--md-ink-1);
+}
+input:focus, textarea:focus, select:focus {
+  outline-color: var(--md-caramel-soft);
+}
+
+/* ===== Nav shell ===== */
+.nav-shell {
+  background: rgba(251, 241, 232, 0.94);
+  border-bottom-color: rgba(215, 193, 159, 0.55);
+}
+.nav-brand { color: var(--md-cinnamon); }
+.nav-link {
+  color: var(--md-ink-2);
+  background: rgba(255, 250, 243, 0.85);
+  border-color: rgba(215, 193, 159, 0.85);
+}
+.nav-link:hover {
+  color: var(--md-cinnamon-ink);
+  background: rgba(255, 255, 255, 0.96);
+  border-color: var(--md-border-strong);
+}
+.nav-link.is-active {
+  color: var(--md-ink-on-dark);
+  background: linear-gradient(180deg, var(--md-caramel) 0%, var(--md-cinnamon) 100%);
+  border-color: var(--md-cinnamon-deep);
+}
+.nav-user { color: var(--md-ink-3); }
+
+/* ===== Hero ===== */
+.hero-shell {
+  border-color: rgba(215, 193, 159, 0.8);
+  box-shadow: 0 14px 36px rgba(90, 51, 26, 0.16);
+}
+.hero-content {
+  background: rgba(255, 250, 243, 0.78);
+  border-color: rgba(215, 193, 159, 0.8);
+  box-shadow: 0 8px 24px rgba(90, 51, 26, 0.14);
+}
+.hero-kicker { color: var(--md-gold-deep); letter-spacing: 0.22em; }
+.hero-title { color: var(--md-cinnamon-ink); }
+.hero-subtitle { color: var(--md-ink-2); }
+.hero-btn-primary {
+  color: var(--md-ink-on-dark);
+  background: linear-gradient(180deg, var(--md-caramel) 0%, var(--md-cinnamon) 100%);
+  border-color: var(--md-cinnamon-deep);
+}
+.hero-btn-secondary {
+  color: var(--md-ink-1);
+  background: rgba(255, 255, 255, 0.85);
+  border-color: var(--md-border-strong);
+}
+
+/* ===== Section heads ===== */
+.home-section-head h2 { color: var(--md-cinnamon-ink); }
+.home-section-head span { color: var(--md-ink-3); }
+
+/* ===== Featured & product cards ===== */
+.featured-card, .customer-product-card, .product-list-card {
+  background: var(--md-ivory);
+  border-color: var(--md-border);
+  box-shadow: 0 8px 20px rgba(90, 51, 26, 0.09);
+}
+.featured-card:hover,
+.customer-product-card:hover {
+  box-shadow: 0 14px 28px rgba(90, 51, 26, 0.13);
+}
+.featured-row strong, .product-price { color: var(--md-cinnamon); }
+.featured-row a { color: var(--md-cinnamon); font-weight: 600; }
+.product-name, .featured-body h3, .customer-product-body h3 {
+  color: var(--md-cinnamon-ink);
+}
+.product-card-description { color: var(--md-ink-2); }
+.customer-products-kicker,
+.customer-products-subtitle,
+.customer-products-hint {
+  color: var(--md-gold-deep);
+}
+
+/* ===== My Orders ===== */
+.myorders-head h2 { color: var(--md-cinnamon-ink); }
+.myorders-head span { color: var(--md-ink-2); }
+.myorders-tab {
+  background: rgba(255, 250, 243, 0.92);
+  border-color: var(--md-border-strong);
+  color: var(--md-ink-2);
+}
+.myorders-tab strong {
+  background: rgba(155, 93, 46, 0.13);
+  color: var(--md-cinnamon);
+}
+.myorders-tab.is-active {
+  background: linear-gradient(180deg, var(--md-caramel) 0%, var(--md-cinnamon) 100%);
+  border-color: var(--md-cinnamon-deep);
+  color: var(--md-ink-on-dark);
+  box-shadow: 0 10px 20px rgba(90, 51, 26, 0.2);
+}
+.myorders-card {
+  border-color: var(--md-border);
+  background: linear-gradient(180deg, var(--md-ivory) 0%, var(--md-butter-soft) 100%);
+}
+.myorders-title { color: var(--md-cinnamon-ink); }
+.myorders-id { color: var(--md-ink-3); }
+.myorders-metric-value.is-price { color: var(--md-cinnamon); }
+.myorders-metric { border-color: var(--md-border); }
+.myorders-metric-label { color: var(--md-ink-3); }
+
+/* ===== Payment ===== */
+.payment-head h2, .payment-card-head h3 { color: var(--md-cinnamon-ink); }
+.payment-kicker, .payment-card-kicker { color: var(--md-gold-deep); }
+.payment-top-note {
+  background: linear-gradient(180deg, var(--md-butter-soft) 0%, var(--md-cream, #FAEFDD) 100%);
+  border-color: var(--md-border-strong);
+  color: var(--md-cinnamon-ink);
+}
+.payment-card {
+  background: linear-gradient(180deg, var(--md-ivory) 0%, var(--md-butter-soft) 100%);
+  border-color: var(--md-border);
+  color: var(--md-ink-1);
+}
+.payment-info-item { background: rgba(255, 250, 243, 0.85); border-color: var(--md-border); }
+.payment-info-label { color: var(--md-ink-3); }
+.payment-info-value { color: var(--md-ink-1); }
+.payment-back-link { color: var(--md-cinnamon); }
+
+/* ===== Order guide (keep the rainbow accents but soften to warm family) ===== */
+.order-guide-hero {
+  background:
+    radial-gradient(420px 180px at 50% 0%, rgba(240, 207, 196, 0.42), transparent 70%),
+    linear-gradient(180deg, var(--md-ivory) 0%, var(--md-butter-soft) 100%);
+  border-color: var(--md-border);
+}
+.order-guide-kicker { color: var(--md-gold-deep); }
+.order-guide-hero h1 { color: var(--md-cinnamon-ink); }
+.order-guide-intro { color: var(--md-ink-2); }
+.order-guide-canvas {
+  background:
+    radial-gradient(640px 220px at 50% 0%, rgba(240, 207, 196, 0.38), transparent 72%),
+    linear-gradient(180deg, var(--md-ivory) 0%, var(--md-butter-soft) 100%);
+  border-color: var(--md-border);
+}
+
+/* ===== Brand mark in nav (optional — show logo image next to text) =====
+   Markup change required in NavBar.tsx — see HOW-TO-APPLY.md. */
+.nav-brand img {
+  height: 26px;
+  width: auto;
+  display: block;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+.nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+}
