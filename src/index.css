@@ -2719,7 +2719,7 @@ table {
 
   /* Hide desktop auth inside nav-menu, show mobile auth section inside dropdown */
   .nav-auth--desktop {
-    display: none;
+    display: none !important;
   }
 
   .nav-auth--mobile {
@@ -2751,7 +2751,7 @@ table {
   }
 
   .nav-links,
-  .nav-auth {
+  .nav-auth--mobile {
     width: 100%;
     display: flex;
     flex-direction: column;
