@@ -349,9 +349,6 @@ export default function HomePage() {
             <Link to="/order-guide" className="hero-btn hero-btn-secondary">
               先看訂購流程
             </Link>
-            <Link to="/customer/sell-windows" className="hero-btn hero-btn-secondary">
-              看檔期活動
-            </Link>
           </div>
         </div>
       </section>
