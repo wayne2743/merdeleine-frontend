@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type CSSProperties, type ChangeEvent, type FormEvent } from "react";
 import { catalogApi } from "../../api/catalogApi";
 import type { Ingredient } from "../../types/domain";
 
@@ -51,6 +51,10 @@ function formatDateTime(value?: string | null): string {
 function formatStockQuantity(value: number | string): string {
   if (typeof value === "number") return value.toString();
   return value;
+}
+
+function normalizeEnumValue(value: string): string {
+  return value.trim().toUpperCase().replace(/[\s-]+/g, "_");
 }
 
 const actionButtonBase: CSSProperties = {
@@ -117,6 +121,13 @@ export default function IngredientAdminPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
+  const attributeOptions = useMemo(() => {
+    const fromData = ingredients
+      .map((item) => normalizeEnumValue(item.attribute ?? ""))
+      .filter((item) => item.length > 0);
+    return Array.from(new Set(fromData));
+  }, [ingredients]);
+
   async function loadIngredients() {
     setListLoading(true);
     setListError(null);
@@ -136,6 +147,10 @@ export default function IngredientAdminPage() {
 
   function onChange(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value } = e.target;
+    if (name === "attribute") {
+      setForm((prev) => ({ ...prev, attribute: normalizeEnumValue(value) }));
+      return;
+    }
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
@@ -180,9 +195,14 @@ export default function IngredientAdminPage() {
       return;
     }
 
-    const attribute = form.attribute.trim();
+    const attribute = normalizeEnumValue(form.attribute);
     if (!attribute) {
       setFormError("請輸入原物料屬性（attribute）");
+      return;
+    }
+
+    if (!/^[A-Z][A-Z0-9_]*$/.test(attribute)) {
+      setFormError("屬性格式錯誤，請使用英數與底線，例如 RAW_MATERIAL");
       return;
     }
 
@@ -330,8 +350,17 @@ export default function IngredientAdminPage() {
                 value={form.attribute}
                 onChange={onChange}
                 placeholder="例：RAW_MATERIAL"
+                list="ingredient-attribute-options"
                 style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }}
               />
+              <datalist id="ingredient-attribute-options">
+                {attributeOptions.map((option) => (
+                  <option key={option} value={option} />
+                ))}
+              </datalist>
+              <div style={{ marginTop: 4, color: "#9a7a55", fontSize: 12 }}>
+                需填後端 enum 值（會自動轉大寫與底線）
+              </div>
             </div>
             <div>
               <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
