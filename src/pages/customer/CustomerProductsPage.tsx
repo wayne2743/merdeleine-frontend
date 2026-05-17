@@ -651,6 +651,7 @@ export default function CustomerProductsPage() {
                 <>
                   <button
                     onClick={() => scrollDetailImages("left")}
+                    aria-label="上一張"
                     style={{
                       position: "absolute",
                       left: 8,
@@ -663,9 +664,15 @@ export default function CustomerProductsPage() {
                       border: "1px solid #ddd",
                       background: "rgba(255,255,255,0.95)",
                       cursor: "pointer",
+                      color: "#8f6640",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
                   >
-                    ◀
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" width="16" height="16" aria-hidden="true">
+                      <path d="m15 5-7 7 7 7" />
+                    </svg>
                   </button>
 
                   <div
@@ -717,6 +724,7 @@ export default function CustomerProductsPage() {
 
                   <button
                     onClick={() => scrollDetailImages("right")}
+                    aria-label="下一張"
                     style={{
                       position: "absolute",
                       right: 8,
@@ -729,9 +737,15 @@ export default function CustomerProductsPage() {
                       border: "1px solid #ddd",
                       background: "rgba(255,255,255,0.95)",
                       cursor: "pointer",
+                      color: "#8f6640",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
                   >
-                    ▶
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" width="16" height="16" aria-hidden="true">
+                      <path d="m9 5 7 7-7 7" />
+                    </svg>
                   </button>
                 </>
               ) : (
