@@ -2507,6 +2507,9 @@ table {
   font-size: 12px;
   color: #5f4a38;
   margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sellwindow-card-meta {

@@ -24,6 +24,23 @@ function formatPrice(amount: number, currency: string) {
   return `${currency} ${Number(amount).toLocaleString()}`;
 }
 
+function getCompactSellWindowName(item: ProductSellWindowView): string {
+  const rawName = String(item.sellWindowName ?? "").trim();
+  if (!rawName) return "-";
+
+  const productName = String(item.productName ?? "").trim();
+  if (!productName) return rawName;
+
+  // Remove duplicated product prefix like: "焦糖達克瓦茲 第23週客戶發起開團" -> "第23週客戶發起開團"
+  const escapedProductName = productName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const withoutProductPrefix = rawName.replace(
+    new RegExp(`^${escapedProductName}[\\s\\-_:：|/、，,]*`, "i"),
+    ""
+  ).trim();
+
+  return withoutProductPrefix || rawName;
+}
+
 function pickImageUrl(images: { imageType: string; isActive: boolean; isPrimary: boolean; sortOrder: number; cdnUrl: string }[]) {
   const activeImages = images.filter((img) => img.isActive);
   const sorted = (imgs: typeof images) => [...imgs].sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary) || a.sortOrder - b.sortOrder);
@@ -176,6 +193,7 @@ export default function SellWindowListPage() {
           const isLowStock = remainingQty != null && remainingQty > 0 && remainingQty <= 3;
           const isReservable = !isSoldOut && it.quotaStatus === "OPEN";
           const predictedShipDate = getPredictedShipDate(it);
+          const compactSellWindowName = getCompactSellWindowName(it);
 
           return (
             <article key={it.productSellWindowId} className="sellwindow-list-card">
@@ -198,7 +216,9 @@ export default function SellWindowListPage() {
                     {isSoldOut && <div className="sellwindow-urgency is-soldout">已額滿</div>}
                     {!isSoldOut && isLowStock && <div className="sellwindow-urgency is-low">名額緊張</div>}
                   </div>
-                  <div className="sellwindow-card-subtitle">檔期：{it.sellWindowName}（{it.timezone}）</div>
+                  <div className="sellwindow-card-subtitle" title={it.sellWindowName}>
+                    檔期：{compactSellWindowName}
+                  </div>
 
                   <div className="sellwindow-card-meta">
                     <div>接單起訖：{fmt(it.startAt)} ～ {fmt(it.endAt)}</div>
