@@ -17,6 +17,7 @@ import ProductAdminPage from "./pages/admin/ProductAdminPage";
 import PaymentAdminPage from "./pages/admin/PaymentAdminPage";
 import SellWindowCrudPage from "./pages/admin/SellWindowCrudPage";
 import StorePickupLocationAdminPage from "./pages/admin/StorePickupLocationAdminPage";
+import IngredientAdminPage from "./pages/admin/IngredientAdminPage";
 
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -51,6 +52,7 @@ export default function App() {
             <Route path="/admin/payments" element={<PaymentAdminPage />} />
             <Route path="/admin/sell-window-crud" element={<SellWindowCrudPage />} />
             <Route path="/admin/store-pickup-locations" element={<StorePickupLocationAdminPage />} />
+            <Route path="/admin/ingredients" element={<IngredientAdminPage />} />
             <Route path="/admin/confirm" element={<ConfirmBatchPage />} />
             <Route path="/admin/production" element={<Navigate to="/admin/sell-window-crud" replace />} />
             <Route path="/admin/production-planning" element={<Navigate to="/admin/sell-window-crud" replace />} />

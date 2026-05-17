@@ -62,6 +62,9 @@ export default function NavBar() {
                 <NavLink to="/admin/store-pickup-locations" className={navLinkClass}>
                   門市取貨點管理
                 </NavLink>
+                <NavLink to="/admin/ingredients" className={navLinkClass}>
+                  原物料管理
+                </NavLink>
               </>
             )}
           </div>

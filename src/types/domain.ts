@@ -212,6 +212,27 @@ export type ProductUpdateRequest = {
   defaultShipDays?: number | null;
 };
 
+export type Ingredient = {
+  id: string;
+  name: string;
+  unit?: string | null;
+  description?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+};
+
+export type IngredientCreateRequest = {
+  name: string;
+  unit?: string | null;
+  description?: string | null;
+};
+
+export type IngredientUpdateRequest = {
+  name?: string;
+  unit?: string | null;
+  description?: string | null;
+};
+
 export type ProductImage = {
   id: string;
   productId: string;

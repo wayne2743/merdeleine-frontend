@@ -21,6 +21,9 @@ import type {
   NextGroupOpenAtResponse,
   OpenProductSellWindowResponse,
   SellWindowNextGroupOpenAtResponse,
+  Ingredient,
+  IngredientCreateRequest,
+  IngredientUpdateRequest,
 } from "../types/domain";
 
 const HOME_FEATURED_STORAGE_KEY = "merdeleine.home.featuredProductIds";
@@ -568,6 +571,31 @@ export const catalogApi = {
       `/api/catalog/products/${productId}/open-product-sell-window`
     );
     return data;
+  },
+
+  // ── Ingredients ──────────────────────────────────────────────────────────
+  async listIngredients(): Promise<Ingredient[]> {
+    const { data } = await http.get<Ingredient[]>("/api/catalog/ingredients");
+    return data;
+  },
+
+  async getIngredient(id: string): Promise<Ingredient> {
+    const { data } = await http.get<Ingredient>(`/api/catalog/ingredients/${id}`);
+    return data;
+  },
+
+  async createIngredient(req: IngredientCreateRequest): Promise<Ingredient> {
+    const { data } = await http.post<Ingredient>("/api/catalog/ingredients", req);
+    return data;
+  },
+
+  async updateIngredient(id: string, req: IngredientUpdateRequest): Promise<Ingredient> {
+    const { data } = await http.put<Ingredient>(`/api/catalog/ingredients/${id}`, req);
+    return data;
+  },
+
+  async deleteIngredient(id: string): Promise<void> {
+    await http.delete(`/api/catalog/ingredients/${id}`);
   },
 
 };
