@@ -453,6 +453,82 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── 聯絡我們 ── */}
+      <section className="home-section" style={{ paddingTop: 40, paddingBottom: 40 }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ margin: 0, marginBottom: 6, fontSize: 32, fontWeight: 700, color: "#4a321f" }}>聯絡我們</h2>
+          <p style={{ margin: 0, fontSize: 14, color: "#888" }}>有任何問題歡迎透過以下方式與我們聯繫</p>
+        </div>
+        <div className="home-contact-grid">
+          {/* LINE */}
+          <a
+            href="https://line.me/ti/p/~@490ajoi"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="home-contact-card"
+          >
+            <div className="home-contact-icon" style={{ background: "#06C755" }}>
+              <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+                <path d="M12 2C6.48 2 2 5.92 2 10.72c0 3.1 1.73 5.83 4.35 7.5-.14.53-.52 1.93-.6 2.23-.09.38.14.37.3.27.12-.08 1.96-1.3 2.76-1.82.37.05.75.08 1.19.08 5.52 0 10-3.92 10-8.76C20 5.92 17.52 2 12 2z"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 15, color: "#4a321f", marginBottom: 2 }}>LINE 官方帳號</div>
+              <div style={{ fontSize: 13, color: "#888" }}>@490ajoi</div>
+            </div>
+          </a>
+
+          {/* Instagram */}
+          <a
+            href="https://www.instagram.com/merdeleine.tw"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="home-contact-card"
+          >
+            <div className="home-contact-icon" style={{ background: "linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)" }}>
+              <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 15, color: "#4a321f", marginBottom: 2 }}>Instagram</div>
+              <div style={{ fontSize: 13, color: "#888" }}>@merdeleine.tw</div>
+            </div>
+          </a>
+
+          {/* Email */}
+          <a
+            href="mailto:merdeleine.tw@gmail.com"
+            className="home-contact-card"
+          >
+            <div className="home-contact-icon" style={{ background: "#c0855a" }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 15, color: "#4a321f", marginBottom: 2 }}>電子郵件</div>
+              <div style={{ fontSize: 13, color: "#888" }}>merdeleine.tw@gmail.com</div>
+            </div>
+          </a>
+
+          {/* 服務時間 */}
+          <div className="home-contact-card" style={{ cursor: "default" }}>
+            <div className="home-contact-icon" style={{ background: "#a0845c" }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 15, color: "#4a321f", marginBottom: 2 }}>服務時間</div>
+              <div style={{ fontSize: 13, color: "#888", lineHeight: 1.6 }}>週五 19:00 以後<br />週六 &amp; 週日</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="home-section" style={{ paddingTop: 8 }}>
         <div
           style={{
