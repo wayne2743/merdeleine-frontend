@@ -1,20 +1,57 @@
-import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
+import { useEffect, useState, type CSSProperties, type ChangeEvent, type FormEvent } from "react";
 import { catalogApi } from "../../api/catalogApi";
 import type { Ingredient } from "../../types/domain";
 
 type IngredientForm = {
   id: string | null;
   name: string;
-  unit: string;
-  description: string;
+  unitPriceCents: string;
+  brand: string;
+  origin: string;
+  governmentRegistrationInfo: string;
+  attribute: string;
+  stockedAt: string;
+  expiresAt: string;
+  stockQuantity: string;
 };
 
 const INITIAL_FORM: IngredientForm = {
   id: null,
   name: "",
-  unit: "",
-  description: "",
+  unitPriceCents: "",
+  brand: "",
+  origin: "",
+  governmentRegistrationInfo: "",
+  attribute: "",
+  stockedAt: "",
+  expiresAt: "",
+  stockQuantity: "",
 };
+
+function normalizeDateInput(value?: string | null): string {
+  if (!value) return "";
+  return value.length >= 10 ? value.slice(0, 10) : value;
+}
+
+function formatMoney(cents: number): string {
+  return new Intl.NumberFormat("zh-TW", {
+    style: "currency",
+    currency: "TWD",
+    maximumFractionDigits: 0,
+  }).format(cents / 100);
+}
+
+function formatDateTime(value?: string | null): string {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString("zh-TW", { hour12: false });
+}
+
+function formatStockQuantity(value: number | string): string {
+  if (typeof value === "number") return value.toString();
+  return value;
+}
 
 const actionButtonBase: CSSProperties = {
   minWidth: 72,
@@ -97,7 +134,7 @@ export default function IngredientAdminPage() {
     void loadIngredients();
   }, []);
 
-  function onChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  function onChange(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   }
@@ -106,8 +143,14 @@ export default function IngredientAdminPage() {
     setForm({
       id: ingredient.id,
       name: ingredient.name,
-      unit: ingredient.unit ?? "",
-      description: ingredient.description ?? "",
+      unitPriceCents: String(ingredient.unitPriceCents ?? ""),
+      brand: ingredient.brand ?? "",
+      origin: ingredient.origin ?? "",
+      governmentRegistrationInfo: ingredient.governmentRegistrationInfo ?? "",
+      attribute: ingredient.attribute ?? "",
+      stockedAt: normalizeDateInput(ingredient.stockedAt),
+      expiresAt: normalizeDateInput(ingredient.expiresAt),
+      stockQuantity: String(ingredient.stockQuantity ?? ""),
     });
     setFormError(null);
     setFormSuccess(null);
@@ -131,12 +174,41 @@ export default function IngredientAdminPage() {
       return;
     }
 
+    const unitPriceCents = Number(form.unitPriceCents);
+    if (!Number.isInteger(unitPriceCents) || unitPriceCents < 0) {
+      setFormError("單價（分）必須是大於等於 0 的整數");
+      return;
+    }
+
+    const attribute = form.attribute.trim();
+    if (!attribute) {
+      setFormError("請輸入原物料屬性（attribute）");
+      return;
+    }
+
+    const stockQuantity = Number(form.stockQuantity);
+    if (!Number.isFinite(stockQuantity) || stockQuantity < 0) {
+      setFormError("庫存數量必須是大於等於 0 的數字");
+      return;
+    }
+
+    if (form.stockedAt && form.expiresAt && form.stockedAt > form.expiresAt) {
+      setFormError("到期日不可早於進貨日");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const payload = {
         name,
-        unit: form.unit.trim() || null,
-        description: form.description.trim() || null,
+        unitPriceCents,
+        brand: form.brand.trim() || null,
+        origin: form.origin.trim() || null,
+        governmentRegistrationInfo: form.governmentRegistrationInfo.trim() || null,
+        attribute,
+        stockedAt: form.stockedAt || null,
+        expiresAt: form.expiresAt || null,
+        stockQuantity,
       };
 
       if (form.id) {
@@ -221,7 +293,7 @@ export default function IngredientAdminPage() {
         )}
 
         <form onSubmit={(e) => void onSubmit(e)}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 20px", marginBottom: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "12px 20px", marginBottom: 12 }}>
             <div>
               <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
                 名稱 <span style={{ color: "#be123c" }}>*</span>
@@ -236,13 +308,91 @@ export default function IngredientAdminPage() {
             </div>
             <div>
               <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
-                計量單位
+                單價（分） <span style={{ color: "#be123c" }}>*</span>
               </label>
               <input
-                name="unit"
-                value={form.unit}
+                name="unitPriceCents"
+                type="number"
+                min={0}
+                step={1}
+                value={form.unitPriceCents}
                 onChange={onChange}
-                placeholder="例：g、ml、個"
+                placeholder="例：350"
+                style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
+                屬性（attribute） <span style={{ color: "#be123c" }}>*</span>
+              </label>
+              <input
+                name="attribute"
+                value={form.attribute}
+                onChange={onChange}
+                placeholder="例：RAW_MATERIAL"
+                style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
+                庫存數量 <span style={{ color: "#be123c" }}>*</span>
+              </label>
+              <input
+                name="stockQuantity"
+                type="number"
+                min={0}
+                step="0.001"
+                value={form.stockQuantity}
+                onChange={onChange}
+                placeholder="例：25.500"
+                style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
+                品牌
+              </label>
+              <input
+                name="brand"
+                value={form.brand}
+                onChange={onChange}
+                placeholder="例：在地農場 A"
+                style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
+                產地
+              </label>
+              <input
+                name="origin"
+                value={form.origin}
+                onChange={onChange}
+                placeholder="例：台灣雲林"
+                style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
+                進貨日
+              </label>
+              <input
+                name="stockedAt"
+                type="date"
+                value={form.stockedAt}
+                onChange={onChange}
+                style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
+                到期日
+              </label>
+              <input
+                name="expiresAt"
+                type="date"
+                value={form.expiresAt}
+                onChange={onChange}
                 style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }}
               />
             </div>
@@ -250,14 +400,14 @@ export default function IngredientAdminPage() {
 
           <div style={{ marginBottom: 20 }}>
             <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
-              備註說明
+              政府登記資訊
             </label>
             <textarea
-              name="description"
-              value={form.description}
+              name="governmentRegistrationInfo"
+              value={form.governmentRegistrationInfo}
               onChange={onChange}
               rows={2}
-              placeholder="可填寫來源、規格或注意事項"
+              placeholder="可填寫字號、許可文件或追溯資訊"
               style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, resize: "vertical", boxSizing: "border-box" }}
             />
           </div>
@@ -331,8 +481,13 @@ export default function IngredientAdminPage() {
               <thead>
                 <tr style={{ background: "linear-gradient(180deg, #f7e9d0 0%, #f0d9b5 100%)", color: "#5f4528" }}>
                   <th style={thStyle}>名稱</th>
-                  <th style={thStyle}>計量單位</th>
-                  <th style={thStyle}>備註說明</th>
+                  <th style={thStyle}>屬性</th>
+                  <th style={thStyle}>單價</th>
+                  <th style={thStyle}>庫存</th>
+                  <th style={thStyle}>品牌 / 產地</th>
+                  <th style={thStyle}>進貨 / 到期</th>
+                  <th style={thStyle}>登記資訊</th>
+                  <th style={thStyle}>建立 / 更新</th>
                   <th style={{ ...thStyle, textAlign: "center" }}>操作</th>
                 </tr>
               </thead>
@@ -343,15 +498,24 @@ export default function IngredientAdminPage() {
                     style={{ background: idx % 2 === 0 ? "#fffdf8" : "#fdf7ef" }}
                   >
                     <td style={tdStyle}>{ing.name}</td>
-                    <td style={tdStyle}>{ing.unit ?? "-"}</td>
+                    <td style={tdStyle}>{ing.attribute}</td>
+                    <td style={tdStyle}>{formatMoney(ing.unitPriceCents)}</td>
+                    <td style={tdStyle}>{formatStockQuantity(ing.stockQuantity)}</td>
+                    <td style={tdStyle}>{[ing.brand, ing.origin].filter(Boolean).join(" / ") || "-"}</td>
+                    <td style={tdStyle}>{`${ing.stockedAt ?? "-"} / ${ing.expiresAt ?? "-"}`}</td>
                     <td style={{ ...tdStyle, maxWidth: 200, color: "#888" }}>
-                      {ing.description ? (
-                        <span title={ing.description}>
-                          {ing.description.length > 50 ? `${ing.description.slice(0, 50)}…` : ing.description}
+                      {ing.governmentRegistrationInfo ? (
+                        <span title={ing.governmentRegistrationInfo}>
+                          {ing.governmentRegistrationInfo.length > 40
+                            ? `${ing.governmentRegistrationInfo.slice(0, 40)}…`
+                            : ing.governmentRegistrationInfo}
                         </span>
                       ) : (
                         "-"
                       )}
+                    </td>
+                    <td style={{ ...tdStyle, color: "#777", fontSize: 12 }}>
+                      {formatDateTime(ing.createdAt)} / {formatDateTime(ing.updatedAt)}
                     </td>
                     <td style={{ ...tdStyle, textAlign: "center", whiteSpace: "nowrap" }}>
                       <div style={{ display: "inline-flex", gap: 6 }}>

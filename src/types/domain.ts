@@ -215,22 +215,40 @@ export type ProductUpdateRequest = {
 export type Ingredient = {
   id: string;
   name: string;
-  unit?: string | null;
-  description?: string | null;
+  unitPriceCents: number;
+  brand?: string | null;
+  origin?: string | null;
+  governmentRegistrationInfo?: string | null;
+  attribute: string;
+  stockedAt?: string | null;
+  expiresAt?: string | null;
+  stockQuantity: number | string;
   createdAt?: string | null;
   updatedAt?: string | null;
 };
 
 export type IngredientCreateRequest = {
   name: string;
-  unit?: string | null;
-  description?: string | null;
+  unitPriceCents: number;
+  brand?: string | null;
+  origin?: string | null;
+  governmentRegistrationInfo?: string | null;
+  attribute: string;
+  stockedAt?: string | null;
+  expiresAt?: string | null;
+  stockQuantity: number;
 };
 
 export type IngredientUpdateRequest = {
   name?: string;
-  unit?: string | null;
-  description?: string | null;
+  unitPriceCents?: number;
+  brand?: string | null;
+  origin?: string | null;
+  governmentRegistrationInfo?: string | null;
+  attribute?: string;
+  stockedAt?: string | null;
+  expiresAt?: string | null;
+  stockQuantity?: number;
 };
 
 export type ProductImage = {
