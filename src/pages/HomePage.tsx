@@ -329,6 +329,92 @@ export default function HomePage() {
         )}
       </section>
 
+      {/* ── 訂購流程 ── */}
+      <section className="home-section" style={{ paddingTop: 40, paddingBottom: 40 }}>
+        <div style={{ marginBottom: 32 }}>
+          <h2 style={{ margin: 0, marginBottom: 6, fontSize: 32, fontWeight: 700, color: "#4a321f" }}>訂購流程</h2>
+          <p style={{ margin: 0, fontSize: 14, color: "#888" }}>五個步驟，從挑選到取貨</p>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: 16,
+          }}
+        >
+          {[
+            {
+              step: 1,
+              title: "瀏覽商品",
+              desc: "從本週檔期中挑選想要的甜點。",
+              color: "#c99876",
+            },
+            {
+              step: 2,
+              title: "加入清單",
+              desc: "選擇數量與預取貨點，送出預約。",
+              color: "#d0a584",
+            },
+            {
+              step: 3,
+              title: "等待成團",
+              desc: "檔期結束、店家確認後通知付款。",
+              color: "#b8956a",
+            },
+            {
+              step: 4,
+              title: "完成付款",
+              desc: "支援轉帳付款或 LINE Pay。",
+              color: "#a67c52",
+            },
+            {
+              step: 5,
+              title: "現場取貨",
+              desc: "前往選定門市，依約定時間取貨。",
+              color: "#7fa572",
+            },
+          ].map((item) => (
+            <div
+              key={item.step}
+              style={{
+                background: "#fff",
+                borderRadius: 10,
+                padding: 20,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+              }}
+            >
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: "50%",
+                  background: item.color,
+                  color: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 20,
+                  fontWeight: 700,
+                  marginBottom: 12,
+                }}
+              >
+                {item.step}
+              </div>
+              <h3 style={{ margin: 0, marginBottom: 8, fontSize: 16, fontWeight: 600, color: "#4a321f" }}>
+                {item.title}
+              </h3>
+              <p style={{ margin: 0, fontSize: 13, color: "#777", lineHeight: 1.6 }}>
+                {item.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="home-section" style={{ paddingTop: 8 }}>
         <div
           style={{
