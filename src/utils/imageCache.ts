@@ -80,6 +80,17 @@ async function setCachedBlob(url: string, blob: Blob): Promise<void> {
  * Returns blob URL string that can be used as img src
  */
 export async function fetchImageWithCache(url: string): Promise<string> {
+  // Cross-origin images often block fetch() without CORS headers.
+  // Fall back to direct URL to avoid noisy console errors.
+  try {
+    const parsed = new URL(url, window.location.origin);
+    if (parsed.origin !== window.location.origin) {
+      return url;
+    }
+  } catch {
+    return url;
+  }
+
   // Check if already cached
   const cachedBlob = await getCachedBlob(url);
   if (cachedBlob) {
@@ -97,7 +108,6 @@ export async function fetchImageWithCache(url: string): Promise<string> {
     await setCachedBlob(url, blob);
     return URL.createObjectURL(blob);
   } catch (error) {
-    console.error("Error fetching image:", error);
     // Fallback to direct URL
     return url;
   }

@@ -130,6 +130,12 @@ function formatPrice(product: Product): string {
   return `${currency} ${amount.toLocaleString()}`;
 }
 
+function getProductStatusLabel(status: Product["status"]): string {
+  if (status === "ACTIVE") return "上架中";
+  if (status === "INACTIVE") return "已下架";
+  return "草稿";
+}
+
 function getProductOpenDays(product?: Product | null): number {
   const raw = Number(product?.defaultOpenDays ?? 7);
   return Number.isFinite(raw) && raw >= 1 ? Math.floor(raw) : 7;
@@ -206,7 +212,8 @@ function extractNextSellWindowOpenAt(payload: SellWindowNextGroupOpenAtResponse)
 export default function CustomerProductsPage() {
   const nav = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user } = useAuth();
+  const { user, status } = useAuth();
+  const isAuthenticated = status === "authenticated";
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
@@ -419,6 +426,11 @@ export default function CustomerProductsPage() {
   }
 
   async function handleStartGroup(p: Product) {
+    if (!isAuthenticated) {
+      nav("/login");
+      return;
+    }
+
     if (checkingOpenProductId) return;
 
     setCheckingOpenProductId(p.id);
@@ -511,7 +523,7 @@ export default function CustomerProductsPage() {
                 <p className="customer-product-desc">{descriptionText}</p>
                 <div className="featured-row customer-product-row">
                   <strong>{formatPrice(p)}</strong>
-                  <span className="product-status">狀態：{p.status}</span>
+                  <span className="product-status">狀態：{getProductStatusLabel(p.status)}</span>
                 </div>
 
                 <button
@@ -519,10 +531,14 @@ export default function CustomerProductsPage() {
                     e.stopPropagation();
                     void handleStartGroup(p);
                   }}
-                  disabled={p.status !== "ACTIVE" || checkingOpenProductId === p.id}
+                  disabled={checkingOpenProductId === p.id}
                   className="product-action-btn customer-product-btn"
                 >
-                  {checkingOpenProductId === p.id ? "檢查檔期中..." : "發起開團 / 立即預約"}
+                  {checkingOpenProductId === p.id
+                    ? "檢查檔期中..."
+                    : isAuthenticated
+                      ? "發起開團 / 立即預約"
+                      : "登入後即可預約"}
                 </button>
               </div>
             </article>

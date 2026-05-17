@@ -34,10 +34,10 @@ export default function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forbidden" element={<ForbiddenPage />} />
         <Route path="/order-guide" element={<OrderGuidePage />} />
+        <Route path="/customer/products" element={<CustomerProductsPage />} />
 
         <Route element={<RequireAuth />}>
           <Route element={<RequireRole allow={["USER"]} />}>
-            <Route path="/customer/products" element={<CustomerProductsPage />} />
             <Route path="/customer/sell-windows" element={<SellWindowListPage />} />
             <Route path="/customer/sell-windows/:productSellWindowId" element={<SellWindowDetailPage />} />
             <Route path="/customer/orders" element={<MyOrdersPage />} />

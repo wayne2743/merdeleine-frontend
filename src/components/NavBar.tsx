@@ -34,11 +34,12 @@ export default function NavBar() {
               首頁
             </NavLink>
 
+            <NavLink to="/customer/products" className={navLinkClass}>
+              商品列表
+            </NavLink>
+
             {isUser && (
               <>
-                <NavLink to="/customer/products" className={navLinkClass}>
-                  商品列表
-                </NavLink>
                 <NavLink to="/customer/sell-windows" className={navLinkClass}>
                   檔期列表
                 </NavLink>
