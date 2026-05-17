@@ -9,6 +9,8 @@ type FeaturedProductCard = {
   desc: string;
   fullDesc: string;
   price: string;
+  calories: string;
+  allergens: string;
   image: string;
   actionTo: string;
 };
@@ -42,6 +44,27 @@ function decodeDescription(value?: string | null): string {
 function trimDescription(value: string, maxLength = 34): string {
   if (value.length <= maxLength) return value;
   return `${value.slice(0, maxLength).trim()}…`;
+}
+
+function parseSupplementalInfo(description: string): { calories: string; allergens: string } {
+  const lines = description
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const calorieLine = lines.find((line) => /熱量|卡路里|kcal/i.test(line));
+  const allergenLine = lines.find((line) => /過敏原|allergen/i.test(line));
+
+  const normalizeValue = (line: string | undefined, fallback: string) => {
+    if (!line) return fallback;
+    const splitParts = line.split(/[：:]/);
+    return (splitParts.length > 1 ? splitParts.slice(1).join(":") : line).trim() || fallback;
+  };
+
+  return {
+    calories: normalizeValue(calorieLine, "尚未提供"),
+    allergens: normalizeValue(allergenLine, "尚未提供"),
+  };
 }
 
 function getImageGroupKey(image: ProductImage): string | null {
@@ -210,14 +233,18 @@ export default function HomePage() {
 
             if (!image) return null;
 
-            const desc = trimDescription(decodeDescription(product.description));
+            const decodedDescription = decodeDescription(product.description);
+            const desc = trimDescription(decodedDescription);
+            const supplementalInfo = parseSupplementalInfo(decodedDescription);
 
             return {
               id: product.id,
               name: product.name,
               desc,
-              fullDesc: decodeDescription(product.description) || "（無描述）",
+              fullDesc: decodedDescription || "（無描述）",
               price: formatPrice(product),
+              calories: supplementalInfo.calories,
+              allergens: supplementalInfo.allergens,
               image,
               actionTo: `/customer/products?action=group&productId=${encodeURIComponent(product.id)}`,
             };
@@ -264,6 +291,10 @@ export default function HomePage() {
       cancelled = true;
     };
   }, []);
+
+  const featuredDetailImages = featuredDetail ? detailImageByProductId[featuredDetail.id] ?? [] : [];
+  const shouldCenterDetailImages = featuredDetailImages.length > 0 && featuredDetailImages.length < 3;
+  const showGalleryNav = featuredDetailImages.length > 1;
 
   return (
     <div className="home-page">
@@ -506,6 +537,7 @@ export default function HomePage() {
               maxWidth: 680,
               maxHeight: "calc(100dvh - 32px)",
               overflowY: "auto",
+              overflowX: "hidden",
               background: "#fff",
               borderRadius: 12,
               padding: 16,
@@ -542,22 +574,24 @@ export default function HomePage() {
                 position: "relative",
               }}
             >
-              {detailImageByProductId[featuredDetail.id]?.length ? (
+              {featuredDetailImages.length ? (
                 <>
-                  <button
-                    type="button"
-                    aria-label="上一張"
-                    onClick={() => scrollDetailImages("left")}
-                    className="home-detail-gallery-nav home-detail-gallery-nav-left"
-                  >
-                    <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-                      <path d="M12.5 4.5 7 10l5.5 5.5" />
-                    </svg>
-                  </button>
+                  {showGalleryNav && (
+                    <button
+                      type="button"
+                      aria-label="上一張"
+                      onClick={() => scrollDetailImages("left")}
+                      className="home-detail-gallery-nav home-detail-gallery-nav-left"
+                    >
+                      <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                        <path d="M12.5 4.5 7 10l5.5 5.5" />
+                      </svg>
+                    </button>
+                  )}
 
                   <div
                     ref={detailStripRef}
-                    className="home-detail-gallery-strip"
+                    className={`home-detail-gallery-strip${shouldCenterDetailImages ? " is-centered" : ""}`}
                     style={{
                       width: "100%",
                       height: "100%",
@@ -570,7 +604,7 @@ export default function HomePage() {
                       scrollBehavior: "smooth",
                     }}
                   >
-                    {detailImageByProductId[featuredDetail.id].map((item, index) => (
+                    {featuredDetailImages.map((item, index) => (
                       <div
                         key={`${featuredDetail.id}-${index}`}
                         style={{
@@ -601,16 +635,18 @@ export default function HomePage() {
                     ))}
                   </div>
 
-                  <button
-                    type="button"
-                    aria-label="下一張"
-                    onClick={() => scrollDetailImages("right")}
-                    className="home-detail-gallery-nav home-detail-gallery-nav-right"
-                  >
-                    <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-                      <path d="M7.5 4.5 13 10l-5.5 5.5" />
-                    </svg>
-                  </button>
+                  {showGalleryNav && (
+                    <button
+                      type="button"
+                      aria-label="下一張"
+                      onClick={() => scrollDetailImages("right")}
+                      className="home-detail-gallery-nav home-detail-gallery-nav-right"
+                    >
+                      <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                        <path d="M7.5 4.5 13 10l-5.5 5.5" />
+                      </svg>
+                    </button>
+                  )}
                 </>
               ) : (
                 <div
@@ -697,13 +733,39 @@ export default function HomePage() {
               </div>
             )}
 
-            <div style={{ marginTop: 14, fontSize: 18, fontWeight: 700, color: "#4a321f" }}>{featuredDetail.name}</div>
-            <div style={{ marginTop: 8, fontSize: 14, color: "#5b442f" }}>售價：{featuredDetail.price}</div>
-            <div style={{ marginTop: 8, fontSize: 13, color: "#6c5642", whiteSpace: "pre-wrap" }}>
+            <div style={{ marginTop: 14, fontSize: 38, fontWeight: 700, color: "#4a321f", lineHeight: 1.15 }}>{featuredDetail.name}</div>
+            <div
+              style={{
+                marginTop: 10,
+                display: "inline-flex",
+                alignItems: "baseline",
+                gap: 6,
+                background: "#f8efe3",
+                border: "1px solid #e8d3b5",
+                borderRadius: 999,
+                padding: "7px 12px",
+              }}
+            >
+              <span style={{ fontSize: 14, color: "#7c6146", fontWeight: 600 }}>售價</span>
+              <span style={{ fontSize: 22, color: "#5b2d08", fontWeight: 800 }}>{featuredDetail.price}</span>
+            </div>
+
+            <div className="home-detail-meta-row" style={{ marginTop: 10 }}>
+              <div className="home-detail-meta-item">
+                <span className="home-detail-meta-label">卡路里</span>
+                <strong className="home-detail-meta-value">{featuredDetail.calories}</strong>
+              </div>
+              <div className="home-detail-meta-item">
+                <span className="home-detail-meta-label">過敏原</span>
+                <strong className="home-detail-meta-value">{featuredDetail.allergens}</strong>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 12, fontSize: 15, color: "#6c5642", whiteSpace: "pre-wrap", lineHeight: 1.9 }}>
               {featuredDetail.fullDesc}
             </div>
-            <div style={{ marginTop: 14 }}>
-              <Link to={featuredDetail.actionTo} className="hero-btn hero-btn-primary" onClick={() => setFeaturedDetail(null)}>
+            <div className="home-featured-detail-actions" style={{ marginTop: 14 }}>
+              <Link to={featuredDetail.actionTo} className="hero-btn hero-btn-primary home-featured-detail-cta" onClick={() => setFeaturedDetail(null)}>
                 加入清單
               </Link>
             </div>
