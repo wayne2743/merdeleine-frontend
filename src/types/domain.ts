@@ -157,15 +157,21 @@ export interface CounterSnapshot {
   asOfTs: string;
 }
 
+
+export type ProductIngredient = {
+  ingredientId: string;
+  ingredientName?: string;
+  ingredientAttribute?: string;
+  caloriesPer100g?: number | null;
+  allergens?: string | null;
+  requiredAmount: string;
+  unit: string;
+};
+
 export type Product = {
   id: string;
   name: string;
   description?: string | null;
-  ingredients?: string | null;
-  allergens?: string | null;
-  allergies?: string | null;
-  calories?: number | null;
-  calorie?: number | null;
   unitPriceCents?: number | null;
   currency?: string | null;
   status: "DRAFT" | "ACTIVE" | "INACTIVE";
@@ -174,16 +180,14 @@ export type Product = {
   defaultOpenDays?: number | null;
   defaultLeadDays?: number | null;
   defaultShipDays?: number | null;
+  productIngredients: ProductIngredient[];
+  createdAt?: string | null;
+  updatedAt?: string | null;
 };
 
 export type ProductCreateRequest = {
   name: string;
   description?: string;
-  ingredients?: string;
-  allergens?: string;
-  allergies?: string;
-  calories?: number;
-  calorie?: number;
   status?: "DRAFT" | "ACTIVE" | "INACTIVE";
   unitPriceCents: number;
   currency: string;
@@ -192,16 +196,16 @@ export type ProductCreateRequest = {
   defaultOpenDays?: number | null;
   defaultLeadDays?: number | null;
   defaultShipDays?: number | null;
+  productIngredients: Array<{
+    ingredientId: string;
+    requiredAmount: string;
+    unit: string;
+  }>;
 };
 
 export type ProductUpdateRequest = {
   name?: string;
   description?: string;
-  ingredients?: string;
-  allergens?: string;
-  allergies?: string;
-  calories?: number;
-  calorie?: number;
   status?: "DRAFT" | "ACTIVE" | "INACTIVE";
   unitPriceCents?: number;
   currency?: string;
@@ -210,6 +214,11 @@ export type ProductUpdateRequest = {
   defaultOpenDays?: number | null;
   defaultLeadDays?: number | null;
   defaultShipDays?: number | null;
+  productIngredients?: Array<{
+    ingredientId: string;
+    requiredAmount: string;
+    unit: string;
+  }>;
 };
 
 export type Ingredient = {

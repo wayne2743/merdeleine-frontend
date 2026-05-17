@@ -6,9 +6,6 @@ type ProductForm = {
   id: string | null;
   name: string;
   description: string;
-  ingredients: string;
-  allergens: string;
-  calories: string;
   unitPriceCents: string;
   currency: string;
   defaultMinQty: string;
@@ -17,6 +14,11 @@ type ProductForm = {
   defaultLeadDays: string;
   defaultShipDays: string;
   status: "DRAFT" | "ACTIVE" | "INACTIVE";
+  productIngredients: Array<{
+    ingredientId: string;
+    requiredAmount: string;
+    unit: string;
+  }>;
 };
 
 type ProductImageForm = {
@@ -45,9 +47,6 @@ const INITIAL_FORM: ProductForm = {
   id: null,
   name: "",
   description: "",
-  ingredients: "",
-  allergens: "",
-  calories: "",
   unitPriceCents: "",
   currency: "TWD",
   defaultMinQty: "1",
@@ -56,6 +55,7 @@ const INITIAL_FORM: ProductForm = {
   defaultLeadDays: "0",
   defaultShipDays: "0",
   status: "ACTIVE",
+  productIngredients: [],
 };
 
 const INITIAL_IMAGE_FORM: ProductImageForm = {
