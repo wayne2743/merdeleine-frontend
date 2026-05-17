@@ -620,6 +620,120 @@ table {
   justify-content: center;
 }
 
+.order-guide-simple-flow {
+  border-radius: 24px;
+  border: 1px solid rgba(234, 214, 188, 0.86);
+  background: linear-gradient(180deg, #fffdfb 0%, #fff8f2 100%);
+  box-shadow: var(--shadow-soft);
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.order-guide-simple-flow h2 {
+  margin: 0;
+  font-size: 26px;
+  color: #4a281c;
+}
+
+.order-guide-simple-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.order-guide-simple-step {
+  position: relative;
+  border: 1px solid rgba(222, 199, 171, 0.9);
+  border-radius: 16px;
+  background: #fff;
+  padding: 14px;
+  min-height: 152px;
+}
+
+.order-guide-simple-step-no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #e8c99e 0%, #cd9f68 100%);
+  color: #4d2f16;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.order-guide-simple-step h3 {
+  margin: 10px 0 6px;
+  font-size: 18px;
+  color: #4a2c18;
+}
+
+.order-guide-simple-step p {
+  margin: 0;
+  font-size: 14px;
+  color: #6a5542;
+  line-height: 1.6;
+}
+
+.order-guide-simple-arrow {
+  position: absolute;
+  top: 50%;
+  right: -8px;
+  transform: translate(50%, -50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid #ddc2a1;
+  background: #f8e8d4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.order-guide-simple-arrow svg {
+  width: 16px;
+  height: 16px;
+}
+
+.order-guide-simple-arrow path {
+  fill: none;
+  stroke: #906846;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.order-guide-simple-rules {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.order-guide-simple-rule-card {
+  border: 1px solid rgba(226, 206, 182, 0.85);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 20px rgba(88, 56, 33, 0.07);
+  padding: 14px;
+}
+
+.order-guide-simple-rule-card h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  color: #50321d;
+}
+
+.order-guide-simple-rule-card p {
+  margin: 0;
+  font-size: 14px;
+  color: #6b5542;
+  line-height: 1.6;
+}
+
 .order-guide-canvas {
   padding: 10px;
   border-radius: 24px;
@@ -2658,6 +2772,22 @@ table {
 
   .order-guide-hero-actions .hero-btn {
     width: 100%;
+  }
+
+  .order-guide-simple-grid,
+  .order-guide-simple-rules {
+    grid-template-columns: 1fr;
+  }
+
+  .order-guide-simple-step {
+    min-height: 0;
+  }
+
+  .order-guide-simple-step .order-guide-simple-arrow {
+    top: auto;
+    bottom: -8px;
+    right: 50%;
+    transform: translate(50%, 50%) rotate(90deg);
   }
 
   .order-guide-canvas {
