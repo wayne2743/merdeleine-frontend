@@ -1903,12 +1903,6 @@ table {
   font-size: 15px;
 }
 
-.myorders-note {
-  margin-top: 4px;
-  color: #7a6959;
-  font-size: 14px;
-}
-
 .myorders-modal-backdrop {
   position: fixed;
   inset: 0;

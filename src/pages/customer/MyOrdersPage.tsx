@@ -870,9 +870,6 @@ export default function MyOrdersPage() {
         </div>
       )}
 
-      <p className="myorders-note">
-        ※ Order 收到 batch.confirmed 後會把 RESERVED → PAYMENT_REQUESTED，並設定 payment_due_at
-      </p>
     </div>
   );
 }
