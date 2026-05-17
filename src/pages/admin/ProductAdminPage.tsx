@@ -6,6 +6,9 @@ type ProductForm = {
   id: string | null;
   name: string;
   description: string;
+  ingredients: string;
+  allergens: string;
+  calories: string;
   unitPriceCents: string;
   currency: string;
   defaultMinQty: string;
@@ -42,6 +45,9 @@ const INITIAL_FORM: ProductForm = {
   id: null,
   name: "",
   description: "",
+  ingredients: "",
+  allergens: "",
+  calories: "",
   unitPriceCents: "",
   currency: "TWD",
   defaultMinQty: "1",
@@ -117,6 +123,9 @@ function toForm(product: Product): ProductForm {
     id: product.id,
     name: product.name || "",
     description: decodeDescriptionFromDb(product.description),
+    ingredients: product.ingredients || "",
+    allergens: product.allergens || product.allergies || "",
+    calories: Number.isFinite(product.calories) ? String(product.calories) : Number.isFinite(product.calorie) ? String(product.calorie) : "",
     unitPriceCents: Number.isFinite(product.unitPriceCents) ? String(product.unitPriceCents) : "",
     currency: product.currency || "TWD",
     defaultMinQty: Number.isFinite(product.defaultMinQty) ? String(product.defaultMinQty) : "1",
@@ -232,6 +241,9 @@ export default function ProductAdminPage() {
 
     const name = form.name.trim();
     const description = encodeDescriptionForDb(form.description.trim());
+    const ingredients = form.ingredients.trim();
+    const allergens = form.allergens.trim();
+    const calories = form.calories.trim() === "" ? undefined : Number(form.calories);
     const currency = form.currency.trim().toUpperCase();
     const unitPriceCents = Number(form.unitPriceCents);
     const defaultMinQty = Number(form.defaultMinQty);
@@ -246,6 +258,10 @@ export default function ProductAdminPage() {
     }
     if (!Number.isInteger(unitPriceCents) || unitPriceCents < 0) {
       setMessage("請填寫正確的單價（整數，且不可小於 0）");
+      return;
+    }
+    if (calories !== undefined && (!Number.isFinite(calories) || calories < 0)) {
+      setMessage("請填寫正確的 calories（留空或數字，且不可小於 0）");
       return;
     }
     if (!Number.isInteger(defaultMinQty) || defaultMinQty < 1) {
@@ -283,6 +299,11 @@ export default function ProductAdminPage() {
         const payload: ProductUpdateRequest = {
           name,
           description,
+          ingredients,
+          allergens,
+          allergies: allergens,
+          calories,
+          calorie: calories,
           status: form.status,
           unitPriceCents,
           currency,
@@ -297,6 +318,11 @@ export default function ProductAdminPage() {
         const payload: ProductCreateRequest = {
           name,
           description,
+          ingredients,
+          allergens,
+          allergies: allergens,
+          calories,
+          calorie: calories,
           status: form.status,
           unitPriceCents,
           currency,
@@ -528,12 +554,15 @@ export default function ProductAdminPage() {
       </div>
 
       <div style={{ marginTop: 14, borderRadius: 12, overflowX: "auto", border: "1px solid #eadfcd", background: "#fff" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", color: "#2f241b", minWidth: 920 }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", color: "#2f241b", minWidth: 1080 }}>
           <thead>
             <tr style={{ textAlign: "left", borderBottom: "1px solid #eee" }}>
               <th style={{ padding: 10 }}>商品名稱</th>
               <th style={{ padding: 10 }}>狀態</th>
               <th style={{ padding: 10 }}>單價</th>
+              <th style={{ padding: 10 }}>熱量</th>
+              <th style={{ padding: 10 }}>成分</th>
+              <th style={{ padding: 10 }}>過敏原</th>
               <th style={{ padding: 10 }}>描述</th>
               <th style={{ padding: 10, width: 220 }}>操作</th>
             </tr>
@@ -541,7 +570,7 @@ export default function ProductAdminPage() {
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={5} style={{ padding: 12 }}>
+                <td colSpan={8} style={{ padding: 12 }}>
                   載入中...
                 </td>
               </tr>
@@ -549,7 +578,7 @@ export default function ProductAdminPage() {
 
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={5} style={{ padding: 12 }}>
+                <td colSpan={8} style={{ padding: 12 }}>
                   {statusFilter === "ALL" ? "目前沒有商品資料" : `沒有「${statusFilter === "ACTIVE" ? "上架中" : statusFilter === "INACTIVE" ? "下架" : "草稿"}」的商品`}
                 </td>
               </tr>
@@ -562,6 +591,9 @@ export default function ProductAdminPage() {
                     <td style={{ padding: 10, fontWeight: 600 }}>{p.name}</td>
                     <td style={{ padding: 10 }}>{p.status}</td>
                     <td style={{ padding: 10 }}>{fmtPrice(p.unitPriceCents, p.currency)}</td>
+                    <td style={{ padding: 10 }}>{Number.isFinite(p.calories) ? `${p.calories} kcal` : "-"}</td>
+                    <td style={{ padding: 10 }}>{p.ingredients || "-"}</td>
+                    <td style={{ padding: 10 }}>{p.allergens || p.allergies || "-"}</td>
                     <td style={{ padding: 10 }}>{truncateDescription(p.description)}</td>
                     <td style={{ padding: 10 }}>
                       <div style={{ display: "grid", gap: 8, justifyItems: "start" }}>
@@ -683,6 +715,35 @@ export default function ProductAdminPage() {
                   rows={4}
                 />
               </label>
+
+              <label style={{ display: "grid", gap: 4 }}>
+                <span>成分</span>
+                <textarea
+                  value={form.ingredients}
+                  onChange={(e) => updateForm("ingredients", e.target.value)}
+                  maxLength={500}
+                  rows={2}
+                />
+              </label>
+
+              <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
+                <label style={{ display: "grid", gap: 4 }}>
+                  <span>過敏原</span>
+                  <input value={form.allergens} onChange={(e) => updateForm("allergens", e.target.value)} maxLength={200} />
+                </label>
+
+                <label style={{ display: "grid", gap: 4 }}>
+                  <span>熱量（kcal）</span>
+                  <input
+                    type="number"
+                    min={0}
+                    step={1}
+                    value={form.calories}
+                    onChange={(e) => updateForm("calories", e.target.value)}
+                    placeholder="例如 320"
+                  />
+                </label>
+              </div>
 
               <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
                 <label style={{ display: "grid", gap: 4 }}>

@@ -151,6 +151,27 @@ function decodeProductDescription(value?: string | null): string {
   return (value || "").replace(/\\n/g, "\n");
 }
 
+function extractSupplementalInfo(product: Product): { ingredients: string; allergens: string; calories: string } {
+  const description = decodeProductDescription(product.description || "");
+  const lines = description
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const parseByKeyword = (regexp: RegExp, fallback: string) => {
+    const line = lines.find((value) => regexp.test(value));
+    if (!line) return fallback;
+    const splitParts = line.split(/[：:]/);
+    return (splitParts.length > 1 ? splitParts.slice(1).join(":") : line).trim() || fallback;
+  };
+
+  return {
+    ingredients: (product.ingredients || "").trim() || parseByKeyword(/成分|原料|ingredients?/i, "尚未提供"),
+    allergens: (product.allergens || "").trim() || parseByKeyword(/過敏原|allergen/i, "尚未提供"),
+    calories: Number.isFinite(product.calories) ? `${product.calories} kcal` : parseByKeyword(/熱量|卡路里|kcal/i, "尚未提供"),
+  };
+}
+
 function extractOpenSellWindowUuid(payload: OpenProductSellWindowResponse): string | null {
   if (typeof payload === "string") {
     const raw = payload.trim();
@@ -852,6 +873,11 @@ export default function CustomerProductsPage() {
 
             <div style={{ marginTop: 14, fontSize: 18, fontWeight: 700, color: "#4a321f" }}>{detailSelected.name}</div>
             <div style={{ marginTop: 8, fontSize: 14, color: "#5b442f" }}>售價：{formatPrice(detailSelected)}</div>
+            <div style={{ marginTop: 10, display: "grid", gap: 4, fontSize: 13, color: "#6c5642" }}>
+              <div>成分：{extractSupplementalInfo(detailSelected).ingredients}</div>
+              <div>過敏原：{extractSupplementalInfo(detailSelected).allergens}</div>
+              <div>熱量：{extractSupplementalInfo(detailSelected).calories}</div>
+            </div>
             <div style={{ marginTop: 8, fontSize: 13, color: "#6c5642", whiteSpace: "pre-wrap" }}>
               {decodeProductDescription(detailSelected.description) || "（無描述）"}
             </div>

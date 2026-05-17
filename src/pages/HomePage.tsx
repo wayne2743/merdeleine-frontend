@@ -9,6 +9,7 @@ type FeaturedProductCard = {
   desc: string;
   fullDesc: string;
   price: string;
+  ingredients: string;
   calories: string;
   allergens: string;
   image: string;
@@ -46,12 +47,13 @@ function trimDescription(value: string, maxLength = 34): string {
   return `${value.slice(0, maxLength).trim()}…`;
 }
 
-function parseSupplementalInfo(description: string): { calories: string; allergens: string } {
+function parseSupplementalInfo(description: string): { ingredients: string; calories: string; allergens: string } {
   const lines = description
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean);
 
+  const ingredientLine = lines.find((line) => /成分|原料|ingredients?/i.test(line));
   const calorieLine = lines.find((line) => /熱量|卡路里|kcal/i.test(line));
   const allergenLine = lines.find((line) => /過敏原|allergen/i.test(line));
 
@@ -62,8 +64,18 @@ function parseSupplementalInfo(description: string): { calories: string; allerge
   };
 
   return {
+    ingredients: normalizeValue(ingredientLine, "尚未提供"),
     calories: normalizeValue(calorieLine, "尚未提供"),
     allergens: normalizeValue(allergenLine, "尚未提供"),
+  };
+}
+
+function resolveSupplementalInfo(product: Product, description: string): { ingredients: string; calories: string; allergens: string } {
+  const fallback = parseSupplementalInfo(description);
+  return {
+    ingredients: (product.ingredients || "").trim() || fallback.ingredients,
+    calories: Number.isFinite(product.calories) ? `${product.calories} kcal` : fallback.calories,
+    allergens: (product.allergens || "").trim() || fallback.allergens,
   };
 }
 
@@ -268,7 +280,7 @@ export default function HomePage() {
 
             const decodedDescription = decodeDescription(product.description);
             const desc = trimDescription(decodedDescription);
-            const supplementalInfo = parseSupplementalInfo(decodedDescription);
+            const supplementalInfo = resolveSupplementalInfo(product, decodedDescription);
 
             return {
               id: product.id,
@@ -276,6 +288,7 @@ export default function HomePage() {
               desc,
               fullDesc: decodedDescription || "（無描述）",
               price: formatPrice(product),
+              ingredients: supplementalInfo.ingredients,
               calories: supplementalInfo.calories,
               allergens: supplementalInfo.allergens,
               image,
@@ -830,6 +843,10 @@ export default function HomePage() {
             </div>
 
             <div className="home-detail-meta-row" style={{ marginTop: 10 }}>
+              <div className="home-detail-meta-item">
+                <span className="home-detail-meta-label">成分</span>
+                <strong className="home-detail-meta-value">{featuredDetail.ingredients}</strong>
+              </div>
               <div className="home-detail-meta-item">
                 <span className="home-detail-meta-label">卡路里</span>
                 <strong className="home-detail-meta-value">{featuredDetail.calories}</strong>

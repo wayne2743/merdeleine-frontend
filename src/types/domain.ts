@@ -161,6 +161,11 @@ export type Product = {
   id: string;
   name: string;
   description?: string | null;
+  ingredients?: string | null;
+  allergens?: string | null;
+  allergies?: string | null;
+  calories?: number | null;
+  calorie?: number | null;
   unitPriceCents?: number | null;
   currency?: string | null;
   status: "DRAFT" | "ACTIVE" | "INACTIVE";
@@ -174,6 +179,11 @@ export type Product = {
 export type ProductCreateRequest = {
   name: string;
   description?: string;
+  ingredients?: string;
+  allergens?: string;
+  allergies?: string;
+  calories?: number;
+  calorie?: number;
   status?: "DRAFT" | "ACTIVE" | "INACTIVE";
   unitPriceCents: number;
   currency: string;
@@ -187,6 +197,11 @@ export type ProductCreateRequest = {
 export type ProductUpdateRequest = {
   name?: string;
   description?: string;
+  ingredients?: string;
+  allergens?: string;
+  allergies?: string;
+  calories?: number;
+  calorie?: number;
   status?: "DRAFT" | "ACTIVE" | "INACTIVE";
   unitPriceCents?: number;
   currency?: string;
