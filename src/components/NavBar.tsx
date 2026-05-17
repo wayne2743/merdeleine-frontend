@@ -22,20 +22,12 @@ export default function NavBar() {
     <>
     <div className="nav-shell">
       <div className="nav-inner">
+        {/* ── Brand (always links to home) ── */}
         <NavLink to="/" className="nav-brand">
           merdeleine.tw
         </NavLink>
 
-        <button
-          type="button"
-          className="nav-toggle"
-          aria-expanded={isMenuOpen}
-          aria-controls="main-nav-menu"
-          onClick={() => setIsMenuOpen((prev) => !prev)}
-        >
-          選單
-        </button>
-
+        {/* ── Collapsible links (desktop: always visible; mobile: controlled by hamburger) ── */}
         <div id="main-nav-menu" className={`nav-menu${isMenuOpen ? " is-open" : ""}`}>
           <div className="nav-links">
             <NavLink to="/" className={navLinkClass}>
@@ -61,9 +53,6 @@ export default function NavBar() {
 
             {isAdmin && (
               <>
-                {/* <NavLink to="/admin" end className={navLinkClass}>
-                  總覽
-                </NavLink> */}
                 <NavLink to="/admin/products" className={navLinkClass}>
                   商品管理
                 </NavLink>
@@ -76,15 +65,13 @@ export default function NavBar() {
                 <NavLink to="/admin/store-pickup-locations" className={navLinkClass}>
                   門市取貨點管理
                 </NavLink>
-                {/* <NavLink to="/admin/confirm" className={navLinkClass}>
-                  後台：Confirm 成團
-                </NavLink> */}
               </>
             )}
           </div>
 
+          {/* Desktop auth (hidden on mobile, handled by nav-right instead) */}
           <div className="nav-spacer" />
-          <div className="nav-auth">
+          <div className="nav-auth nav-auth--desktop">
             {isAuthenticated ? (
               <>
                 <span className="nav-user">{user?.displayName ?? user?.email ?? ""}</span>
@@ -94,6 +81,46 @@ export default function NavBar() {
               <button onClick={() => setIsLoginModalOpen(true)}>登入</button>
             )}
           </div>
+
+          {/* Mobile auth (shown inside the dropdown) */}
+          <div className="nav-auth nav-auth--mobile">
+            {isAuthenticated ? (
+              <>
+                <span className="nav-user">{user?.displayName ?? user?.email ?? ""}</span>
+                <button onClick={() => void logout()}>登出</button>
+              </>
+            ) : (
+              <button onClick={() => setIsLoginModalOpen(true)}>登入</button>
+            )}
+          </div>
+        </div>
+
+        {/* ── Right side controls (mobile hamburger) ── */}
+        <div className="nav-right">
+          {/* Hamburger / Close toggle (mobile only) */}
+          <button
+            type="button"
+            className="nav-toggle"
+            aria-expanded={isMenuOpen}
+            aria-controls="main-nav-menu"
+            aria-label={isMenuOpen ? "關閉選單" : "開啟選單"}
+            onClick={() => setIsMenuOpen((prev) => !prev)}
+          >
+            {isMenuOpen ? (
+              /* X icon */
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            ) : (
+              /* Hamburger icon */
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                <line x1="3" y1="7" x2="21" y2="7" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="17" x2="21" y2="17" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
     </div>

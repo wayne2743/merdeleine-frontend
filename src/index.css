@@ -171,16 +171,37 @@ table {
   align-items: center;
 }
 
+/* nav-right: always-visible right controls (login button + hamburger on mobile) */
+.nav-right {
+  display: none; /* hidden on desktop; only hamburger area shown on mobile */
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
 .nav-toggle {
   display: none;
-  margin-left: auto;
-  border-radius: 10px;
-  padding: 7px 12px;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  padding: 0;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(198, 173, 141, 0.5);
   color: #544436;
-  font-size: 13px;
-  font-weight: 700;
+  cursor: pointer;
+}
+
+.nav-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Desktop: hide nav-right (hamburger/login-inline), show nav-auth--desktop */
+.nav-auth--mobile {
+  display: none;
 }
 
 .nav-brand {
@@ -418,6 +439,15 @@ table {
   align-items: center;
   justify-content: center;
   color: #fff;
+}
+
+.home-contact-card > div:last-child {
+  min-width: 0;
+}
+
+.home-contact-card > div:last-child div {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .category-grid {
@@ -2684,10 +2714,26 @@ table {
     margin-right: 0;
   }
 
+  /* Show right controls area (login inline + hamburger) */
+  .nav-right {
+    display: flex;
+  }
+
   .nav-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: flex;
+  }
+
+  /* Hide desktop auth inside nav-menu, show mobile auth section inside dropdown */
+  .nav-auth--desktop {
+    display: none;
+  }
+
+  .nav-auth--mobile {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
   }
 
   .nav-menu {
@@ -2734,6 +2780,15 @@ table {
 
   .nav-spacer {
     display: none;
+  }
+
+  .home-contact-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .home-contact-card {
+    padding: 16px;
   }
 
   .home-page {
