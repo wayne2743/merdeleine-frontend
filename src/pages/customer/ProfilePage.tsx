@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { authApi, type UpdateProfilePayload } from "../../api/authApi";
 import { useAuth } from "../../auth/AuthProvider";
+import type { AuthUser } from "../../types/auth";
 
 type ProfileForm = {
   displayName: string;
@@ -14,19 +15,41 @@ function trimOrEmpty(value: string) {
   return value.trim();
 }
 
+function pickUserString(user: AuthUser | null, ...keys: string[]): string {
+  if (!user) return "";
+  const raw = user as unknown as Record<string, unknown>;
+  for (const key of keys) {
+    const value = raw[key];
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+  return "";
+}
+
+function mapUserToForm(user: AuthUser | null): ProfileForm {
+  return {
+    displayName: pickUserString(user, "displayName", "display_name"),
+    contactName: pickUserString(user, "contactName", "contact_name", "name"),
+    contactPhone: pickUserString(user, "contactPhone", "contact_phone", "phone"),
+    contactEmail: pickUserString(user, "contactEmail", "contact_email", "email"),
+    shippingAddress: pickUserString(user, "shippingAddress", "shipping_address", "address"),
+  };
+}
+
 export default function ProfilePage() {
   const { user, refreshMe } = useAuth();
 
-  const [form, setForm] = useState<ProfileForm>({
-    displayName: user?.displayName ?? "",
-    contactName: "",
-    contactPhone: "",
-    contactEmail: user?.email ?? "",
-    shippingAddress: "",
-  });
+  const [form, setForm] = useState<ProfileForm>(() => mapUserToForm(user));
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const userDefaults = useMemo(() => mapUserToForm(user), [user]);
+
+  useEffect(() => {
+    setForm(userDefaults);
+  }, [userDefaults]);
 
   const hasAnyValue = useMemo(
     () => Object.values(form).some((value) => value.trim().length > 0),
@@ -43,28 +66,48 @@ export default function ProfilePage() {
     setError(null);
     setSuccess(null);
 
-    const payload: UpdateProfilePayload = {};
-
     const displayName = trimOrEmpty(form.displayName);
     const contactName = trimOrEmpty(form.contactName);
     const contactPhone = trimOrEmpty(form.contactPhone);
     const contactEmail = trimOrEmpty(form.contactEmail);
     const shippingAddress = trimOrEmpty(form.shippingAddress);
 
-    if (displayName) payload.displayName = displayName;
-    if (contactName) payload.contactName = contactName;
-    if (contactPhone) payload.contactPhone = contactPhone;
-    if (contactEmail) payload.contactEmail = contactEmail;
-    if (shippingAddress) payload.shippingAddress = shippingAddress;
+    const defaults = userDefaults;
 
-    if (Object.keys(payload).length === 0) {
-      setError("請至少填寫一個要更新的欄位");
+    const displayNameChanged = displayName !== defaults.displayName;
+    const contactChanged =
+      contactName !== defaults.contactName ||
+      contactPhone !== defaults.contactPhone ||
+      contactEmail !== defaults.contactEmail ||
+      shippingAddress !== defaults.shippingAddress;
+
+    if (!displayNameChanged && !contactChanged) {
+      setError("目前沒有可更新的變更");
+      return;
+    }
+
+    // /auth/me 更新聯絡資料時需要完整欄位，避免只改單欄造成後端覆蓋空值。
+    if (contactChanged && (!contactName || !contactPhone || !contactEmail)) {
+      setError("更新聯絡資料時，請填寫聯絡人姓名、聯絡電話與聯絡 Email");
       return;
     }
 
     setSubmitting(true);
     try {
-      await authApi.updateProfile(payload);
+      if (contactChanged) {
+        await authApi.updateMe({
+          contactName,
+          contactPhone,
+          contactEmail,
+          shippingAddress,
+        });
+      }
+
+      if (displayNameChanged) {
+        const payload: UpdateProfilePayload = { displayName };
+        await authApi.updateProfile(payload);
+      }
+
       await refreshMe();
       setSuccess("資料已更新");
     } catch (err: unknown) {
