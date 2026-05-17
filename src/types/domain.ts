@@ -222,7 +222,9 @@ export type Ingredient = {
   attribute: string;
   stockedAt?: string | null;
   expiresAt?: string | null;
-  stockQuantity: number | string;
+  caloriesPer100g?: number | null;
+  allergens?: string | null;
+  stockQuantity: string;
   createdAt?: string | null;
   updatedAt?: string | null;
 };
@@ -236,7 +238,9 @@ export type IngredientCreateRequest = {
   attribute: string;
   stockedAt?: string | null;
   expiresAt?: string | null;
-  stockQuantity: number;
+  caloriesPer100g?: number | null;
+  allergens?: string | null;
+  stockQuantity: string;
 };
 
 export type IngredientUpdateRequest = {
@@ -248,7 +252,9 @@ export type IngredientUpdateRequest = {
   attribute?: string;
   stockedAt?: string | null;
   expiresAt?: string | null;
-  stockQuantity?: number;
+  caloriesPer100g?: number | null;
+  allergens?: string | null;
+  stockQuantity?: string;
 };
 
 export type ProductImage = {

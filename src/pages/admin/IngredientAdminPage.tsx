@@ -12,6 +12,8 @@ type IngredientForm = {
   attribute: string;
   stockedAt: string;
   expiresAt: string;
+  caloriesPer100g: string;
+  allergens: string;
   stockQuantity: string;
 };
 
@@ -25,6 +27,8 @@ const INITIAL_FORM: IngredientForm = {
   attribute: "",
   stockedAt: "",
   expiresAt: "",
+  caloriesPer100g: "",
+  allergens: "",
   stockQuantity: "",
 };
 
@@ -48,9 +52,16 @@ function formatDateTime(value?: string | null): string {
   return date.toLocaleString("zh-TW", { hour12: false });
 }
 
-function formatStockQuantity(value: number | string): string {
-  if (typeof value === "number") return value.toString();
+function formatStockQuantity(value: string): string {
   return value;
+}
+
+function normalizeStockQuantity(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  const parsed = Number(trimmed);
+  if (!Number.isFinite(parsed) || parsed < 0) return "";
+  return parsed.toFixed(3);
 }
 
 function normalizeEnumValue(value: string): string {
@@ -165,6 +176,8 @@ export default function IngredientAdminPage() {
       attribute: ingredient.attribute ?? "",
       stockedAt: normalizeDateInput(ingredient.stockedAt),
       expiresAt: normalizeDateInput(ingredient.expiresAt),
+      caloriesPer100g: ingredient.caloriesPer100g == null ? "" : String(ingredient.caloriesPer100g),
+      allergens: ingredient.allergens ?? "",
       stockQuantity: String(ingredient.stockQuantity ?? ""),
     });
     setFormError(null);
@@ -206,10 +219,20 @@ export default function IngredientAdminPage() {
       return;
     }
 
-    const stockQuantity = Number(form.stockQuantity);
-    if (!Number.isFinite(stockQuantity) || stockQuantity < 0) {
+    const normalizedStockQuantity = normalizeStockQuantity(form.stockQuantity);
+    if (!normalizedStockQuantity) {
       setFormError("庫存數量必須是大於等於 0 的數字");
       return;
+    }
+
+    let caloriesPer100g: number | null = null;
+    if (form.caloriesPer100g.trim()) {
+      const parsedCalories = Number(form.caloriesPer100g);
+      if (!Number.isInteger(parsedCalories) || parsedCalories < 0) {
+        setFormError("每 100g 熱量必須是大於等於 0 的整數");
+        return;
+      }
+      caloriesPer100g = parsedCalories;
     }
 
     if (form.stockedAt && form.expiresAt && form.stockedAt > form.expiresAt) {
@@ -228,7 +251,9 @@ export default function IngredientAdminPage() {
         attribute,
         stockedAt: form.stockedAt || null,
         expiresAt: form.expiresAt || null,
-        stockQuantity,
+        caloriesPer100g,
+        allergens: form.allergens.trim() || null,
+        stockQuantity: normalizedStockQuantity,
       };
 
       if (form.id) {
@@ -425,6 +450,33 @@ export default function IngredientAdminPage() {
                 style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }}
               />
             </div>
+            <div>
+              <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
+                每 100g 熱量
+              </label>
+              <input
+                name="caloriesPer100g"
+                type="number"
+                min={0}
+                step={1}
+                value={form.caloriesPer100g}
+                onChange={onChange}
+                placeholder="例：364"
+                style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
+                過敏原
+              </label>
+              <input
+                name="allergens"
+                value={form.allergens}
+                onChange={onChange}
+                placeholder="例：小麥、麩質"
+                style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }}
+              />
+            </div>
           </div>
 
           <div style={{ marginBottom: 20 }}>
@@ -512,6 +564,7 @@ export default function IngredientAdminPage() {
                   <th style={thStyle}>名稱</th>
                   <th style={thStyle}>屬性</th>
                   <th style={thStyle}>單價</th>
+                  <th style={thStyle}>熱量 / 過敏原</th>
                   <th style={thStyle}>庫存</th>
                   <th style={thStyle}>品牌 / 產地</th>
                   <th style={thStyle}>進貨 / 到期</th>
@@ -529,6 +582,12 @@ export default function IngredientAdminPage() {
                     <td style={tdStyle}>{ing.name}</td>
                     <td style={tdStyle}>{ing.attribute}</td>
                     <td style={tdStyle}>{formatMoney(ing.unitPriceCents)}</td>
+                    <td style={{ ...tdStyle, maxWidth: 220 }}>
+                      {(ing.caloriesPer100g ?? "-")}
+                      <span style={{ color: "#999" }}> kcal</span>
+                      <br />
+                      <span style={{ color: "#777" }} title={ing.allergens ?? ""}>{ing.allergens ?? "-"}</span>
+                    </td>
                     <td style={tdStyle}>{formatStockQuantity(ing.stockQuantity)}</td>
                     <td style={tdStyle}>{[ing.brand, ing.origin].filter(Boolean).join(" / ") || "-"}</td>
                     <td style={tdStyle}>{`${ing.stockedAt ?? "-"} / ${ing.expiresAt ?? "-"}`}</td>
