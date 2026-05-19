@@ -272,6 +272,7 @@ export type IngredientUpdateRequest = {
 export type Stock = {
   id: string;
   ingredientId: string;
+  ingredientName?: string | null;
   unitPriceCents: number;
   stockedAt?: string | null;
   expiresAt?: string | null;
