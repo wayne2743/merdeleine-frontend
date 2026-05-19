@@ -224,45 +224,59 @@ export type ProductUpdateRequest = {
 export type Ingredient = {
   id: string;
   name: string;
-  unitPriceCents: number;
   brand?: string | null;
   origin?: string | null;
   governmentRegistrationInfo?: string | null;
   attribute: string;
-  stockedAt?: string | null;
-  expiresAt?: string | null;
   caloriesPer100g?: number | null;
   allergens?: string | null;
-  stockQuantity: string;
   createdAt?: string | null;
   updatedAt?: string | null;
 };
 
 export type IngredientCreateRequest = {
   name: string;
-  unitPriceCents: number;
   brand?: string | null;
   origin?: string | null;
   governmentRegistrationInfo?: string | null;
   attribute: string;
-  stockedAt?: string | null;
-  expiresAt?: string | null;
   caloriesPer100g?: number | null;
   allergens?: string | null;
-  stockQuantity: string;
 };
 
 export type IngredientUpdateRequest = {
   name?: string;
-  unitPriceCents?: number;
   brand?: string | null;
   origin?: string | null;
   governmentRegistrationInfo?: string | null;
   attribute?: string;
-  stockedAt?: string | null;
-  expiresAt?: string | null;
   caloriesPer100g?: number | null;
   allergens?: string | null;
+};
+
+export type Stock = {
+  id: string;
+  ingredientId: string;
+  unitPriceCents: number;
+  stockedAt?: string | null;
+  expiresAt?: string | null;
+  stockQuantity: string;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+};
+
+export type StockCreateRequest = {
+  ingredientId: string;
+  unitPriceCents: number;
+  stockedAt?: string | null;
+  expiresAt?: string | null;
+  stockQuantity: string;
+};
+
+export type StockUpdateRequest = {
+  unitPriceCents?: number;
+  stockedAt?: string | null;
+  expiresAt?: string | null;
   stockQuantity?: string;
 };
 
