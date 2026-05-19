@@ -6,6 +6,9 @@ type ProductForm = {
   id: string | null;
   name: string;
   description: string;
+  ingredients: string;
+  allergens: string;
+  calories: string;
   unitPriceCents: string;
   currency: string;
   defaultMinQty: string;
@@ -47,6 +50,9 @@ const INITIAL_FORM: ProductForm = {
   id: null,
   name: "",
   description: "",
+  ingredients: "",
+  allergens: "",
+  calories: "",
   unitPriceCents: "",
   currency: "TWD",
   defaultMinQty: "1",
@@ -134,6 +140,7 @@ function toForm(product: Product): ProductForm {
     defaultLeadDays: Number.isFinite(product.defaultLeadDays) ? String(product.defaultLeadDays) : "0",
     defaultShipDays: Number.isFinite(product.defaultShipDays) ? String(product.defaultShipDays) : "0",
     status: product.status,
+    productIngredients: product.productIngredients ?? [],
   };
 }
 
@@ -331,6 +338,7 @@ export default function ProductAdminPage() {
           defaultOpenDays,
           defaultLeadDays,
           defaultShipDays,
+          productIngredients: form.productIngredients,
         };
         savedProduct = await catalogApi.createProduct(payload);
       }

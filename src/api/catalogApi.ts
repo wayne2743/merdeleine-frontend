@@ -11,6 +11,7 @@ import type {
 import type { PageResponse } from "../types/page";
 import type {
   Product,
+  ProductIngredient,
   ProductCreateRequest,
   ProductImage,
   ProductImageUploadRequest,
@@ -233,6 +234,7 @@ function normalizeProduct(data: unknown): Product {
     defaultOpenDays: pickNullableNumber(raw.defaultOpenDays, raw.default_open_days),
     defaultLeadDays: pickNullableNumber(raw.defaultLeadDays, raw.default_lead_days),
     defaultShipDays: pickNullableNumber(raw.defaultShipDays, raw.default_ship_days),
+    productIngredients: Array.isArray(raw.productIngredients) ? (raw.productIngredients as ProductIngredient[]) : [],
   };
 }
 
