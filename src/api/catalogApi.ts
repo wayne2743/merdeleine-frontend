@@ -11,6 +11,7 @@ import type {
 import type { PageResponse } from "../types/page";
 import type {
   Product,
+  ProductIngredient,
   ProductCreateRequest,
   ProductImage,
   ProductImageUploadRequest,
@@ -24,6 +25,9 @@ import type {
   Ingredient,
   IngredientCreateRequest,
   IngredientUpdateRequest,
+  Stock,
+  StockCreateRequest,
+  StockUpdateRequest,
 } from "../types/domain";
 
 const HOME_FEATURED_STORAGE_KEY = "merdeleine.home.featuredProductIds";
@@ -230,6 +234,7 @@ function normalizeProduct(data: unknown): Product {
     defaultOpenDays: pickNullableNumber(raw.defaultOpenDays, raw.default_open_days),
     defaultLeadDays: pickNullableNumber(raw.defaultLeadDays, raw.default_lead_days),
     defaultShipDays: pickNullableNumber(raw.defaultShipDays, raw.default_ship_days),
+    productIngredients: Array.isArray(raw.productIngredients) ? (raw.productIngredients as ProductIngredient[]) : [],
   };
 }
 
@@ -596,6 +601,31 @@ export const catalogApi = {
 
   async deleteIngredient(id: string): Promise<void> {
     await http.delete(`/api/catalog/ingredients/${id}`);
+  },
+
+  // ── Stocks ───────────────────────────────────────────────────────────────
+  async createStock(req: StockCreateRequest): Promise<Stock> {
+    const { data } = await http.post<Stock>("/api/catalog/stocks", req);
+    return data;
+  },
+
+  async getStock(id: string): Promise<Stock> {
+    const { data } = await http.get<Stock>(`/api/catalog/stocks/${id}`);
+    return data;
+  },
+
+  async listIngredientStocks(ingredientId: string): Promise<Stock[]> {
+    const { data } = await http.get<Stock[]>(`/api/catalog/ingredients/${ingredientId}/stocks`);
+    return data;
+  },
+
+  async updateStock(id: string, req: StockUpdateRequest): Promise<Stock> {
+    const { data } = await http.put<Stock>(`/api/catalog/stocks/${id}`, req);
+    return data;
+  },
+
+  async deleteStock(id: string): Promise<void> {
+    await http.delete(`/api/catalog/stocks/${id}`);
   },
 
 };
