@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
 import { catalogApi } from "../../api/catalogApi";
-import type { Product, ProductCreateRequest, ProductImage, ProductUpdateRequest } from "../../types/domain";
+import type { Ingredient, Product, ProductCreateRequest, ProductImage, ProductUpdateRequest } from "../../types/domain";
 
 type ProductForm = {
   id: string | null;
@@ -144,6 +144,8 @@ function toForm(product: Product): ProductForm {
   };
 }
 
+const INITIAL_PI_DRAFT = { ingredientId: "", requiredAmount: "", unit: "" };
+
 export default function ProductAdminPage() {
   const [items, setItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -152,6 +154,8 @@ export default function ProductAdminPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [form, setForm] = useState<ProductForm>(INITIAL_FORM);
   const [formModalOpen, setFormModalOpen] = useState(false);
+  const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
+  const [piDraft, setPiDraft] = useState(INITIAL_PI_DRAFT);
   const [imageForm, setImageForm] = useState<ProductImageForm>(INITIAL_IMAGE_FORM);
   const [imagesModal, setImagesModal] = useState<ProductImagesModalState>({
     open: false,
@@ -232,14 +236,18 @@ export default function ProductAdminPage() {
     setMessage(null);
     resetForm();
     resetImageForm();
+    setPiDraft(INITIAL_PI_DRAFT);
     setFormModalOpen(true);
+    void catalogApi.listIngredients().then(setAllIngredients).catch(() => {});
   }
 
   function openEditModal(product: Product) {
     setMessage(null);
     setForm(toForm(product));
     resetImageForm();
+    setPiDraft(INITIAL_PI_DRAFT);
     setFormModalOpen(true);
+    void catalogApi.listIngredients().then(setAllIngredients).catch(() => {});
   }
 
   async function onSubmit(e: FormEvent) {
@@ -562,7 +570,7 @@ export default function ProductAdminPage() {
       </div>
 
       <div style={{ marginTop: 14, borderRadius: 12, overflowX: "auto", border: "1px solid #eadfcd", background: "#fff" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", color: "#2f241b", minWidth: 1080 }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", color: "#2f241b", minWidth: 1100 }}>
           <thead>
             <tr style={{ textAlign: "left", borderBottom: "1px solid #eee" }}>
               <th style={{ padding: 10 }}>商品名稱</th>
@@ -571,6 +579,7 @@ export default function ProductAdminPage() {
               <th style={{ padding: 10 }}>熱量</th>
               <th style={{ padding: 10 }}>成分</th>
               <th style={{ padding: 10 }}>過敏原</th>
+              <th style={{ padding: 10 }}>原物料</th>
               <th style={{ padding: 10 }}>描述</th>
               <th style={{ padding: 10, width: 220 }}>操作</th>
             </tr>
@@ -578,7 +587,7 @@ export default function ProductAdminPage() {
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={8} style={{ padding: 12 }}>
+                <td colSpan={9} style={{ padding: 12 }}>
                   載入中...
                 </td>
               </tr>
@@ -586,7 +595,7 @@ export default function ProductAdminPage() {
 
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={8} style={{ padding: 12 }}>
+                <td colSpan={9} style={{ padding: 12 }}>
                   {statusFilter === "ALL" ? "目前沒有商品資料" : `沒有「${statusFilter === "ACTIVE" ? "上架中" : statusFilter === "INACTIVE" ? "下架" : "草稿"}」的商品`}
                 </td>
               </tr>
@@ -594,6 +603,7 @@ export default function ProductAdminPage() {
 
             {!loading &&
               items.map((p) => {
+                const piNames = (p.productIngredients ?? []).map((pi) => pi.ingredientName ?? pi.ingredientId);
                 return (
                   <tr key={p.id} style={{ borderBottom: "1px solid #f1ebe2" }}>
                     <td style={{ padding: 10, fontWeight: 600 }}>{p.name}</td>
@@ -602,6 +612,17 @@ export default function ProductAdminPage() {
                     <td style={{ padding: 10 }}>{Number.isFinite(p.calories) ? `${p.calories} kcal` : "-"}</td>
                     <td style={{ padding: 10 }}>{p.ingredients || "-"}</td>
                     <td style={{ padding: 10 }}>{p.allergens || p.allergies || "-"}</td>
+                    <td style={{ padding: 10, maxWidth: 180, fontSize: 12 }}>
+                      {piNames.length > 0 ? (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                          {piNames.map((name, i) => (
+                            <span key={i} style={{ background: "#f7ede0", color: "#7a5c3a", borderRadius: 999, padding: "2px 8px", fontWeight: 500, border: "1px solid #e8d5b8", whiteSpace: "nowrap" }}>
+                              {name}
+                            </span>
+                          ))}
+                        </div>
+                      ) : "-"}
+                    </td>
                     <td style={{ padding: 10 }}>{truncateDescription(p.description)}</td>
                     <td style={{ padding: 10 }}>
                       <div style={{ display: "grid", gap: 8, justifyItems: "start" }}>
@@ -845,6 +866,116 @@ export default function ProductAdminPage() {
 
               <div style={{ fontSize: 12, color: "#6b5a47" }}>
                 `defaultMaxQty` 可留空，代表不限制上限。
+              </div>
+
+              {/* ── 綁定原物料 ── */}
+              <div style={{ borderTop: "1px solid #eee", paddingTop: 12, display: "grid", gap: 10 }}>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>綁定原物料</div>
+
+                {/* 已綁定列表 */}
+                {form.productIngredients.length > 0 && (
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                      <thead>
+                        <tr style={{ background: "#f7f2eb", color: "#5f4528", textAlign: "left" }}>
+                          <th style={{ padding: "6px 10px", fontWeight: 600 }}>原物料名稱</th>
+                          <th style={{ padding: "6px 10px", fontWeight: 600 }}>用量</th>
+                          <th style={{ padding: "6px 10px", fontWeight: 600 }}>單位</th>
+                          <th style={{ padding: "6px 10px", fontWeight: 600 }}></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {form.productIngredients.map((pi, idx) => {
+                          const name = allIngredients.find((i) => i.id === pi.ingredientId)?.name ?? pi.ingredientId;
+                          return (
+                            <tr key={pi.ingredientId} style={{ borderBottom: "1px solid #f0e8dc", background: idx % 2 === 0 ? "#fff" : "#fdf8f2" }}>
+                              <td style={{ padding: "6px 10px" }}>{name}</td>
+                              <td style={{ padding: "6px 10px" }}>{pi.requiredAmount}</td>
+                              <td style={{ padding: "6px 10px" }}>{pi.unit}</td>
+                              <td style={{ padding: "6px 10px" }}>
+                                <button
+                                  type="button"
+                                  onClick={() => updateForm("productIngredients", form.productIngredients.filter((_, i) => i !== idx))}
+                                  style={{ background: "#fff1f2", color: "#ba3b2f", border: "1px solid #f1b8b0", borderRadius: 999, padding: "3px 10px", fontSize: 12, cursor: "pointer", fontWeight: 600 }}
+                                >
+                                  移除
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                {form.productIngredients.length === 0 && (
+                  <div style={{ fontSize: 13, color: "#aaa" }}>尚未綁定任何原物料</div>
+                )}
+
+                {/* 新增一筆綁定 */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto auto", gap: 8, alignItems: "end" }}>
+                  <div>
+                    <div style={{ fontSize: 12, color: "#7a5c3a", fontWeight: 600, marginBottom: 3 }}>選擇原物料</div>
+                    <select
+                      value={piDraft.ingredientId}
+                      onChange={(e) => setPiDraft((p) => ({ ...p, ingredientId: e.target.value }))}
+                      style={{ width: "100%", padding: "7px 8px", borderRadius: 6, border: "1px solid #e2c9a3", fontSize: 13 }}
+                    >
+                      <option value="">— 選擇 —</option>
+                      {allIngredients
+                        .filter((i) => !form.productIngredients.some((pi) => pi.ingredientId === i.id))
+                        .map((i) => (
+                          <option key={i.id} value={i.id}>{i.name}</option>
+                        ))}
+                    </select>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 12, color: "#7a5c3a", fontWeight: 600, marginBottom: 3 }}>用量</div>
+                    <input
+                      type="number"
+                      min={0}
+                      step="0.001"
+                      value={piDraft.requiredAmount}
+                      onChange={(e) => setPiDraft((p) => ({ ...p, requiredAmount: e.target.value }))}
+                      placeholder="例：100"
+                      style={{ width: 90, padding: "7px 8px", borderRadius: 6, border: "1px solid #e2c9a3", fontSize: 13, boxSizing: "border-box" }}
+                    />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 12, color: "#7a5c3a", fontWeight: 600, marginBottom: 3 }}>單位</div>
+                    <input
+                      value={piDraft.unit}
+                      onChange={(e) => setPiDraft((p) => ({ ...p, unit: e.target.value }))}
+                      placeholder="例：g"
+                      style={{ width: 70, padding: "7px 8px", borderRadius: 6, border: "1px solid #e2c9a3", fontSize: 13, boxSizing: "border-box" }}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    disabled={!piDraft.ingredientId || !piDraft.requiredAmount || !piDraft.unit}
+                    onClick={() => {
+                      if (!piDraft.ingredientId || !piDraft.requiredAmount || !piDraft.unit) return;
+                      updateForm("productIngredients", [
+                        ...form.productIngredients,
+                        { ingredientId: piDraft.ingredientId, requiredAmount: piDraft.requiredAmount, unit: piDraft.unit },
+                      ]);
+                      setPiDraft(INITIAL_PI_DRAFT);
+                    }}
+                    style={{
+                      background: "linear-gradient(180deg, #f7e4c2 0%, #e9c07a 100%)",
+                      color: "#5a3e1b",
+                      border: "1px solid #d5a85a",
+                      borderRadius: 999,
+                      padding: "7px 16px",
+                      fontWeight: 700,
+                      fontSize: 13,
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    加入
+                  </button>
+                </div>
               </div>
 
               <div style={{ borderTop: "1px solid #eee", paddingTop: 10, display: "grid", gap: 10 }}>
