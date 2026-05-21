@@ -23,8 +23,9 @@ export default function NavBar() {
     <div className="nav-shell">
       <div className="nav-inner">
         {/* ── Brand (always links to home) ── */}
-        <NavLink to="/" className="nav-brand">
-          merdeleine.tw
+        <NavLink to="/" className="nav-brand" aria-label="Merdeleine 首頁">
+          <img src="/logo.png" alt="" />
+          <span>Merdeleine</span>
         </NavLink>
 
         {/* ── Collapsible links (desktop: always visible; mobile: controlled by hamburger) ── */}
