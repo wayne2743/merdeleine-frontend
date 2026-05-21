@@ -165,11 +165,59 @@ function extractSupplementalInfo(product: Product): { ingredients: string; aller
     return (splitParts.length > 1 ? splitParts.slice(1).join(":") : line).trim() || fallback;
   };
 
-  return {
-    ingredients: (product.ingredients || "").trim() || parseByKeyword(/成分|原料|ingredients?/i, "尚未提供"),
-    allergens: (product.allergens || "").trim() || parseByKeyword(/過敏原|allergen/i, "尚未提供"),
-    calories: Number.isFinite(product.calories) ? `${product.calories} kcal` : parseByKeyword(/熱量|卡路里|kcal/i, "尚未提供"),
-  };
+  const pis = product.productIngredients ?? [];
+
+  // 成分: use ingredient names from productIngredients when available
+  let ingredients: string;
+  const piNames = pis.map((pi) => pi.ingredientName).filter(Boolean) as string[];
+  if (piNames.length > 0) {
+    const base = (product.ingredients || "").trim();
+    ingredients = base ? `${base}（${piNames.join("、")}）` : piNames.join("、");
+  } else {
+    ingredients = (product.ingredients || "").trim() || parseByKeyword(/成分|原料|ingredients?/i, "尚未提供");
+  }
+
+  // 過敏原: collect and deduplicate allergens from all linked productIngredients
+  let allergens: string;
+  const allergenSet = new Set<string>();
+  pis.forEach((pi) => {
+    if (pi.allergens?.trim()) {
+      pi.allergens.split(/[,，、;；\s]+/).forEach((a) => {
+        const trimmed = a.trim();
+        if (trimmed) allergenSet.add(trimmed);
+      });
+    }
+  });
+  if (allergenSet.size > 0) {
+    const base = (product.allergens || "").trim();
+    const piAllergens = [...allergenSet].join("、");
+    allergens = base ? `${base}、${piAllergens}` : piAllergens;
+  } else {
+    allergens = (product.allergens || "").trim() || parseByKeyword(/過敏原|allergen/i, "尚未提供");
+  }
+
+  // 熱量: sum calories from productIngredients where unit is gram-based
+  let calories: string;
+  const GRAM_UNITS = /^(g|公克|克|grams?)$/i;
+  let totalCalories = 0;
+  let hasCalcCalories = false;
+  pis.forEach((pi) => {
+    if (pi.caloriesPer100g != null && GRAM_UNITS.test((pi.unit || "").trim())) {
+      const amount = parseFloat(pi.requiredAmount);
+      if (Number.isFinite(amount)) {
+        totalCalories += (pi.caloriesPer100g * amount) / 100;
+        hasCalcCalories = true;
+      }
+    }
+  });
+  if (hasCalcCalories) {
+    calories = `${Math.round(totalCalories)} kcal`;
+  } else {
+    const cal = product.calories ?? product.calorie;
+    calories = Number.isFinite(cal) ? `${cal} kcal` : parseByKeyword(/熱量|卡路里|kcal/i, "尚未提供");
+  }
+
+  return { ingredients, allergens, calories };
 }
 
 function extractOpenSellWindowUuid(payload: OpenProductSellWindowResponse): string | null {
