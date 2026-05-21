@@ -312,6 +312,12 @@ export default function ProductAdminPage() {
 
     let savedProduct: Product | null = null;
 
+    const productIngredients = form.productIngredients.map((pi) => ({
+      ingredientId: pi.ingredientId,
+      requiredAmount: pi.requiredAmount,
+      unit: pi.unit,
+    }));
+
     try {
       if (form.id) {
         const payload: ProductUpdateRequest = {
@@ -330,6 +336,7 @@ export default function ProductAdminPage() {
           defaultOpenDays,
           defaultLeadDays,
           defaultShipDays,
+          productIngredients,
         };
         savedProduct = await catalogApi.updateProduct(form.id, payload);
       } else {
@@ -349,7 +356,7 @@ export default function ProductAdminPage() {
           defaultOpenDays,
           defaultLeadDays,
           defaultShipDays,
-          productIngredients: form.productIngredients,
+          productIngredients,
         };
         savedProduct = await catalogApi.createProduct(payload);
       }
