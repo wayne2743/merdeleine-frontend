@@ -17,7 +17,6 @@ type ProductForm = {
   defaultLeadDays: string;
   defaultShipDays: string;
   status: "DRAFT" | "ACTIVE" | "INACTIVE";
-  recipeQty: string;
   productIngredients: Array<{
     ingredientId: string;
     requiredAmount: string;
@@ -62,7 +61,6 @@ const INITIAL_FORM: ProductForm = {
   defaultLeadDays: "0",
   defaultShipDays: "0",
   status: "ACTIVE",
-  recipeQty: "1",
   productIngredients: [],
 };
 
@@ -143,7 +141,6 @@ function toForm(product: Product): ProductForm {
     defaultShipDays: Number.isFinite(product.defaultShipDays) ? String(product.defaultShipDays) : "0",
     status: product.status,
     productIngredients: product.productIngredients ?? [],
-    recipeQty: "1",
   };
 }
 
@@ -882,18 +879,6 @@ export default function ProductAdminPage() {
               <div style={{ borderTop: "1px solid #eee", paddingTop: 12, display: "grid", gap: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
                   <span style={{ fontWeight: 600, fontSize: 14 }}>綁定原物料</span>
-                  <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13 }}>
-                    <span style={{ color: "#7a5c3a", fontWeight: 600 }}>食譜數量</span>
-                    <input
-                      type="number"
-                      min={1}
-                      step={1}
-                      value={form.recipeQty}
-                      onChange={(e) => updateForm("recipeQty", e.target.value)}
-                      style={{ width: 72, padding: "5px 8px", borderRadius: 6, border: "1px solid #e2c9a3", fontSize: 13, textAlign: "center" }}
-                    />
-                    <span style={{ color: "#9a7a55", fontSize: 12 }}>份（輸入用量將 ÷ 此數後儲存）</span>
-                  </label>
                 </div>
 
                 {/* 已綁定列表 */}
@@ -937,69 +922,54 @@ export default function ProductAdminPage() {
                 )}
 
                 {/* 新增一筆綁定 */}
-                {(() => {
-                  const rq = Math.max(1, Number(form.recipeQty) || 1);
-                  const rawAmt = parseFloat(piDraft.requiredAmount);
-                  const perUnit = piDraft.requiredAmount && Number.isFinite(rawAmt) && rq > 0 ? rawAmt / rq : null;
-                  return (
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto auto", gap: 8, alignItems: "end" }}>
-                      <div>
-                        <div style={{ fontSize: 12, color: "#7a5c3a", fontWeight: 600, marginBottom: 3 }}>選擇原物料</div>
-                        <select
-                          value={piDraft.ingredientId}
-                          onChange={(e) => setPiDraft((p) => ({ ...p, ingredientId: e.target.value }))}
-                          style={{ width: "100%", padding: "7px 8px", borderRadius: 6, border: "1px solid #e2c9a3", fontSize: 13 }}
-                        >
-                          <option value="">— 選擇 —</option>
-                          {allIngredients
-                            .filter((i) => !form.productIngredients.some((pi) => pi.ingredientId === i.id))
-                            .map((i) => (
-                              <option key={i.id} value={i.id}>{i.name}</option>
-                            ))}
-                        </select>
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 12, color: "#7a5c3a", fontWeight: 600, marginBottom: 3 }}>
-                          整批用量{rq > 1 ? `（÷${rq}）` : ""}
-                        </div>
-                        <input
-                          type="number"
-                          min={0}
-                          step="0.001"
-                          value={piDraft.requiredAmount}
-                          onChange={(e) => setPiDraft((p) => ({ ...p, requiredAmount: e.target.value }))}
-                          placeholder="例：100"
-                          style={{ width: 100, padding: "7px 8px", borderRadius: 6, border: "1px solid #e2c9a3", fontSize: 13, boxSizing: "border-box" }}
-                        />
-                        {perUnit !== null && rq > 1 && (
-                          <div style={{ fontSize: 11, color: "#1d5fa4", marginTop: 2 }}>
-                            每份 ≈ {perUnit.toFixed(3)} {piDraft.unit || ""}
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 12, color: "#7a5c3a", fontWeight: 600, marginBottom: 3 }}>單位</div>
-                        <input
-                          value={piDraft.unit}
-                          onChange={(e) => setPiDraft((p) => ({ ...p, unit: e.target.value }))}
-                          placeholder="例：g"
-                          style={{ width: 70, padding: "7px 8px", borderRadius: 6, border: "1px solid #e2c9a3", fontSize: 13, boxSizing: "border-box" }}
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        disabled={!piDraft.ingredientId || !piDraft.requiredAmount || !piDraft.unit}
-                        onClick={() => {
-                          if (!piDraft.ingredientId || !piDraft.requiredAmount || !piDraft.unit) return;
-                          const rqNum = Math.max(1, Number(form.recipeQty) || 1);
-                          const amtNum = parseFloat(piDraft.requiredAmount);
-                          const perUnitAmt = Number.isFinite(amtNum) ? (amtNum / rqNum).toFixed(3) : piDraft.requiredAmount;
-                          updateForm("productIngredients", [
-                            ...form.productIngredients,
-                            { ingredientId: piDraft.ingredientId, requiredAmount: perUnitAmt, unit: piDraft.unit },
-                          ]);
-                          setPiDraft(INITIAL_PI_DRAFT);
-                        }}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto auto", gap: 8, alignItems: "end" }}>
+                  <div>
+                    <div style={{ fontSize: 12, color: "#7a5c3a", fontWeight: 600, marginBottom: 3 }}>選擇原物料</div>
+                    <select
+                      value={piDraft.ingredientId}
+                      onChange={(e) => setPiDraft((p) => ({ ...p, ingredientId: e.target.value }))}
+                      style={{ width: "100%", padding: "7px 8px", borderRadius: 6, border: "1px solid #e2c9a3", fontSize: 13 }}
+                    >
+                      <option value="">— 選擇 —</option>
+                      {allIngredients
+                        .filter((i) => !form.productIngredients.some((pi) => pi.ingredientId === i.id))
+                        .map((i) => (
+                          <option key={i.id} value={i.id}>{i.name}</option>
+                        ))}
+                    </select>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 12, color: "#7a5c3a", fontWeight: 600, marginBottom: 3 }}>整批用量</div>
+                    <input
+                      type="number"
+                      min={0}
+                      step="0.001"
+                      value={piDraft.requiredAmount}
+                      onChange={(e) => setPiDraft((p) => ({ ...p, requiredAmount: e.target.value }))}
+                      placeholder="例：100"
+                      style={{ width: 100, padding: "7px 8px", borderRadius: 6, border: "1px solid #e2c9a3", fontSize: 13, boxSizing: "border-box" }}
+                    />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 12, color: "#7a5c3a", fontWeight: 600, marginBottom: 3 }}>單位</div>
+                    <input
+                      value={piDraft.unit}
+                      onChange={(e) => setPiDraft((p) => ({ ...p, unit: e.target.value }))}
+                      placeholder="例：g"
+                      style={{ width: 70, padding: "7px 8px", borderRadius: 6, border: "1px solid #e2c9a3", fontSize: 13, boxSizing: "border-box" }}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    disabled={!piDraft.ingredientId || !piDraft.requiredAmount || !piDraft.unit}
+                    onClick={() => {
+                      if (!piDraft.ingredientId || !piDraft.requiredAmount || !piDraft.unit) return;
+                      updateForm("productIngredients", [
+                        ...form.productIngredients,
+                        { ingredientId: piDraft.ingredientId, requiredAmount: piDraft.requiredAmount, unit: piDraft.unit },
+                      ]);
+                      setPiDraft(INITIAL_PI_DRAFT);
+                    }}
                     style={{
                       background: "linear-gradient(180deg, #f7e4c2 0%, #e9c07a 100%)",
                       color: "#5a3e1b",
@@ -1014,9 +984,7 @@ export default function ProductAdminPage() {
                   >
                     加入
                   </button>
-                    </div>
-                  );
-                })()}
+                </div>
               </div>
 
               <div style={{ borderTop: "1px solid #eee", paddingTop: 10, display: "grid", gap: 10 }}>
