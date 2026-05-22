@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
 import { catalogApi } from "../../api/catalogApi";
-import type { Ingredient, Product, ProductCreateRequest, ProductImage, ProductUpdateRequest } from "../../types/domain";
+import type { Ingredient, IngredientGroup, Product, ProductCreateRequest, ProductImage, ProductUpdateRequest } from "../../types/domain";
 
 type ProductForm = {
   id: string | null;
@@ -22,6 +22,7 @@ type ProductForm = {
     ingredientId: string;
     requiredAmount: string;
     unit: string;
+    ingredientGroupId?: string | null;
   }>;
 };
 
@@ -147,7 +148,7 @@ function toForm(product: Product): ProductForm {
   };
 }
 
-const INITIAL_PI_DRAFT = { ingredientId: "", requiredAmount: "", unit: "" };
+const INITIAL_PI_DRAFT = { ingredientId: "", requiredAmount: "", unit: "", ingredientGroupId: "" };
 
 export default function ProductAdminPage() {
   const [items, setItems] = useState<Product[]>([]);
@@ -159,6 +160,10 @@ export default function ProductAdminPage() {
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
   const [piDraft, setPiDraft] = useState(INITIAL_PI_DRAFT);
+  const [ingredientGroups, setIngredientGroups] = useState<IngredientGroup[]>([]);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  const [editingGroupName, setEditingGroupName] = useState("");
   const [imageForm, setImageForm] = useState<ProductImageForm>(INITIAL_IMAGE_FORM);
   const [imagesModal, setImagesModal] = useState<ProductImagesModalState>({
     open: false,
@@ -233,6 +238,9 @@ export default function ProductAdminPage() {
     setFormModalOpen(false);
     resetForm();
     resetImageForm();
+    setIngredientGroups([]);
+    setNewGroupName("");
+    setEditingGroupId(null);
   }
 
   function openCreateModal() {
@@ -240,6 +248,9 @@ export default function ProductAdminPage() {
     resetForm();
     resetImageForm();
     setPiDraft(INITIAL_PI_DRAFT);
+    setIngredientGroups([]);
+    setNewGroupName("");
+    setEditingGroupId(null);
     setFormModalOpen(true);
     void catalogApi.listIngredients().then(setAllIngredients).catch(() => {});
   }
@@ -249,8 +260,11 @@ export default function ProductAdminPage() {
     setForm(toForm(product));
     resetImageForm();
     setPiDraft(INITIAL_PI_DRAFT);
+    setNewGroupName("");
+    setEditingGroupId(null);
     setFormModalOpen(true);
     void catalogApi.listIngredients().then(setAllIngredients).catch(() => {});
+    void catalogApi.listProductIngredientGroups(product.id).then(setIngredientGroups).catch(() => {});
   }
 
   async function onSubmit(e: FormEvent) {
@@ -321,6 +335,7 @@ export default function ProductAdminPage() {
       ingredientId: pi.ingredientId,
       requiredAmount: pi.requiredAmount,
       unit: pi.unit,
+      ingredientGroupId: pi.ingredientGroupId ?? null,
     }));
 
     try {
@@ -542,6 +557,44 @@ export default function ProductAdminPage() {
 
   function closeOriginalPreview() {
     setSelectedOriginalUrl(null);
+  }
+
+  async function handleCreateGroup() {
+    if (!form.id || !newGroupName.trim()) return;
+    try {
+      const group = await catalogApi.createIngredientGroup({ productId: form.id, name: newGroupName.trim() });
+      setIngredientGroups((prev) => [...prev, group]);
+      setNewGroupName("");
+    } catch (e: any) {
+      setMessage(e?.message ?? "新增群組失敗");
+    }
+  }
+
+  async function handleUpdateGroup(id: string) {
+    if (!editingGroupName.trim()) return;
+    try {
+      const updated = await catalogApi.updateIngredientGroup(id, { name: editingGroupName.trim() });
+      setIngredientGroups((prev) => prev.map((g) => (g.id === id ? updated : g)));
+      setEditingGroupId(null);
+    } catch (e: any) {
+      setMessage(e?.message ?? "更新群組失敗");
+    }
+  }
+
+  async function handleDeleteGroup(id: string) {
+    if (!window.confirm("確定刪除此群組？")) return;
+    try {
+      await catalogApi.deleteIngredientGroup(id);
+      setIngredientGroups((prev) => prev.filter((g) => g.id !== id));
+      setForm((prev) => ({
+        ...prev,
+        productIngredients: prev.productIngredients.map((pi) =>
+          pi.ingredientGroupId === id ? { ...pi, ingredientGroupId: null } : pi
+        ),
+      }));
+    } catch (e: any) {
+      setMessage(e?.message ?? "刪除群組失敗");
+    }
   }
 
   return (
@@ -897,32 +950,117 @@ export default function ProductAdminPage() {
                 `defaultMaxQty` 可留空，代表不限制上限。
               </div>
 
+              {/* ── 材料群組管理（僅編輯模式） ── */}
+              {isEditMode && (
+                <div style={{ borderTop: "1px solid #eee", paddingTop: 12, display: "grid", gap: 10 }}>
+                  <span style={{ fontWeight: 600, fontSize: 14 }}>材料群組管理</span>
+
+                  {ingredientGroups.length === 0 && (
+                    <div style={{ fontSize: 13, color: "#aaa" }}>尚未建立任何群組</div>
+                  )}
+
+                  {ingredientGroups.map((group) => {
+                    const groupIngredients = form.productIngredients.filter((pi) => pi.ingredientGroupId === group.id);
+                    return (
+                      <div key={group.id} style={{ border: "1px solid #e8d9c3", borderRadius: 8, padding: "10px 12px", background: "#fffcf6" }}>
+                        {editingGroupId === group.id ? (
+                          <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: groupIngredients.length > 0 ? 8 : 0 }}>
+                            <input
+                              value={editingGroupName}
+                              onChange={(e) => setEditingGroupName(e.target.value)}
+                              style={{ flex: 1, padding: "5px 8px", borderRadius: 6, border: "1px solid #e2c9a3", fontSize: 13 }}
+                              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void handleUpdateGroup(group.id); } }}
+                            />
+                            <button type="button" onClick={() => void handleUpdateGroup(group.id)} style={{ padding: "5px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, background: "#e9c07a", border: "1px solid #d5a85a", cursor: "pointer" }}>儲存</button>
+                            <button type="button" onClick={() => setEditingGroupId(null)} style={{ padding: "5px 10px", borderRadius: 6, fontSize: 12, background: "#f5f5f5", border: "1px solid #ddd", cursor: "pointer" }}>取消</button>
+                          </div>
+                        ) : (
+                          <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: groupIngredients.length > 0 ? 8 : 0 }}>
+                            <span style={{ fontWeight: 600, fontSize: 13, flex: 1 }}>{group.name}</span>
+                            <button type="button" onClick={() => { setEditingGroupId(group.id); setEditingGroupName(group.name); }} style={{ padding: "3px 10px", borderRadius: 6, fontSize: 12, background: "#f0e8d6", border: "1px solid #e2c9a3", cursor: "pointer" }}>改名</button>
+                            <button type="button" onClick={() => void handleDeleteGroup(group.id)} style={{ padding: "3px 10px", borderRadius: 6, fontSize: 12, background: "#fff1f2", color: "#ba3b2f", border: "1px solid #f1b8b0", cursor: "pointer" }}>刪除</button>
+                          </div>
+                        )}
+                        {groupIngredients.length > 0 && (
+                          <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "#5f4528", display: "grid", gap: 2 }}>
+                            {groupIngredients.map((pi) => {
+                              const name = allIngredients.find((i) => i.id === pi.ingredientId)?.name ?? pi.ingredientId;
+                              return <li key={pi.ingredientId}>{name}：{pi.requiredAmount} {pi.unit}</li>;
+                            })}
+                          </ul>
+                        )}
+                        {groupIngredients.length === 0 && (
+                          <div style={{ fontSize: 12, color: "#bbb" }}>（尚無原物料）</div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    <input
+                      value={newGroupName}
+                      onChange={(e) => setNewGroupName(e.target.value)}
+                      placeholder="新群組名稱"
+                      style={{ flex: 1, padding: "7px 8px", borderRadius: 6, border: "1px solid #e2c9a3", fontSize: 13 }}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void handleCreateGroup(); } }}
+                    />
+                    <button
+                      type="button"
+                      disabled={!newGroupName.trim()}
+                      onClick={() => void handleCreateGroup()}
+                      style={{ padding: "7px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, background: "#e9c07a", border: "1px solid #d5a85a", cursor: "pointer", whiteSpace: "nowrap" }}
+                    >
+                      + 新增群組
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* ── 綁定原物料 ── */}
               <div style={{ borderTop: "1px solid #eee", paddingTop: 12, display: "grid", gap: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
                   <span style={{ fontWeight: 600, fontSize: 14 }}>綁定原物料</span>
                 </div>
 
-                {/* 已綁定列表 */}
+                {/* 依群組顯示已綁定原物料 */}
                 {form.productIngredients.length > 0 && (
                   <div style={{ overflowX: "auto" }}>
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                       <thead>
                         <tr style={{ background: "#f7f2eb", color: "#5f4528", textAlign: "left" }}>
                           <th style={{ padding: "6px 10px", fontWeight: 600 }}>原物料名稱</th>
-                          <th style={{ padding: "6px 10px", fontWeight: 600 }}>每份用量</th>
+                          <th style={{ padding: "6px 10px", fontWeight: 600 }}>用量</th>
                           <th style={{ padding: "6px 10px", fontWeight: 600 }}>單位</th>
+                          <th style={{ padding: "6px 10px", fontWeight: 600 }}>群組</th>
                           <th style={{ padding: "6px 10px", fontWeight: 600 }}></th>
                         </tr>
                       </thead>
                       <tbody>
                         {form.productIngredients.map((pi, idx) => {
                           const name = allIngredients.find((i) => i.id === pi.ingredientId)?.name ?? pi.ingredientId;
+                          const groupName = ingredientGroups.find((g) => g.id === pi.ingredientGroupId)?.name ?? "";
                           return (
                             <tr key={pi.ingredientId} style={{ borderBottom: "1px solid #f0e8dc", background: idx % 2 === 0 ? "#fff" : "#fdf8f2" }}>
                               <td style={{ padding: "6px 10px" }}>{name}</td>
                               <td style={{ padding: "6px 10px" }}>{pi.requiredAmount}</td>
                               <td style={{ padding: "6px 10px" }}>{pi.unit}</td>
+                              <td style={{ padding: "6px 10px" }}>
+                                <select
+                                  value={pi.ingredientGroupId ?? ""}
+                                  onChange={(e) => {
+                                    const updated = [...form.productIngredients];
+                                    updated[idx] = { ...pi, ingredientGroupId: e.target.value || null };
+                                    updateForm("productIngredients", updated);
+                                  }}
+                                  style={{ padding: "3px 6px", borderRadius: 5, border: "1px solid #e2c9a3", fontSize: 12, background: "#fff" }}
+                                >
+                                  <option value="">— 未分組 —</option>
+                                  {ingredientGroups.map((g) => (
+                                    <option key={g.id} value={g.id}>{g.name}</option>
+                                  ))}
+                                </select>
+                                {groupName && <span style={{ marginLeft: 6, fontSize: 11, color: "#7a5c3a" }}>{groupName}</span>}
+                              </td>
                               <td style={{ padding: "6px 10px" }}>
                                 <button
                                   type="button"
@@ -944,7 +1082,7 @@ export default function ProductAdminPage() {
                 )}
 
                 {/* 新增一筆綁定 */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto auto", gap: 8, alignItems: "end" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto auto auto", gap: 8, alignItems: "end" }}>
                   <div>
                     <div style={{ fontSize: 12, color: "#7a5c3a", fontWeight: 600, marginBottom: 3 }}>選擇原物料</div>
                     <select
@@ -981,6 +1119,21 @@ export default function ProductAdminPage() {
                       style={{ width: 70, padding: "7px 8px", borderRadius: 6, border: "1px solid #e2c9a3", fontSize: 13, boxSizing: "border-box" }}
                     />
                   </div>
+                  {ingredientGroups.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: 12, color: "#7a5c3a", fontWeight: 600, marginBottom: 3 }}>群組</div>
+                      <select
+                        value={piDraft.ingredientGroupId}
+                        onChange={(e) => setPiDraft((p) => ({ ...p, ingredientGroupId: e.target.value }))}
+                        style={{ width: 110, padding: "7px 8px", borderRadius: 6, border: "1px solid #e2c9a3", fontSize: 13 }}
+                      >
+                        <option value="">— 未分組 —</option>
+                        {ingredientGroups.map((g) => (
+                          <option key={g.id} value={g.id}>{g.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   <button
                     type="button"
                     disabled={!piDraft.ingredientId || !piDraft.requiredAmount || !piDraft.unit}
@@ -988,7 +1141,12 @@ export default function ProductAdminPage() {
                       if (!piDraft.ingredientId || !piDraft.requiredAmount || !piDraft.unit) return;
                       updateForm("productIngredients", [
                         ...form.productIngredients,
-                        { ingredientId: piDraft.ingredientId, requiredAmount: piDraft.requiredAmount, unit: piDraft.unit },
+                        {
+                          ingredientId: piDraft.ingredientId,
+                          requiredAmount: piDraft.requiredAmount,
+                          unit: piDraft.unit,
+                          ingredientGroupId: piDraft.ingredientGroupId || null,
+                        },
                       ]);
                       setPiDraft(INITIAL_PI_DRAFT);
                     }}

@@ -28,6 +28,9 @@ import type {
   Stock,
   StockCreateRequest,
   StockUpdateRequest,
+  IngredientGroup,
+  IngredientGroupCreateRequest,
+  IngredientGroupUpdateRequest,
 } from "../types/domain";
 
 const HOME_FEATURED_STORAGE_KEY = "merdeleine.home.featuredProductIds";
@@ -626,6 +629,30 @@ export const catalogApi = {
 
   async deleteStock(id: string): Promise<void> {
     await http.delete(`/api/catalog/stocks/${id}`);
+  },
+
+  async createIngredientGroup(req: IngredientGroupCreateRequest): Promise<IngredientGroup> {
+    const { data } = await http.post<IngredientGroup>(`/api/catalog/ingredient-groups`, req);
+    return data;
+  },
+
+  async getIngredientGroup(id: string): Promise<IngredientGroup> {
+    const { data } = await http.get<IngredientGroup>(`/api/catalog/ingredient-groups/${id}`);
+    return data;
+  },
+
+  async listProductIngredientGroups(productId: string): Promise<IngredientGroup[]> {
+    const { data } = await http.get<IngredientGroup[]>(`/api/catalog/products/${productId}/ingredient-groups`);
+    return Array.isArray(data) ? data : [];
+  },
+
+  async updateIngredientGroup(id: string, req: IngredientGroupUpdateRequest): Promise<IngredientGroup> {
+    const { data } = await http.put<IngredientGroup>(`/api/catalog/ingredient-groups/${id}`, req);
+    return data;
+  },
+
+  async deleteIngredientGroup(id: string): Promise<void> {
+    await http.delete(`/api/catalog/ingredient-groups/${id}`);
   },
 
 };
