@@ -166,6 +166,22 @@ export type ProductIngredient = {
   allergens?: string | null;
   requiredAmount: string;
   unit: string;
+  ingredientGroupId?: string | null;
+};
+
+export type IngredientGroup = {
+  id: string;
+  productId: string;
+  name: string;
+};
+
+export type IngredientGroupCreateRequest = {
+  productId: string;
+  name: string;
+};
+
+export type IngredientGroupUpdateRequest = {
+  name: string;
 };
 
 export type Product = {
@@ -212,6 +228,7 @@ export type ProductCreateRequest = {
     ingredientId: string;
     requiredAmount: string;
     unit: string;
+    ingredientGroupId?: string | null;
   }>;
 };
 
@@ -236,6 +253,7 @@ export type ProductUpdateRequest = {
     ingredientId: string;
     requiredAmount: string;
     unit: string;
+    ingredientGroupId?: string | null;
   }>;
 };
 
