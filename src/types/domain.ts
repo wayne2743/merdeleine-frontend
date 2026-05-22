@@ -185,6 +185,7 @@ export type Product = {
   defaultOpenDays?: number | null;
   defaultLeadDays?: number | null;
   defaultShipDays?: number | null;
+  recipeQuantity?: number | null;
   productIngredients: ProductIngredient[];
   createdAt?: string | null;
   updatedAt?: string | null;
@@ -206,6 +207,7 @@ export type ProductCreateRequest = {
   defaultOpenDays?: number | null;
   defaultLeadDays?: number | null;
   defaultShipDays?: number | null;
+  recipeQuantity?: number | null;
   productIngredients: Array<{
     ingredientId: string;
     requiredAmount: string;
@@ -229,6 +231,7 @@ export type ProductUpdateRequest = {
   defaultOpenDays?: number | null;
   defaultLeadDays?: number | null;
   defaultShipDays?: number | null;
+  recipeQuantity?: number | null;
   productIngredients?: Array<{
     ingredientId: string;
     requiredAmount: string;

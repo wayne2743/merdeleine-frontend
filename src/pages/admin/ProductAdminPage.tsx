@@ -17,6 +17,7 @@ type ProductForm = {
   defaultLeadDays: string;
   defaultShipDays: string;
   status: "DRAFT" | "ACTIVE" | "INACTIVE";
+  recipeQuantity: string;
   productIngredients: Array<{
     ingredientId: string;
     requiredAmount: string;
@@ -61,6 +62,7 @@ const INITIAL_FORM: ProductForm = {
   defaultLeadDays: "0",
   defaultShipDays: "0",
   status: "ACTIVE",
+  recipeQuantity: "1",
   productIngredients: [],
 };
 
@@ -140,6 +142,7 @@ function toForm(product: Product): ProductForm {
     defaultLeadDays: Number.isFinite(product.defaultLeadDays) ? String(product.defaultLeadDays) : "0",
     defaultShipDays: Number.isFinite(product.defaultShipDays) ? String(product.defaultShipDays) : "0",
     status: product.status,
+    recipeQuantity: Number.isFinite(product.recipeQuantity) ? String(product.recipeQuantity) : "1",
     productIngredients: product.productIngredients ?? [],
   };
 }
@@ -266,6 +269,7 @@ export default function ProductAdminPage() {
     const defaultOpenDays = Number(form.defaultOpenDays);
     const defaultLeadDays = Number(form.defaultLeadDays);
     const defaultShipDays = Number(form.defaultShipDays);
+    const recipeQuantity = Number(form.recipeQuantity);
 
     if (!name) {
       setMessage("請填寫商品名稱");
@@ -303,6 +307,10 @@ export default function ProductAdminPage() {
       setMessage("請填寫正確的 defaultShipDays（整數，且不可小於 0）");
       return;
     }
+    if (!Number.isInteger(recipeQuantity) || recipeQuantity < 1) {
+      setMessage("請填寫正確的食譜數量（整數，且需大於等於 1）");
+      return;
+    }
 
     setSubmitting(true);
     setMessage(null);
@@ -333,6 +341,7 @@ export default function ProductAdminPage() {
           defaultOpenDays,
           defaultLeadDays,
           defaultShipDays,
+          recipeQuantity,
           productIngredients,
         };
         savedProduct = await catalogApi.updateProduct(form.id, payload);
@@ -353,6 +362,7 @@ export default function ProductAdminPage() {
           defaultOpenDays,
           defaultLeadDays,
           defaultShipDays,
+          recipeQuantity,
           productIngredients,
         };
         savedProduct = await catalogApi.createProduct(payload);
@@ -866,6 +876,18 @@ export default function ProductAdminPage() {
                     step={1}
                     value={form.defaultShipDays}
                     onChange={(e) => updateForm("defaultShipDays", e.target.value)}
+                    required
+                  />
+                </label>
+
+                <label style={{ display: "grid", gap: 4 }}>
+                  <span>食譜數量（recipeQuantity）</span>
+                  <input
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={form.recipeQuantity}
+                    onChange={(e) => updateForm("recipeQuantity", e.target.value)}
                     required
                   />
                 </label>
