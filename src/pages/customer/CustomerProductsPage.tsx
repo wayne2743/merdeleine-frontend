@@ -731,9 +731,9 @@ export default function CustomerProductsPage() {
                       width: 40,
                       height: 40,
                       borderRadius: "50%",
-                      border: "none",
+                      border: "1px solid rgba(255,255,255,0.7)",
                       background: "linear-gradient(135deg, #5c3d20 0%, #3e2710 100%)",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
+                      boxShadow: "0 4px 14px rgba(0,0,0,0.4)",
                       cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
@@ -741,9 +741,19 @@ export default function CustomerProductsPage() {
                       flexShrink: 0,
                     }}
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e7dfd2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="15 18 9 12 15 6" />
-                    </svg>
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        color: "#fff",
+                        fontSize: 28,
+                        fontWeight: 900,
+                        lineHeight: 1,
+                        textShadow: "0 1px 3px rgba(0,0,0,0.45)",
+                        marginTop: -2,
+                      }}
+                    >
+                      ‹
+                    </span>
                   </button>
 
                   <div
@@ -806,9 +816,9 @@ export default function CustomerProductsPage() {
                       width: 40,
                       height: 40,
                       borderRadius: "50%",
-                      border: "none",
+                      border: "1px solid rgba(255,255,255,0.7)",
                       background: "linear-gradient(135deg, #5c3d20 0%, #3e2710 100%)",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
+                      boxShadow: "0 4px 14px rgba(0,0,0,0.4)",
                       cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
@@ -816,9 +826,19 @@ export default function CustomerProductsPage() {
                       flexShrink: 0,
                     }}
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e7dfd2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="9 18 15 12 9 6" />
-                    </svg>
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        color: "#fff",
+                        fontSize: 28,
+                        fontWeight: 900,
+                        lineHeight: 1,
+                        textShadow: "0 1px 3px rgba(0,0,0,0.45)",
+                        marginTop: -2,
+                      }}
+                    >
+                      ›
+                    </span>
                   </button>
                 </>
               ) : (
