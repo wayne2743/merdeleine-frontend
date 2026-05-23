@@ -20,111 +20,129 @@ export default function NavBar() {
 
   return (
     <>
-    <div className="nav-shell">
-      <div className="nav-inner">
-        {/* ── Brand (always links to home) ── */}
-        <NavLink to="/" className="nav-brand" aria-label="Merdeleine 首頁">
-          <img src="/logo.png" alt="" />
-          <span>Merdeleine</span>
-        </NavLink>
+      <div className="nav-shell">
+        <div className="nav-inner">
 
-        {/* ── Collapsible links (desktop: always visible; mobile: controlled by hamburger) ── */}
-        <div id="main-nav-menu" className={`nav-menu${isMenuOpen ? " is-open" : ""}`}>
-          <div className="nav-links">
-            <NavLink to="/customer/products" className={navLinkClass}>
-              商品列表
-            </NavLink>
+          {/* ── Brand ── */}
+          <NavLink to="/" className="nav-brand" aria-label="Merdeleine 首頁">
+            <img src="/logo.png" alt="" />
+            <span>Merdeleine</span>
+          </NavLink>
 
+          {/* ── Center links (desktop only) ── */}
+          <nav className="nav-center" aria-label="主選單">
+            <NavLink to="/customer/products" className={navLinkClass}>菜單</NavLink>
             {isUser && (
               <>
-                <NavLink to="/customer/sell-windows" className={navLinkClass}>
-                  檔期列表
-                </NavLink>
-                <NavLink to="/customer/orders" className={navLinkClass}>
-                  我的訂單
-                </NavLink>
-                <NavLink to="/customer/profile" className={navLinkClass}>
-                  個人資料
-                </NavLink>
+                <NavLink to="/customer/sell-windows" className={navLinkClass}>檔期</NavLink>
+                <NavLink to="/customer/orders" className={navLinkClass}>訂單</NavLink>
+                <NavLink to="/customer/profile" className={navLinkClass}>個人資料</NavLink>
               </>
             )}
-
             {isAdmin && (
               <>
-                <NavLink to="/admin/products" className={navLinkClass}>
-                  商品管理
-                </NavLink>
-                <NavLink to="/admin/payments" className={navLinkClass}>
-                  付款管理
-                </NavLink>
-                <NavLink to="/admin/sell-window-crud" className={navLinkClass}>
-                  檔期管理
-                </NavLink>
-                <NavLink to="/admin/store-pickup-locations" className={navLinkClass}>
-                  門市取貨點管理
-                </NavLink>
-                <NavLink to="/admin/ingredients" className={navLinkClass}>
-                  原物料管理
-                </NavLink>
+                <NavLink to="/admin/products" className={navLinkClass}>商品管理</NavLink>
+                <NavLink to="/admin/payments" className={navLinkClass}>付款管理</NavLink>
+                <NavLink to="/admin/sell-window-crud" className={navLinkClass}>檔期管理</NavLink>
+                <NavLink to="/admin/store-pickup-locations" className={navLinkClass}>取貨點</NavLink>
+                <NavLink to="/admin/ingredients" className={navLinkClass}>原物料</NavLink>
               </>
             )}
-          </div>
+          </nav>
 
-          {/* Desktop auth (hidden on mobile, handled by nav-right instead) */}
-          <div className="nav-spacer" />
-          <div className="nav-auth nav-auth--desktop">
+          {/* ── Right area: desktop auth icons + mobile hamburger + dropdown ── */}
+          <div className="nav-right">
+
+            {/* Desktop auth controls */}
             {isAuthenticated ? (
-              <>
-                <span className="nav-user">{user?.displayName ?? user?.email ?? ""}</span>
-                <button onClick={() => void logout()}>登出</button>
-              </>
+              <div className="nav-desktop-auth">
+                <span className="nav-user-chip">
+                  {user?.displayName?.split(" ")[0] ?? user?.email ?? ""}
+                </span>
+                <button
+                  type="button"
+                  className="nav-icon-btn"
+                  onClick={() => void logout()}
+                  title="登出"
+                  aria-label="登出"
+                >
+                  {/* Logout icon */}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                </button>
+              </div>
             ) : (
-              <button onClick={() => setIsLoginModalOpen(true)}>登入</button>
+              <button
+                type="button"
+                className="nav-login-btn"
+                onClick={() => setIsLoginModalOpen(true)}
+              >
+                登入
+              </button>
             )}
-          </div>
 
-          {/* Mobile auth (shown inside the dropdown) */}
-          <div className="nav-auth nav-auth--mobile">
-            {isAuthenticated ? (
-              <>
-                <span className="nav-user">{user?.displayName ?? user?.email ?? ""}</span>
-                <button onClick={() => void logout()}>登出</button>
-              </>
-            ) : (
-              <button onClick={() => setIsLoginModalOpen(true)}>登入</button>
-            )}
-          </div>
-        </div>
+            {/* Hamburger toggle (mobile only) */}
+            <button
+              type="button"
+              className="nav-toggle"
+              aria-expanded={isMenuOpen}
+              aria-controls="main-nav-menu"
+              aria-label={isMenuOpen ? "關閉選單" : "開啟選單"}
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+            >
+              {isMenuOpen ? (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                  <line x1="3" y1="7" x2="21" y2="7" />
+                  <line x1="3" y1="12" x2="21" y2="12" />
+                  <line x1="3" y1="17" x2="21" y2="17" />
+                </svg>
+              )}
+            </button>
 
-        {/* ── Right side controls (mobile hamburger) ── */}
-        <div className="nav-right">
-          {/* Hamburger / Close toggle (mobile only) */}
-          <button
-            type="button"
-            className="nav-toggle"
-            aria-expanded={isMenuOpen}
-            aria-controls="main-nav-menu"
-            aria-label={isMenuOpen ? "關閉選單" : "開啟選單"}
-            onClick={() => setIsMenuOpen((prev) => !prev)}
-          >
-            {isMenuOpen ? (
-              /* X icon */
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            ) : (
-              /* Hamburger icon */
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                <line x1="3" y1="7" x2="21" y2="7" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="17" x2="21" y2="17" />
-              </svg>
-            )}
-          </button>
+            {/* Mobile dropdown */}
+            <div id="main-nav-menu" className={`nav-menu${isMenuOpen ? " is-open" : ""}`}>
+              <div className="nav-links">
+                <NavLink to="/customer/products" className={navLinkClass}>菜單</NavLink>
+                {isUser && (
+                  <>
+                    <NavLink to="/customer/sell-windows" className={navLinkClass}>檔期列表</NavLink>
+                    <NavLink to="/customer/orders" className={navLinkClass}>我的訂單</NavLink>
+                    <NavLink to="/customer/profile" className={navLinkClass}>個人資料</NavLink>
+                  </>
+                )}
+                {isAdmin && (
+                  <>
+                    <NavLink to="/admin/products" className={navLinkClass}>商品管理</NavLink>
+                    <NavLink to="/admin/payments" className={navLinkClass}>付款管理</NavLink>
+                    <NavLink to="/admin/sell-window-crud" className={navLinkClass}>檔期管理</NavLink>
+                    <NavLink to="/admin/store-pickup-locations" className={navLinkClass}>門市取貨點管理</NavLink>
+                    <NavLink to="/admin/ingredients" className={navLinkClass}>原物料管理</NavLink>
+                  </>
+                )}
+              </div>
+              <div className="nav-dropdown-auth">
+                {isAuthenticated ? (
+                  <>
+                    <span className="nav-user">{user?.displayName ?? user?.email ?? ""}</span>
+                    <button onClick={() => void logout()}>登出</button>
+                  </>
+                ) : (
+                  <button onClick={() => setIsLoginModalOpen(true)}>登入</button>
+                )}
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
-    </div>
 
       {isLoginModalOpen && (
         <div

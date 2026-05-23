@@ -137,21 +137,30 @@ table {
   background: rgba(251, 248, 243, 0.94);
 }
 
+/* Desktop: 3-column grid [brand | center links | right controls] */
 .nav-inner {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 10px 12px;
-  display: flex;
-  gap: 8px;
+  padding: 10px 20px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
   align-items: center;
   position: relative;
 }
 
-.nav-menu {
+/* Center nav links (desktop) */
+.nav-center {
   display: flex;
+  gap: 4px;
   align-items: center;
-  gap: 8px;
-  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Mobile dropdown — hidden on desktop */
+.nav-menu {
+  display: none;
 }
 
 .nav-links {
@@ -161,25 +170,73 @@ table {
   flex-wrap: wrap;
 }
 
-.nav-spacer {
-  flex: 1;
-}
-
-.nav-auth {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-/* nav-right: always-visible right controls (login button + hamburger on mobile) */
+/* Right area: desktop auth + mobile hamburger */
 .nav-right {
-  display: none; /* hidden on desktop; only hamburger area shown on mobile */
+  display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: auto;
-  flex-shrink: 0;
+  position: relative;
 }
 
+/* Desktop auth group */
+.nav-desktop-auth {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Small user name chip */
+.nav-user-chip {
+  font-size: 13px;
+  font-weight: 600;
+  color: #5d4c3d;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Icon-style button (logout etc.) */
+.nav-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(198, 173, 141, 0.6);
+  color: #544436;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+  box-shadow: none;
+}
+
+.nav-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.96);
+  transform: translateY(-1px);
+}
+
+.nav-icon-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* Login pill button (desktop) */
+.nav-login-btn {
+  padding: 7px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #e8d5b3 0%, #d4b183 100%);
+  border: 1px solid #c09e71;
+  color: #3b2d21;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(93, 69, 45, 0.16);
+}
+
+/* Hamburger toggle (mobile only — hidden on desktop) */
 .nav-toggle {
   display: none;
   align-items: center;
@@ -192,6 +249,7 @@ table {
   border: 1px solid rgba(198, 173, 141, 0.5);
   color: #544436;
   cursor: pointer;
+  box-shadow: none;
 }
 
 .nav-toggle svg {
@@ -199,26 +257,42 @@ table {
   height: 20px;
 }
 
-/* Desktop: hide nav-right (hamburger/login-inline), show nav-auth--desktop */
-.nav-auth--mobile {
-  display: none;
+/* Dropdown auth row (mobile only) */
+.nav-dropdown-auth {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding-top: 4px;
+  border-top: 1px solid rgba(214, 197, 171, 0.5);
 }
 
 .nav-brand {
-  margin-right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: #352a22;
   font-family: "Playfair Display", "Noto Serif TC", serif;
   letter-spacing: 0.04em;
   font-weight: 700;
+  font-size: 17px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nav-brand img {
+  height: 28px;
+  width: auto;
 }
 
 .nav-link {
-  padding: 8px 12px;
+  padding: 7px 13px;
   border-radius: 999px;
   text-decoration: none;
   color: #5a4b3d;
   background: rgba(255, 255, 255, 0.75);
   border: 1px solid rgba(214, 197, 171, 0.9);
+  font-size: 14px;
   transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
 }
 
@@ -238,6 +312,7 @@ table {
 .nav-user {
   color: #5d4c3d;
   font-size: 13px;
+  text-align: center;
 }
 
 .page-container {
@@ -2702,46 +2777,49 @@ table {
     padding: 12px;
   }
 
+  /* Mobile: flex row [brand | right(hamburger)] */
   .nav-inner {
-    gap: 8px;
-    padding: 10px 12px;
+    display: flex;
+    padding: 10px 14px;
+    gap: 0;
   }
 
   .nav-brand {
-    margin-right: 0;
     font-size: 15px;
   }
+
   .nav-brand img {
     height: 22px;
   }
 
-  /* Show right controls area (login inline + hamburger) */
+  /* Hide center links on mobile */
+  .nav-center {
+    display: none;
+  }
+
+  /* Right: push to end, show hamburger, hide desktop auth */
   .nav-right {
-    display: flex;
+    margin-left: auto;
+  }
+
+  .nav-desktop-auth {
+    display: none;
+  }
+
+  .nav-login-btn {
+    display: none;
   }
 
   .nav-toggle {
     display: flex;
   }
 
-  /* Hide desktop auth inside nav-menu, show mobile auth section inside dropdown */
-  .nav-auth--desktop {
-    display: none !important;
-  }
-
-  .nav-auth--mobile {
-    display: flex;
-    width: 100%;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-
+  /* Dropdown: absolute panel below nav-right */
   .nav-menu {
     position: absolute;
     top: calc(100% + 8px);
-    right: 12px;
-    width: min(320px, calc(100vw - 24px));
+    right: 0;
+    width: min(300px, calc(100vw - 28px));
     padding: 12px;
     border-radius: 14px;
     border: 1px solid rgba(220, 199, 170, 0.82);
@@ -2757,8 +2835,7 @@ table {
     display: flex;
   }
 
-  .nav-links,
-  .nav-auth--mobile {
+  .nav-links {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -2770,17 +2847,8 @@ table {
     text-align: center;
   }
 
-  .nav-auth button {
+  .nav-dropdown-auth button {
     width: 100%;
-  }
-
-  .nav-user {
-    text-align: center;
-    width: 100%;
-  }
-
-  .nav-spacer {
-    display: none;
   }
 
   .home-contact-grid {
