@@ -127,6 +127,56 @@ function truncateDescription(value?: string | null, maxLength = 56): string {
   return `${normalized.slice(0, maxLength)}...`;
 }
 
+function splitAllergens(value?: string | null): string[] {
+  if (!value?.trim()) return [];
+  return value
+    .split(/[,，、;；\s]+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function aggregateAllergenTags(product: Product): string[] {
+  const tags = new Set<string>();
+
+  splitAllergens(product.allergens).forEach((tag) => tags.add(tag));
+  splitAllergens(product.allergies).forEach((tag) => tags.add(tag));
+  (product.productIngredients ?? []).forEach((pi) => {
+    splitAllergens(pi.allergens).forEach((tag) => tags.add(tag));
+  });
+
+  return [...tags];
+}
+
+function toGramAmount(requiredAmount: string, unit: string): number | null {
+  const amount = Number(requiredAmount);
+  if (!Number.isFinite(amount) || amount < 0) return null;
+
+  const normalizedUnit = (unit || "").trim().toLowerCase();
+  if (/^(kg|公斤|千克)$/.test(normalizedUnit)) return amount * 1000;
+  if (/^(g|gram|grams|公克|克)$/.test(normalizedUnit)) return amount;
+  if (/^(mg|毫克)$/.test(normalizedUnit)) return amount / 1000;
+  return null;
+}
+
+function aggregateCalories(product: Product): number | null {
+  let totalCalories = 0;
+  let hasCalculatedValue = false;
+
+  (product.productIngredients ?? []).forEach((pi) => {
+    if (!Number.isFinite(pi.caloriesPer100g)) return;
+    const gramAmount = toGramAmount(pi.requiredAmount, pi.unit);
+    if (gramAmount == null) return;
+
+    totalCalories += (Number(pi.caloriesPer100g) * gramAmount) / 100;
+    hasCalculatedValue = true;
+  });
+
+  if (hasCalculatedValue) return Math.round(totalCalories);
+
+  const fallback = product.calories ?? product.calorie;
+  return Number.isFinite(fallback) ? Number(fallback) : null;
+}
+
 function toForm(product: Product): ProductForm {
   return {
     id: product.id,
@@ -674,14 +724,26 @@ export default function ProductAdminPage() {
             {!loading &&
               items.map((p) => {
                 const piNames = (p.productIngredients ?? []).map((pi) => pi.ingredientName ?? pi.ingredientId);
+                const allergenTags = aggregateAllergenTags(p);
+                const totalCalories = aggregateCalories(p);
                 return (
                   <tr key={p.id} style={{ borderBottom: "1px solid #f1ebe2" }}>
                     <td style={{ padding: 10, fontWeight: 600 }}>{p.name}</td>
                     <td style={{ padding: 10 }}>{p.status}</td>
                     <td style={{ padding: 10 }}>{fmtPrice(p.unitPriceCents, p.currency)}</td>
-                    <td style={{ padding: 10 }}>{Number.isFinite(p.calories) ? `${p.calories} kcal` : "-"}</td>
+                    <td style={{ padding: 10 }}>{totalCalories != null ? `${totalCalories} kcal` : "-"}</td>
                     <td style={{ padding: 10 }}>{p.ingredients || "-"}</td>
-                    <td style={{ padding: 10 }}>{p.allergens || p.allergies || "-"}</td>
+                    <td style={{ padding: 10, maxWidth: 180, fontSize: 12 }}>
+                      {allergenTags.length > 0 ? (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                          {allergenTags.map((tag) => (
+                            <span key={tag} style={{ background: "#f7ede0", color: "#7a5c3a", borderRadius: 999, padding: "2px 8px", fontWeight: 500, border: "1px solid #e8d5b8", whiteSpace: "nowrap" }}>
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      ) : "-"}
+                    </td>
                     <td style={{ padding: 10, maxWidth: 180, fontSize: 12 }}>
                       {piNames.length > 0 ? (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
