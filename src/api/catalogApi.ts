@@ -212,6 +212,15 @@ function normalizeSellWindowResponse(data: unknown): SellWindowResponse {
   };
 }
 
+function toAmountString(...values: unknown[]): string {
+  for (const value of values) {
+    if (value === null || value === undefined || value === "") continue;
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return "";
+}
+
 function normalizeProductIngredient(data: unknown): ProductIngredient {
   const raw = asRecord(data) ?? {};
   return {
@@ -225,7 +234,7 @@ function normalizeProductIngredient(data: unknown): ProductIngredient {
       raw.caloriesPer_100g,
     ),
     allergens: pickNullableString(raw.allergens),
-    requiredAmount: pickString(raw.requiredAmount, raw.required_amount),
+    requiredAmount: toAmountString(raw.requiredAmount, raw.required_amount),
     unit: pickString(raw.unit),
     ingredientGroupId: pickNullableString(raw.ingredientGroupId, raw.ingredient_group_id),
   };
