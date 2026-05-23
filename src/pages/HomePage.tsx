@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { catalogApi } from "../api/catalogApi";
+import { extractSupplementalInfo, splitInfoTags } from "../utils/productInfo";
 import type { Product, ProductImage } from "../types/domain";
 
 type FeaturedProductCard = {
@@ -45,38 +46,6 @@ function decodeDescription(value?: string | null): string {
 function trimDescription(value: string, maxLength = 34): string {
   if (value.length <= maxLength) return value;
   return `${value.slice(0, maxLength).trim()}…`;
-}
-
-function parseSupplementalInfo(description: string): { ingredients: string; calories: string; allergens: string } {
-  const lines = description
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-  const ingredientLine = lines.find((line) => /成分|原料|ingredients?/i.test(line));
-  const calorieLine = lines.find((line) => /熱量|卡路里|kcal/i.test(line));
-  const allergenLine = lines.find((line) => /過敏原|allergen/i.test(line));
-
-  const normalizeValue = (line: string | undefined, fallback: string) => {
-    if (!line) return fallback;
-    const splitParts = line.split(/[：:]/);
-    return (splitParts.length > 1 ? splitParts.slice(1).join(":") : line).trim() || fallback;
-  };
-
-  return {
-    ingredients: normalizeValue(ingredientLine, "尚未提供"),
-    calories: normalizeValue(calorieLine, "尚未提供"),
-    allergens: normalizeValue(allergenLine, "尚未提供"),
-  };
-}
-
-function resolveSupplementalInfo(product: Product, description: string): { ingredients: string; calories: string; allergens: string } {
-  const fallback = parseSupplementalInfo(description);
-  return {
-    ingredients: (product.ingredients || "").trim() || fallback.ingredients,
-    calories: Number.isFinite(product.calories) ? `${product.calories} kcal` : fallback.calories,
-    allergens: (product.allergens || "").trim() || fallback.allergens,
-  };
 }
 
 function getImageGroupKey(image: ProductImage): string | null {
@@ -250,10 +219,13 @@ export default function HomePage() {
     async function loadFeaturedProducts() {
       setLoadingFeatured(true);
       try {
-        const products = await catalogApi.listProducts();
+        // Use the paged endpoint (same as the customer products page) — it
+        // returns productIngredients, so calories/ingredients/allergens shown
+        // here stay consistent with the product detail modal.
+        const response = await catalogApi.pageProducts({ page: 0, size: 200, sort: "createdAt,desc" });
         if (cancelled) return;
 
-        const activeProducts = (products ?? []).filter((product) => product.status === "ACTIVE");
+        const activeProducts = (response.items ?? []).filter((product) => product.status === "ACTIVE");
         const featuredIds = catalogApi.getHomeFeaturedProductIds();
         const selectedProducts = featuredIds
           .map((productId) => activeProducts.find((product) => product.id === productId))
@@ -280,7 +252,7 @@ export default function HomePage() {
 
             const decodedDescription = decodeDescription(product.description);
             const desc = trimDescription(decodedDescription);
-            const supplementalInfo = resolveSupplementalInfo(product, decodedDescription);
+            const supplementalInfo = extractSupplementalInfo(product);
 
             return {
               id: product.id,
@@ -842,24 +814,66 @@ export default function HomePage() {
               <span style={{ fontSize: 22, color: "#5b2d08", fontWeight: 800 }}>{featuredDetail.price}</span>
             </div>
 
-            <div className="home-detail-meta-row" style={{ marginTop: 10 }}>
-              <div className="home-detail-meta-item">
-                <span className="home-detail-meta-label">成分</span>
-                <strong className="home-detail-meta-value">{featuredDetail.ingredients}</strong>
-              </div>
-              <div className="home-detail-meta-item">
-                <span className="home-detail-meta-label">卡路里</span>
-                <strong className="home-detail-meta-value">{featuredDetail.calories}</strong>
-              </div>
-              <div className="home-detail-meta-item">
-                <span className="home-detail-meta-label">過敏原</span>
-                <strong className="home-detail-meta-value">{featuredDetail.allergens}</strong>
-              </div>
-            </div>
+            {(() => {
+              const ingredientTags = splitInfoTags(featuredDetail.ingredients);
+              const allergenTags = splitInfoTags(featuredDetail.allergens);
+              return (
+                <div
+                  style={{
+                    marginTop: 16,
+                    display: "grid",
+                    gap: 14,
+                    padding: "16px 18px",
+                    borderRadius: 14,
+                    background: "#faf6f0",
+                    border: "1px solid #ece0cf",
+                  }}
+                >
+                  {/* 成分 */}
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 6 }}>成分</div>
+                    {ingredientTags.length > 0 ? (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {ingredientTags.map((tag, i) => (
+                          <span key={i} style={{ background: "#fff", color: "#5b442f", borderRadius: 999, padding: "4px 11px", fontSize: 13, border: "1px solid #e3d3bd" }}>{tag}</span>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 14, color: "#8a7560" }}>尚未提供</div>
+                    )}
+                  </div>
 
-            <div style={{ marginTop: 12, fontSize: 15, color: "#6c5642", whiteSpace: "pre-wrap", lineHeight: 1.9 }}>
-              {featuredDetail.fullDesc}
-            </div>
+                  {/* 過敏原 */}
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 6 }}>過敏原</div>
+                    {allergenTags.length > 0 ? (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {allergenTags.map((tag, i) => (
+                          <span key={i} style={{ background: "#fdf0ec", color: "#b5532e", borderRadius: 999, padding: "4px 11px", fontSize: 13, fontWeight: 600, border: "1px solid #f1cdbf" }}>{tag}</span>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 14, color: "#8a7560" }}>尚未提供</div>
+                    )}
+                  </div>
+
+                  {/* 熱量 */}
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54" }}>熱量</span>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: "#5b442f" }}>{featuredDetail.calories}</span>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {featuredDetail.fullDesc && featuredDetail.fullDesc !== "（無描述）" && (
+              <div style={{ marginTop: 18 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 8 }}>商品介紹</div>
+                <div style={{ fontSize: 15, lineHeight: 1.85, color: "#54402d", whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word" }}>
+                  {featuredDetail.fullDesc}
+                </div>
+              </div>
+            )}
             <div className="home-featured-detail-actions" style={{ marginTop: 14 }}>
               <Link to={featuredDetail.actionTo} className="hero-btn hero-btn-primary home-featured-detail-cta" onClick={() => setFeaturedDetail(null)}>
                 加入清單
