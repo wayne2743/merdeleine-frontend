@@ -466,6 +466,11 @@ export const catalogApi = {
     return Array.isArray(data) ? data.map((item) => normalizeProduct(item)) : [];
   },
 
+  async getProduct(productId: string): Promise<Product> {
+    const { data } = await http.get<unknown>(`/api/catalog/products/${productId}`);
+    return normalizeProduct(data);
+  },
+
   async pageProducts(params: {
     page: number;
     size: number;

@@ -185,7 +185,7 @@ function extractSupplementalInfo(product: Product): { ingredients: string; aller
     const base = (product.ingredients || "").trim();
     ingredients = base ? `${base}（${piNames.join("、")}）` : piNames.join("、");
   } else {
-    ingredients = (product.ingredients || "").trim() || parseByKeyword(/成分|原料|ingredients?/i, "尚未提供");
+    ingredients = (product.ingredients || "").trim() || parseByKeyword(/^(成分|原料|ingredients?)[\s：:]/i, "尚未提供");
   }
 
   // 過敏原: collect and deduplicate allergens from all linked productIngredients
@@ -313,6 +313,7 @@ export default function CustomerProductsPage() {
 
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailSelected, setDetailSelected] = useState<Product | null>(null);
+  const [detailLoadingFull, setDetailLoadingFull] = useState(false);
   const [originalModalUrl, setOriginalModalUrl] = useState<string | null>(null);
 
   const detailStripRef = useRef<HTMLDivElement | null>(null);
@@ -552,6 +553,15 @@ export default function CustomerProductsPage() {
     if (detailStripRef.current) {
       detailStripRef.current.scrollLeft = 0;
     }
+
+    setDetailLoadingFull(true);
+    catalogApi.getProduct(p.id).then((full) => {
+      setDetailSelected((prev) => (prev?.id === full.id ? full : prev));
+    }).catch(() => {
+      // keep the list-version product — no ingredient data but still shows
+    }).finally(() => {
+      setDetailLoadingFull(false);
+    });
   }
 
   function scrollDetailImages(direction: "left" | "right") {
@@ -956,6 +966,7 @@ export default function CustomerProductsPage() {
                   : value.split(/[、,，;；]/).map((s) => s.trim()).filter(Boolean);
               const ingredientTags = splitTags(info.ingredients);
               const allergenTags = splitTags(info.allergens);
+              const isLoadingIngredients = detailLoadingFull && (detailSelected.productIngredients ?? []).length === 0;
 
               return (
                 <>
@@ -981,7 +992,9 @@ export default function CustomerProductsPage() {
                     {/* 成分 */}
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 6 }}>成分</div>
-                      {ingredientTags.length > 0 ? (
+                      {isLoadingIngredients ? (
+                        <div style={{ fontSize: 14, color: "#b0a090" }}>載入中…</div>
+                      ) : ingredientTags.length > 0 ? (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                           {ingredientTags.map((tag, i) => (
                             <span key={i} style={{ background: "#fff", color: "#5b442f", borderRadius: 999, padding: "4px 11px", fontSize: 13, border: "1px solid #e3d3bd" }}>{tag}</span>
@@ -995,7 +1008,9 @@ export default function CustomerProductsPage() {
                     {/* 過敏原 */}
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 6 }}>過敏原</div>
-                      {allergenTags.length > 0 ? (
+                      {isLoadingIngredients ? (
+                        <div style={{ fontSize: 14, color: "#b0a090" }}>載入中…</div>
+                      ) : allergenTags.length > 0 ? (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                           {allergenTags.map((tag, i) => (
                             <span key={i} style={{ background: "#fdf0ec", color: "#b5532e", borderRadius: 999, padding: "4px 11px", fontSize: 13, fontWeight: 600, border: "1px solid #f1cdbf" }}>{tag}</span>
@@ -1009,7 +1024,9 @@ export default function CustomerProductsPage() {
                     {/* 熱量 */}
                     <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
                       <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54" }}>熱量</span>
-                      <span style={{ fontSize: 15, fontWeight: 700, color: "#5b442f" }}>{info.calories}</span>
+                      <span style={{ fontSize: 15, fontWeight: 700, color: "#5b442f" }}>
+                        {isLoadingIngredients ? "載入中…" : info.calories}
+                      </span>
                     </div>
                   </div>
 
