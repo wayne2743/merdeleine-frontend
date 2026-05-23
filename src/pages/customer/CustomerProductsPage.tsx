@@ -351,10 +351,13 @@ export default function CustomerProductsPage() {
       setLoading(true);
       setError(null);
       try {
-        const data = await catalogApi.listProducts();
+        // Use the paged endpoint (same as admin) — it returns productIngredients,
+        // which the plain /products list endpoint omits, so calories/allergens
+        // can be computed in the detail modal.
+        const response = await catalogApi.pageProducts({ page: 0, size: 200, sort: "createdAt,desc" });
         if (cancelled) return;
 
-        const nextProducts = data ?? [];
+        const nextProducts = response.items ?? [];
         setProducts(nextProducts);
 
         const imageResults = await Promise.allSettled(
