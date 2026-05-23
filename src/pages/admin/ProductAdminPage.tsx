@@ -171,7 +171,11 @@ function aggregateCalories(product: Product): number | null {
     hasCalculatedValue = true;
   });
 
-  if (hasCalculatedValue) return Math.round(totalCalories);
+  if (hasCalculatedValue) {
+    const recipeQuantity = Number(product.recipeQuantity);
+    const validRecipeQuantity = Number.isFinite(recipeQuantity) && recipeQuantity > 0 ? recipeQuantity : 1;
+    return Math.round(totalCalories / validRecipeQuantity);
+  }
 
   const fallback = product.calories ?? product.calorie;
   return Number.isFinite(fallback) ? Number(fallback) : null;
@@ -696,7 +700,7 @@ export default function ProductAdminPage() {
               <th style={{ padding: 10 }}>商品名稱</th>
               <th style={{ padding: 10 }}>狀態</th>
               <th style={{ padding: 10 }}>單價</th>
-              <th style={{ padding: 10 }}>熱量</th>
+              <th style={{ padding: 10 }}>每單位熱量</th>
               <th style={{ padding: 10 }}>成分</th>
               <th style={{ padding: 10 }}>過敏原</th>
               <th style={{ padding: 10 }}>原物料</th>
@@ -725,13 +729,13 @@ export default function ProductAdminPage() {
               items.map((p) => {
                 const piNames = (p.productIngredients ?? []).map((pi) => pi.ingredientName ?? pi.ingredientId);
                 const allergenTags = aggregateAllergenTags(p);
-                const totalCalories = aggregateCalories(p);
+                const perUnitCalories = aggregateCalories(p);
                 return (
                   <tr key={p.id} style={{ borderBottom: "1px solid #f1ebe2" }}>
                     <td style={{ padding: 10, fontWeight: 600 }}>{p.name}</td>
                     <td style={{ padding: 10 }}>{p.status}</td>
                     <td style={{ padding: 10 }}>{fmtPrice(p.unitPriceCents, p.currency)}</td>
-                    <td style={{ padding: 10 }}>{totalCalories != null ? `${totalCalories} kcal` : "-"}</td>
+                    <td style={{ padding: 10 }}>{perUnitCalories != null ? `${perUnitCalories} kcal` : "-"}</td>
                     <td style={{ padding: 10 }}>{p.ingredients || "-"}</td>
                     <td style={{ padding: 10, maxWidth: 180, fontSize: 12 }}>
                       {allergenTags.length > 0 ? (
