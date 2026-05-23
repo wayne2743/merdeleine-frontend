@@ -6,9 +6,6 @@ type ProductForm = {
   id: string | null;
   name: string;
   description: string;
-  ingredients: string;
-  allergens: string;
-  calories: string;
   unitPriceCents: string;
   currency: string;
   defaultMinQty: string;
@@ -52,9 +49,6 @@ const INITIAL_FORM: ProductForm = {
   id: null,
   name: "",
   description: "",
-  ingredients: "",
-  allergens: "",
-  calories: "",
   unitPriceCents: "",
   currency: "TWD",
   defaultMinQty: "1",
@@ -186,9 +180,6 @@ function toForm(product: Product): ProductForm {
     id: product.id,
     name: product.name || "",
     description: decodeDescriptionFromDb(product.description),
-    ingredients: product.ingredients || "",
-    allergens: product.allergens || product.allergies || "",
-    calories: Number.isFinite(product.calories) ? String(product.calories) : Number.isFinite(product.calorie) ? String(product.calorie) : "",
     unitPriceCents: Number.isFinite(product.unitPriceCents) ? String(product.unitPriceCents) : "",
     currency: product.currency || "TWD",
     defaultMinQty: Number.isFinite(product.defaultMinQty) ? String(product.defaultMinQty) : "1",
@@ -343,9 +334,6 @@ export default function ProductAdminPage() {
 
     const name = form.name.trim();
     const description = encodeDescriptionForDb(form.description.trim());
-    const ingredients = form.ingredients.trim() || null;
-    const allergens = form.allergens.trim() || null;
-    const calories = form.calories.trim() === "" ? null : Number(form.calories);
     const currency = form.currency.trim().toUpperCase();
     const unitPriceCents = Number(form.unitPriceCents);
     const defaultMinQty = Number(form.defaultMinQty);
@@ -361,10 +349,6 @@ export default function ProductAdminPage() {
     }
     if (!Number.isInteger(unitPriceCents) || unitPriceCents < 0) {
       setMessage("請填寫正確的單價（整數，且不可小於 0）");
-      return;
-    }
-    if (calories !== null && (!Number.isFinite(calories) || calories < 0)) {
-      setMessage("請填寫正確的 calories（留空或數字，且不可小於 0）");
       return;
     }
     if (!Number.isInteger(defaultMinQty) || defaultMinQty < 1) {
@@ -413,11 +397,6 @@ export default function ProductAdminPage() {
         const payload: ProductUpdateRequest = {
           name,
           description,
-          ingredients,
-          allergens,
-          allergies: allergens,
-          calories,
-          calorie: calories,
           status: form.status,
           unitPriceCents,
           currency,
@@ -434,11 +413,6 @@ export default function ProductAdminPage() {
         const payload: ProductCreateRequest = {
           name,
           description,
-          ingredients,
-          allergens,
-          allergies: allergens,
-          calories,
-          calorie: calories,
           status: form.status,
           unitPriceCents,
           currency,
@@ -967,35 +941,6 @@ export default function ProductAdminPage() {
                   rows={4}
                 />
               </label>
-
-              <label style={{ display: "grid", gap: 4 }}>
-                <span>成分</span>
-                <textarea
-                  value={form.ingredients}
-                  onChange={(e) => updateForm("ingredients", e.target.value)}
-                  maxLength={500}
-                  rows={2}
-                />
-              </label>
-
-              <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
-                <label style={{ display: "grid", gap: 4 }}>
-                  <span>過敏原</span>
-                  <input value={form.allergens} onChange={(e) => updateForm("allergens", e.target.value)} maxLength={200} />
-                </label>
-
-                <label style={{ display: "grid", gap: 4 }}>
-                  <span>熱量（kcal）</span>
-                  <input
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={form.calories}
-                    onChange={(e) => updateForm("calories", e.target.value)}
-                    placeholder="例如 320"
-                  />
-                </label>
-              </div>
 
               <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
                 <label style={{ display: "grid", gap: 4 }}>
