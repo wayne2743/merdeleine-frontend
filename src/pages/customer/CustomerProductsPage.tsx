@@ -196,14 +196,15 @@ function extractSupplementalInfo(product: Product): { ingredients: string; aller
     allergens = (product.allergens || "").trim() || parseByKeyword(/過敏原|allergen/i, "尚未提供");
   }
 
-  // 熱量計算：
+  // 熱量計算（每份）：
   // 1. 聚合所有單位為 g 的原物料
   // 2. 每 100g 熱量 ÷ 100 換算成每 1g 熱量
   // 3. 每 1g 熱量 × 該原物料用量(g) = 該原物料總熱量
-  // 4. 加總所有原物料熱量
+  // 4. 加總所有原物料熱量 = 整批配方總熱量
+  // 5. 整批總熱量 ÷ recipeQuantity = 每份熱量
   let calories: string;
   const GRAM_UNITS = /^(g|公克|克|grams?)$/i;
-  let totalCalories = 0;
+  let totalBatchCalories = 0;
   let hasCalcCalories = false;
   pis.forEach((pi) => {
     const unit = (pi.unit || "").trim();
@@ -214,11 +215,14 @@ function extractSupplementalInfo(product: Product): { ingredients: string; aller
 
     const caloriesPerGram = pi.caloriesPer100g / 100;
     const ingredientCalories = caloriesPerGram * amountInGrams;
-    totalCalories += ingredientCalories;
+    totalBatchCalories += ingredientCalories;
     hasCalcCalories = true;
   });
   if (hasCalcCalories) {
-    calories = `${Math.round(totalCalories)} kcal`;
+    const recipeQty = Number(product.recipeQuantity);
+    const servings = Number.isFinite(recipeQty) && recipeQty > 0 ? recipeQty : 1;
+    const perServingCalories = totalBatchCalories / servings;
+    calories = `${Math.round(perServingCalories)} kcal`;
   } else {
     const cal = product.calories ?? product.calorie;
     calories = Number.isFinite(cal) ? `${cal} kcal` : parseByKeyword(/熱量|卡路里|kcal/i, "尚未提供");
