@@ -233,6 +233,7 @@ export default function ProductAdminPage() {
   const [statusFilter, setStatusFilter] = useState<ProductStatusFilter>("ALL");
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia("(max-width: 640px)").matches);
 
   const isEditMode = Boolean(form.id);
 
@@ -271,6 +272,13 @@ export default function ProductAdminPage() {
   useEffect(() => {
     void loadProducts(page, statusFilter);
   }, [page, statusFilter]);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   function updateForm<K extends keyof ProductForm>(key: K, value: ProductForm[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -693,15 +701,75 @@ export default function ProductAdminPage() {
         <span style={{ color: "#c9b08a", fontSize: 13 }}>每頁 {PAGE_SIZE} 筆，排序：建立時間新到舊</span>
       </div>
 
+      {/* Mobile card list */}
+      {isMobile ? (
+        <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 12 }}>
+          {loading && <div style={{ color: "#c9b08a", padding: "8px 0" }}>載入中...</div>}
+          {!loading && items.length === 0 && (
+            <div style={{ color: "#c9b08a", padding: "8px 0" }}>
+              {statusFilter === "ALL" ? "目前沒有商品資料" : `沒有「${statusFilter === "ACTIVE" ? "上架中" : statusFilter === "INACTIVE" ? "下架" : "草稿"}」的商品`}
+            </div>
+          )}
+          {!loading && items.map((p) => {
+            const piNames = (p.productIngredients ?? []).map((pi) => pi.ingredientName ?? pi.ingredientId);
+            const allergenTags = aggregateAllergenTags(p);
+            const perUnitCalories = aggregateCalories(p);
+            const statusLabel = p.status === "ACTIVE" ? "上架中" : p.status === "INACTIVE" ? "下架" : "草稿";
+            const statusColor = p.status === "ACTIVE" ? { background: "#e6f4ea", color: "#2e7d32" } : p.status === "INACTIVE" ? { background: "#fce8e6", color: "#b71c1c" } : { background: "#f5f5f5", color: "#616161" };
+            return (
+              <div key={p.id} style={{ background: "#fff", border: "1px solid #eadfcd", borderRadius: 12, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
+                {/* Name + status */}
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
+                  <span style={{ fontWeight: 700, fontSize: 16, color: "#2f241b", lineHeight: 1.3 }}>{p.name}</span>
+                  <span style={{ ...statusColor, borderRadius: 999, padding: "2px 10px", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", flexShrink: 0 }}>{statusLabel}</span>
+                </div>
+                {/* Price + calories */}
+                <div style={{ display: "flex", gap: 16, fontSize: 13, color: "#7a5c3a" }}>
+                  <span>單價：{fmtPrice(p.unitPriceCents, p.currency)}</span>
+                  <span>熱量：{perUnitCalories != null ? `${perUnitCalories} kcal` : "-"}</span>
+                </div>
+                {/* Allergens */}
+                {allergenTags.length > 0 && (
+                  <div>
+                    <div style={{ fontSize: 11, color: "#a08060", marginBottom: 4 }}>過敏原</div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                      {allergenTags.map((tag) => (
+                        <span key={tag} style={{ background: "#f7ede0", color: "#7a5c3a", borderRadius: 999, padding: "2px 8px", fontSize: 12, fontWeight: 500, border: "1px solid #e8d5b8" }}>{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* Ingredients */}
+                {piNames.length > 0 && (
+                  <div>
+                    <div style={{ fontSize: 11, color: "#a08060", marginBottom: 4 }}>原物料</div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                      {piNames.map((name, i) => (
+                        <span key={i} style={{ background: "#f7ede0", color: "#7a5c3a", borderRadius: 999, padding: "2px 8px", fontSize: 12, fontWeight: 500, border: "1px solid #e8d5b8" }}>{name}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* Actions */}
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", paddingTop: 4 }}>
+                  <button type="button" onClick={() => void openImagesModal(p)} disabled={submitting} style={{ ...actionButtonBase, ...actionButtonView }}>查看圖片</button>
+                  <button type="button" onClick={() => openEditModal(p)} disabled={submitting} style={{ ...actionButtonBase, ...actionButtonEdit }}>編輯</button>
+                  <button type="button" onClick={() => void onDelete(p)} disabled={submitting} style={{ ...actionButtonBase, ...actionButtonDelete }}>刪除</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+      /* Desktop table */
       <div style={{ marginTop: 14, borderRadius: 12, overflowX: "auto", border: "1px solid #eadfcd", background: "#fff" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", color: "#2f241b", minWidth: 1100 }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", color: "#2f241b", minWidth: 900 }}>
           <thead>
             <tr style={{ textAlign: "left", borderBottom: "1px solid #eee" }}>
               <th style={{ padding: 10 }}>商品名稱</th>
               <th style={{ padding: 10 }}>狀態</th>
               <th style={{ padding: 10 }}>單價</th>
               <th style={{ padding: 10 }}>每單位熱量</th>
-              <th style={{ padding: 10 }}>成分</th>
               <th style={{ padding: 10 }}>過敏原</th>
               <th style={{ padding: 10 }}>原物料</th>
               <th style={{ padding: 10 }}>描述</th>
@@ -711,7 +779,7 @@ export default function ProductAdminPage() {
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={9} style={{ padding: 12 }}>
+                <td colSpan={8} style={{ padding: 12 }}>
                   載入中...
                 </td>
               </tr>
@@ -719,7 +787,7 @@ export default function ProductAdminPage() {
 
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={9} style={{ padding: 12 }}>
+                <td colSpan={8} style={{ padding: 12 }}>
                   {statusFilter === "ALL" ? "目前沒有商品資料" : `沒有「${statusFilter === "ACTIVE" ? "上架中" : statusFilter === "INACTIVE" ? "下架" : "草稿"}」的商品`}
                 </td>
               </tr>
@@ -736,7 +804,6 @@ export default function ProductAdminPage() {
                     <td style={{ padding: 10 }}>{p.status}</td>
                     <td style={{ padding: 10 }}>{fmtPrice(p.unitPriceCents, p.currency)}</td>
                     <td style={{ padding: 10 }}>{perUnitCalories != null ? `${perUnitCalories} kcal` : "-"}</td>
-                    <td style={{ padding: 10 }}>{p.ingredients || "-"}</td>
                     <td style={{ padding: 10, maxWidth: 180, fontSize: 12 }}>
                       {allergenTags.length > 0 ? (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
@@ -796,6 +863,7 @@ export default function ProductAdminPage() {
           </tbody>
         </table>
       </div>
+      )}
 
       {!error && (
         <div style={{ marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
