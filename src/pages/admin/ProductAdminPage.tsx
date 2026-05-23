@@ -1081,9 +1081,9 @@ export default function ProductAdminPage() {
                         )}
                         {groupIngredients.length > 0 && (
                           <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "#5f4528", display: "grid", gap: 2 }}>
-                            {groupIngredients.map((pi) => {
+                            {groupIngredients.map((pi, i) => {
                               const name = allIngredients.find((i) => i.id === pi.ingredientId)?.name ?? pi.ingredientId;
-                              return <li key={pi.ingredientId}>{name}：{pi.requiredAmount} {pi.unit}</li>;
+                              return <li key={`${pi.ingredientId}-${i}`}>{name}：{pi.requiredAmount} {pi.unit}</li>;
                             })}
                           </ul>
                         )}
@@ -1168,7 +1168,7 @@ export default function ProductAdminPage() {
                           const name = allIngredients.find((i) => i.id === pi.ingredientId)?.name ?? pi.ingredientId;
                           const groupName = ingredientGroups.find((g) => g.id === pi.ingredientGroupId)?.name ?? "";
                           return (
-                            <tr key={pi.ingredientId} style={{ borderBottom: "1px solid #f0e8dc", background: idx % 2 === 0 ? "#fff" : "#fdf8f2" }}>
+                            <tr key={`${pi.ingredientId}-${idx}`} style={{ borderBottom: "1px solid #f0e8dc", background: idx % 2 === 0 ? "#fff" : "#fdf8f2" }}>
                               <td style={{ padding: "6px 10px" }}>{name}</td>
                               <td style={{ padding: "6px 10px" }}>{pi.requiredAmount}</td>
                               <td style={{ padding: "6px 10px" }}>{pi.unit}</td>
@@ -1219,11 +1219,9 @@ export default function ProductAdminPage() {
                       style={{ width: "100%", padding: "7px 8px", borderRadius: 6, border: "1px solid #e2c9a3", fontSize: 13 }}
                     >
                       <option value="">— 選擇 —</option>
-                      {allIngredients
-                        .filter((i) => !form.productIngredients.some((pi) => pi.ingredientId === i.id))
-                        .map((i) => (
-                          <option key={i.id} value={i.id}>{i.name}</option>
-                        ))}
+                      {allIngredients.map((i) => (
+                        <option key={i.id} value={i.id}>{i.name}</option>
+                      ))}
                     </select>
                   </div>
                   <div>
@@ -1267,6 +1265,14 @@ export default function ProductAdminPage() {
                     disabled={!piDraft.ingredientId || !piDraft.requiredAmount || !piDraft.unit}
                     onClick={() => {
                       if (!piDraft.ingredientId || !piDraft.requiredAmount || !piDraft.unit) return;
+                      const draftGroup = piDraft.ingredientGroupId || "";
+                      const isDuplicate = form.productIngredients.some(
+                        (pi) => pi.ingredientId === piDraft.ingredientId && (pi.ingredientGroupId ?? "") === draftGroup
+                      );
+                      if (isDuplicate) {
+                        setMessage("此原物料已加入相同群組，請選擇其他群組");
+                        return;
+                      }
                       updateForm("productIngredients", [
                         ...form.productIngredients,
                         {

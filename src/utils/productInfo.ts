@@ -35,7 +35,7 @@ export function extractSupplementalInfo(product: Product): SupplementalInfo {
 
   // 成分: use ingredient names from productIngredients when available
   let ingredients: string;
-  const piNames = pis.map((pi) => pi.ingredientName).filter(Boolean) as string[];
+  const piNames = [...new Set(pis.map((pi) => pi.ingredientName).filter(Boolean) as string[])];
   if (piNames.length > 0) {
     const base = (product.ingredients || "").trim();
     ingredients = base ? `${base}（${piNames.join("、")}）` : piNames.join("、");
