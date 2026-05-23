@@ -724,33 +724,26 @@ export default function CustomerProductsPage() {
                     type="button"
                     style={{
                       position: "absolute",
-                      left: 8,
+                      left: 10,
                       top: "50%",
                       transform: "translateY(-50%)",
                       zIndex: 2,
-                      width: 30,
-                      height: 30,
+                      width: 40,
+                      height: 40,
                       borderRadius: "50%",
-                      border: "1px solid #ddd",
-                      background: "rgba(255,255,255,0.95)",
+                      border: "none",
+                      background: "linear-gradient(135deg, #5c3d20 0%, #3e2710 100%)",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
                       cursor: "pointer",
-                      color: "#8f6640",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
+                      flexShrink: 0,
                     }}
                   >
-                    <span
-                      aria-hidden="true"
-                      style={{
-                        width: 10,
-                        height: 10,
-                        borderTop: "2.5px solid #8f6640",
-                        borderLeft: "2.5px solid #8f6640",
-                        transform: "rotate(-45deg)",
-                        marginLeft: 3,
-                      }}
-                    />
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e7dfd2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
                   </button>
 
                   <div
@@ -806,33 +799,26 @@ export default function CustomerProductsPage() {
                     type="button"
                     style={{
                       position: "absolute",
-                      right: 8,
+                      right: 10,
                       top: "50%",
                       transform: "translateY(-50%)",
                       zIndex: 2,
-                      width: 30,
-                      height: 30,
+                      width: 40,
+                      height: 40,
                       borderRadius: "50%",
-                      border: "1px solid #ddd",
-                      background: "rgba(255,255,255,0.95)",
+                      border: "none",
+                      background: "linear-gradient(135deg, #5c3d20 0%, #3e2710 100%)",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
                       cursor: "pointer",
-                      color: "#8f6640",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
+                      flexShrink: 0,
                     }}
                   >
-                    <span
-                      aria-hidden="true"
-                      style={{
-                        width: 10,
-                        height: 10,
-                        borderTop: "2.5px solid #8f6640",
-                        borderRight: "2.5px solid #8f6640",
-                        transform: "rotate(45deg)",
-                        marginRight: 3,
-                      }}
-                    />
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e7dfd2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
                   </button>
                 </>
               ) : (
