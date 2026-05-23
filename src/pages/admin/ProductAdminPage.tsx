@@ -335,9 +335,9 @@ export default function ProductAdminPage() {
 
     const name = form.name.trim();
     const description = encodeDescriptionForDb(form.description.trim());
-    const ingredients = form.ingredients.trim();
-    const allergens = form.allergens.trim();
-    const calories = form.calories.trim() === "" ? undefined : Number(form.calories);
+    const ingredients = form.ingredients.trim() || null;
+    const allergens = form.allergens.trim() || null;
+    const calories = form.calories.trim() === "" ? null : Number(form.calories);
     const currency = form.currency.trim().toUpperCase();
     const unitPriceCents = Number(form.unitPriceCents);
     const defaultMinQty = Number(form.defaultMinQty);
@@ -355,7 +355,7 @@ export default function ProductAdminPage() {
       setMessage("請填寫正確的單價（整數，且不可小於 0）");
       return;
     }
-    if (calories !== undefined && (!Number.isFinite(calories) || calories < 0)) {
+    if (calories !== null && (!Number.isFinite(calories) || calories < 0)) {
       setMessage("請填寫正確的 calories（留空或數字，且不可小於 0）");
       return;
     }

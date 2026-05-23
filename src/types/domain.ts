@@ -210,11 +210,11 @@ export type Product = {
 export type ProductCreateRequest = {
   name: string;
   description?: string;
-  ingredients?: string;
-  allergens?: string;
-  allergies?: string;
-  calories?: number;
-  calorie?: number;
+  ingredients?: string | null;
+  allergens?: string | null;
+  allergies?: string | null;
+  calories?: number | null;
+  calorie?: number | null;
   status?: "DRAFT" | "ACTIVE" | "INACTIVE";
   unitPriceCents: number;
   currency: string;
@@ -235,11 +235,11 @@ export type ProductCreateRequest = {
 export type ProductUpdateRequest = {
   name?: string;
   description?: string;
-  ingredients?: string;
-  allergens?: string;
-  allergies?: string;
-  calories?: number;
-  calorie?: number;
+  ingredients?: string | null;
+  allergens?: string | null;
+  allergies?: string | null;
+  calories?: number | null;
+  calorie?: number | null;
   status?: "DRAFT" | "ACTIVE" | "INACTIVE";
   unitPriceCents?: number;
   currency?: string;
