@@ -151,6 +151,17 @@ function decodeProductDescription(value?: string | null): string {
   return (value || "").replace(/\\n/g, "\n");
 }
 
+function toGramAmount(requiredAmount: string, unit: string): number | null {
+  const amount = Number(requiredAmount);
+  if (!Number.isFinite(amount) || amount < 0) return null;
+
+  const normalizedUnit = (unit || "").trim().toLowerCase();
+  if (/^(kg|公斤|千克)$/.test(normalizedUnit)) return amount * 1000;
+  if (/^(g|gram|grams|公克|克)$/.test(normalizedUnit)) return amount;
+  if (/^(mg|毫克)$/.test(normalizedUnit)) return amount / 1000;
+  return null;
+}
+
 function extractSupplementalInfo(product: Product): { ingredients: string; allergens: string; calories: string } {
   const description = decodeProductDescription(product.description || "");
   const lines = description
@@ -197,23 +208,22 @@ function extractSupplementalInfo(product: Product): { ingredients: string; aller
   }
 
   // 熱量計算（每份）：
-  // 1. 聚合所有單位為 g 的原物料
+  // 1. 聚合所有材料，依單位換算成公克
   // 2. 每 100g 熱量 ÷ 100 換算成每 1g 熱量
-  // 3. 每 1g 熱量 × 該原物料用量(g) = 該原物料總熱量
-  // 4. 加總所有原物料熱量 = 整批配方總熱量
+  // 3. 每 1g 熱量 × 該材料用量(g) = 該材料總熱量
+  // 4. 加總所有材料熱量 = 整批配方總熱量
   // 5. 整批總熱量 ÷ recipeQuantity = 每份熱量
   let calories: string;
-  const GRAM_UNITS = /^(g|公克|克|grams?)$/i;
   let totalBatchCalories = 0;
   let hasCalcCalories = false;
   pis.forEach((pi) => {
-    const unit = (pi.unit || "").trim();
-    if (pi.caloriesPer100g == null || !GRAM_UNITS.test(unit)) return;
+    const caloriesPer100g = Number(pi.caloriesPer100g);
+    if (!Number.isFinite(caloriesPer100g)) return;
 
-    const amountInGrams = parseFloat(pi.requiredAmount);
-    if (!Number.isFinite(amountInGrams)) return;
+    const amountInGrams = toGramAmount(pi.requiredAmount, pi.unit);
+    if (amountInGrams == null) return;
 
-    const caloriesPerGram = pi.caloriesPer100g / 100;
+    const caloriesPerGram = caloriesPer100g / 100;
     const ingredientCalories = caloriesPerGram * amountInGrams;
     totalBatchCalories += ingredientCalories;
     hasCalcCalories = true;
