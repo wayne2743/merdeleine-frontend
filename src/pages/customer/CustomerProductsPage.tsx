@@ -705,6 +705,7 @@ export default function CustomerProductsPage() {
               maxWidth: 680,
               maxHeight: "calc(100dvh - 32px)",
               overflowY: "auto",
+              overflowX: "hidden",
               background: "#fff",
               borderRadius: 12,
               padding: 16,
@@ -946,16 +947,84 @@ export default function CustomerProductsPage() {
               </div>
             )}
 
-            <div style={{ marginTop: 14, fontSize: 18, fontWeight: 700, color: "#4a321f" }}>{detailSelected.name}</div>
-            <div style={{ marginTop: 8, fontSize: 14, color: "#5b442f" }}>售價：{formatPrice(detailSelected)}</div>
-            <div style={{ marginTop: 10, display: "grid", gap: 4, fontSize: 13, color: "#6c5642" }}>
-              <div>成分：{extractSupplementalInfo(detailSelected).ingredients}</div>
-              <div>過敏原：{extractSupplementalInfo(detailSelected).allergens}</div>
-              <div>熱量：{extractSupplementalInfo(detailSelected).calories}</div>
-            </div>
-            <div style={{ marginTop: 8, fontSize: 13, color: "#6c5642", whiteSpace: "pre-wrap" }}>
-              {decodeProductDescription(detailSelected.description) || "（無描述）"}
-            </div>
+            {(() => {
+              const info = extractSupplementalInfo(detailSelected);
+              const description = decodeProductDescription(detailSelected.description).trim();
+              const splitTags = (value: string) =>
+                value === "尚未提供"
+                  ? []
+                  : value.split(/[、,，;；]/).map((s) => s.trim()).filter(Boolean);
+              const ingredientTags = splitTags(info.ingredients);
+              const allergenTags = splitTags(info.allergens);
+
+              return (
+                <>
+                  <div style={{ marginTop: 18, fontSize: 22, fontWeight: 800, color: "#3d2c1f", lineHeight: 1.3 }}>
+                    {detailSelected.name}
+                  </div>
+                  <div style={{ marginTop: 6, fontSize: 18, fontWeight: 700, color: "#8c5425" }}>
+                    {formatPrice(detailSelected)}
+                  </div>
+
+                  {/* Info card */}
+                  <div
+                    style={{
+                      marginTop: 16,
+                      display: "grid",
+                      gap: 14,
+                      padding: "16px 18px",
+                      borderRadius: 14,
+                      background: "#faf6f0",
+                      border: "1px solid #ece0cf",
+                    }}
+                  >
+                    {/* 成分 */}
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 6 }}>成分</div>
+                      {ingredientTags.length > 0 ? (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                          {ingredientTags.map((tag, i) => (
+                            <span key={i} style={{ background: "#fff", color: "#5b442f", borderRadius: 999, padding: "4px 11px", fontSize: 13, border: "1px solid #e3d3bd" }}>{tag}</span>
+                          ))}
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: 14, color: "#8a7560" }}>尚未提供</div>
+                      )}
+                    </div>
+
+                    {/* 過敏原 */}
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 6 }}>過敏原</div>
+                      {allergenTags.length > 0 ? (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                          {allergenTags.map((tag, i) => (
+                            <span key={i} style={{ background: "#fdf0ec", color: "#b5532e", borderRadius: 999, padding: "4px 11px", fontSize: 13, fontWeight: 600, border: "1px solid #f1cdbf" }}>{tag}</span>
+                          ))}
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: 14, color: "#8a7560" }}>尚未提供</div>
+                      )}
+                    </div>
+
+                    {/* 熱量 */}
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54" }}>熱量</span>
+                      <span style={{ fontSize: 15, fontWeight: 700, color: "#5b442f" }}>{info.calories}</span>
+                    </div>
+                  </div>
+
+                  {/* 商品介紹 */}
+                  {description && (
+                    <div style={{ marginTop: 18 }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 8 }}>商品介紹</div>
+                      <div style={{ fontSize: 15, lineHeight: 1.85, color: "#54402d", whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word" }}>
+                        {description}
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       )}
