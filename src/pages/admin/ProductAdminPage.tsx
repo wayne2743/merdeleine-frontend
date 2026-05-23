@@ -215,6 +215,8 @@ export default function ProductAdminPage() {
   const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
   const [piDraft, setPiDraft] = useState(INITIAL_PI_DRAFT);
   const [ingredientGroups, setIngredientGroups] = useState<IngredientGroup[]>([]);
+  const [allDbGroups, setAllDbGroups] = useState<IngredientGroup[]>([]);
+  const [selectedDbGroupName, setSelectedDbGroupName] = useState("");
   const [newGroupName, setNewGroupName] = useState("");
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState("");
@@ -301,6 +303,8 @@ export default function ProductAdminPage() {
     resetForm();
     resetImageForm();
     setIngredientGroups([]);
+    setAllDbGroups([]);
+    setSelectedDbGroupName("");
     setNewGroupName("");
     setEditingGroupId(null);
   }
@@ -311,6 +315,8 @@ export default function ProductAdminPage() {
     resetImageForm();
     setPiDraft(INITIAL_PI_DRAFT);
     setIngredientGroups([]);
+    setAllDbGroups([]);
+    setSelectedDbGroupName("");
     setNewGroupName("");
     setEditingGroupId(null);
     setFormModalOpen(true);
@@ -322,11 +328,13 @@ export default function ProductAdminPage() {
     setForm(toForm(product));
     resetImageForm();
     setPiDraft(INITIAL_PI_DRAFT);
+    setSelectedDbGroupName("");
     setNewGroupName("");
     setEditingGroupId(null);
     setFormModalOpen(true);
     void catalogApi.listIngredients().then(setAllIngredients).catch(() => {});
     void catalogApi.listProductIngredientGroups(product.id).then(setIngredientGroups).catch(() => {});
+    void catalogApi.listAllIngredientGroups().then(setAllDbGroups).catch(() => {});
   }
 
   async function onSubmit(e: FormEvent) {
@@ -629,6 +637,17 @@ export default function ProductAdminPage() {
       setNewGroupName("");
     } catch (e: any) {
       setMessage(e?.message ?? "新增群組失敗");
+    }
+  }
+
+  async function handleAddExistingGroup() {
+    if (!form.id || !selectedDbGroupName) return;
+    try {
+      const group = await catalogApi.createIngredientGroup({ productId: form.id, name: selectedDbGroupName });
+      setIngredientGroups((prev) => [...prev, group]);
+      setSelectedDbGroupName("");
+    } catch (e: any) {
+      setMessage(e?.message ?? "加入群組失敗");
     }
   }
 
@@ -1130,6 +1149,36 @@ export default function ProductAdminPage() {
                     );
                   })}
 
+                  {/* Select from existing DB groups */}
+                  {allDbGroups.length > 0 && (() => {
+                    const existingNames = new Set(ingredientGroups.map((g) => g.name));
+                    const options = [...new Set(allDbGroups.map((g) => g.name))].filter((n) => !existingNames.has(n));
+                    if (options.length === 0) return null;
+                    return (
+                      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                        <select
+                          value={selectedDbGroupName}
+                          onChange={(e) => setSelectedDbGroupName(e.target.value)}
+                          style={{ flex: 1, padding: "7px 8px", borderRadius: 6, border: "1px solid #e2c9a3", fontSize: 13, background: "#fff" }}
+                        >
+                          <option value="">— 選擇現有群組 —</option>
+                          {options.map((name) => (
+                            <option key={name} value={name}>{name}</option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          disabled={!selectedDbGroupName}
+                          onClick={() => void handleAddExistingGroup()}
+                          style={{ padding: "7px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, background: "#e9c07a", border: "1px solid #d5a85a", cursor: "pointer", whiteSpace: "nowrap" }}
+                        >
+                          加入
+                        </button>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Create new group */}
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                     <input
                       value={newGroupName}

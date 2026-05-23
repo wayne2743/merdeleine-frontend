@@ -686,6 +686,11 @@ export const catalogApi = {
     return Array.isArray(data) ? data : [];
   },
 
+  async listAllIngredientGroups(): Promise<IngredientGroup[]> {
+    const { data } = await http.get<IngredientGroup[]>("/api/catalog/ingredient-groups");
+    return Array.isArray(data) ? data : [];
+  },
+
   async updateIngredientGroup(id: string, req: IngredientGroupUpdateRequest): Promise<IngredientGroup> {
     const { data } = await http.put<IngredientGroup>(`/api/catalog/ingredient-groups/${id}`, req);
     return data;
