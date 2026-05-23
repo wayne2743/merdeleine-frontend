@@ -212,6 +212,34 @@ function normalizeSellWindowResponse(data: unknown): SellWindowResponse {
   };
 }
 
+function toAmountString(...values: unknown[]): string {
+  for (const value of values) {
+    if (value === null || value === undefined || value === "") continue;
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return "";
+}
+
+function normalizeProductIngredient(data: unknown): ProductIngredient {
+  const raw = asRecord(data) ?? {};
+  return {
+    ingredientId: pickString(raw.ingredientId, raw.ingredient_id),
+    ingredientName: pickString(raw.ingredientName, raw.ingredient_name) || undefined,
+    ingredientAttribute:
+      pickString(raw.ingredientAttribute, raw.ingredient_attribute) || undefined,
+    caloriesPer100g: pickNullableNumber(
+      raw.caloriesPer100g,
+      raw.calories_per_100g,
+      raw.caloriesPer_100g,
+    ),
+    allergens: pickNullableString(raw.allergens),
+    requiredAmount: toAmountString(raw.requiredAmount, raw.required_amount),
+    unit: pickString(raw.unit),
+    ingredientGroupId: pickNullableString(raw.ingredientGroupId, raw.ingredient_group_id),
+  };
+}
+
 function normalizeProduct(data: unknown): Product {
   const raw = asRecord(data) ?? {};
   const rawStatus = pickString(raw.status).toUpperCase();
@@ -219,6 +247,12 @@ function normalizeProduct(data: unknown): Product {
     rawStatus === "ACTIVE" || rawStatus === "DRAFT" || rawStatus === "INACTIVE"
       ? rawStatus
       : "DRAFT";
+
+  const rawIngredients = Array.isArray(raw.productIngredients)
+    ? raw.productIngredients
+    : Array.isArray(raw.product_ingredients)
+    ? raw.product_ingredients
+    : [];
 
   return {
     id: pickString(raw.id, raw.productId, raw.product_id),
@@ -237,7 +271,8 @@ function normalizeProduct(data: unknown): Product {
     defaultOpenDays: pickNullableNumber(raw.defaultOpenDays, raw.default_open_days),
     defaultLeadDays: pickNullableNumber(raw.defaultLeadDays, raw.default_lead_days),
     defaultShipDays: pickNullableNumber(raw.defaultShipDays, raw.default_ship_days),
-    productIngredients: Array.isArray(raw.productIngredients) ? (raw.productIngredients as ProductIngredient[]) : [],
+    recipeQuantity: pickNullableNumber(raw.recipeQuantity, raw.recipe_quantity),
+    productIngredients: rawIngredients.map(normalizeProductIngredient),
   };
 }
 
