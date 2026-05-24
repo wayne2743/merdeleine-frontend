@@ -603,8 +603,8 @@ export default function HomePage() {
               overflowY: "auto",
               overflowX: "hidden",
               background: "#fff",
-              borderRadius: 12,
-              padding: 16,
+              borderRadius: 16,
+              padding: "20px 20px 24px",
               position: "relative",
             }}
             onClick={(e) => e.stopPropagation()}
@@ -622,8 +622,8 @@ export default function HomePage() {
               ×
             </button>
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ fontWeight: 800, fontSize: 16, color: "#4a321f" }}>商品詳細</div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div style={{ fontWeight: 800, fontSize: 20, color: "#4a321f" }}>商品詳細</div>
             </div>
 
             <div
@@ -810,8 +810,8 @@ export default function HomePage() {
                 padding: "7px 12px",
               }}
             >
-              <span style={{ fontSize: 14, color: "#7c6146", fontWeight: 600 }}>售價</span>
-              <span style={{ fontSize: 22, color: "#5b2d08", fontWeight: 800 }}>{featuredDetail.price}</span>
+              <span style={{ fontSize: 16, color: "#7c6146", fontWeight: 600 }}>售價</span>
+              <span style={{ fontSize: 26, color: "#5b2d08", fontWeight: 800 }}>{featuredDetail.price}</span>
             </div>
 
             {(() => {
@@ -820,10 +820,10 @@ export default function HomePage() {
               return (
                 <div
                   style={{
-                    marginTop: 16,
+                    marginTop: 20,
                     display: "grid",
-                    gap: 14,
-                    padding: "16px 18px",
+                    gap: 18,
+                    padding: "20px 20px",
                     borderRadius: 14,
                     background: "#faf6f0",
                     border: "1px solid #ece0cf",
@@ -831,36 +831,36 @@ export default function HomePage() {
                 >
                   {/* 成分 */}
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 6 }}>成分</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 10 }}>成分</div>
                     {ingredientTags.length > 0 ? (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                         {ingredientTags.map((tag, i) => (
-                          <span key={i} style={{ background: "#fff", color: "#5b442f", borderRadius: 999, padding: "4px 11px", fontSize: 13, border: "1px solid #e3d3bd" }}>{tag}</span>
+                          <span key={i} style={{ background: "#fff", color: "#5b442f", borderRadius: 999, padding: "7px 16px", fontSize: 15, border: "1px solid #e3d3bd" }}>{tag}</span>
                         ))}
                       </div>
                     ) : (
-                      <div style={{ fontSize: 14, color: "#8a7560" }}>尚未提供</div>
+                      <div style={{ fontSize: 15, color: "#8a7560" }}>尚未提供</div>
                     )}
                   </div>
 
                   {/* 過敏原 */}
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 6 }}>過敏原</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 10 }}>過敏原</div>
                     {allergenTags.length > 0 ? (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                         {allergenTags.map((tag, i) => (
-                          <span key={i} style={{ background: "#fdf0ec", color: "#b5532e", borderRadius: 999, padding: "4px 11px", fontSize: 13, fontWeight: 600, border: "1px solid #f1cdbf" }}>{tag}</span>
+                          <span key={i} style={{ background: "#fdf0ec", color: "#b5532e", borderRadius: 999, padding: "7px 16px", fontSize: 15, fontWeight: 600, border: "1px solid #f1cdbf" }}>{tag}</span>
                         ))}
                       </div>
                     ) : (
-                      <div style={{ fontSize: 14, color: "#8a7560" }}>尚未提供</div>
+                      <div style={{ fontSize: 15, color: "#8a7560" }}>尚未提供</div>
                     )}
                   </div>
 
                   {/* 熱量 */}
                   <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54" }}>熱量</span>
-                    <span style={{ fontSize: 15, fontWeight: 700, color: "#5b442f" }}>{featuredDetail.calories}</span>
+                    <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54" }}>熱量</span>
+                    <span style={{ fontSize: 17, fontWeight: 700, color: "#5b442f" }}>{featuredDetail.calories}</span>
                   </div>
                 </div>
               );
@@ -868,8 +868,8 @@ export default function HomePage() {
 
             {featuredDetail.fullDesc && featuredDetail.fullDesc !== "（無描述）" && (
               <div style={{ marginTop: 18 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 8 }}>商品介紹</div>
-                <div style={{ fontSize: 15, lineHeight: 1.85, color: "#54402d", whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word" }}>
+                <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 10 }}>商品介紹</div>
+                <div style={{ fontSize: 16, lineHeight: 1.9, color: "#54402d", whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word" }}>
                   {featuredDetail.fullDesc}
                 </div>
               </div>
