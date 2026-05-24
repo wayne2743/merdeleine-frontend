@@ -1148,16 +1148,23 @@ export default function CustomerProductsPage() {
                   我們會依您的下單數量，優先加入目前可併單的檔期；若暫時沒有可加入檔期，系統會自動建立新檔期並先為您保留數量。檔期結束前，若下單總量達到最低成團門檻，系統才會通知所有訂購者進行付款。
                 </div>
 
-                <label style={{ display: "grid", gap: 6, marginBottom: 20 }}>
+                <div style={{ display: "grid", gap: 6, marginBottom: 20 }}>
                   <span style={{ fontSize: 13, fontWeight: 600, color: "#5f4b3a" }}>下單數量</span>
-                  <input
-                    type="number"
-                    min={1}
-                    value={qty}
-                    onChange={(e) => setQty(Math.max(1, Number(e.target.value)))}
-                    style={{ fontSize: 15, padding: "10px 14px" }}
-                  />
-                </label>
+                  <div style={{ display: "flex", alignItems: "center", border: "1px solid #d8c8b5", borderRadius: 8, overflow: "hidden", background: "#fff", width: "fit-content" }}>
+                    <button
+                      type="button"
+                      onClick={() => setQty((q) => Math.max(1, q - 1))}
+                      disabled={qty <= 1}
+                      style={{ width: 44, height: 44, fontSize: 22, fontWeight: 600, color: "#8a6948", background: "transparent", border: "none", cursor: qty > 1 ? "pointer" : "default", lineHeight: 1 }}
+                    >−</button>
+                    <span style={{ width: 48, textAlign: "center", fontSize: 16, fontWeight: 600, color: "#3f3228", userSelect: "none" }}>{qty}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQty((q) => q + 1)}
+                      style={{ width: 44, height: 44, fontSize: 22, fontWeight: 600, color: "#8a6948", background: "transparent", border: "none", cursor: "pointer", lineHeight: 1 }}
+                    >+</button>
+                  </div>
+                </div>
 
                 <div
                   style={{
