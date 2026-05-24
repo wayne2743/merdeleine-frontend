@@ -139,4 +139,15 @@ export const orderApi = {
     );
     return data;
   },
+
+  async updateStorePickupLocation(
+    id: string,
+    payload: StorePickupLocationRequest
+  ): Promise<StorePickupLocationResponse> {
+    const { data } = await http.put<StorePickupLocationResponse>(
+      `/api/order/admin/store-pickup-locations/${id}`,
+      payload
+    );
+    return data;
+  },
 };

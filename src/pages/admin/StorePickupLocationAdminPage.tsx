@@ -48,6 +48,10 @@ export default function StorePickupLocationAdminPage() {
   const [locations, setLocations] = useState<StorePickupLocationResponse[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<FormState>(INITIAL_FORM);
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
 
   async function loadLocations() {
     setListLoading(true);
@@ -71,6 +75,57 @@ export default function StorePickupLocationAdminPage() {
   ) {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  }
+
+  function startEdit(loc: StorePickupLocationResponse) {
+    if (!loc.id) return;
+    setEditError(null);
+    setEditingId(loc.id);
+    setEditForm({
+      name: loc.name ?? "",
+      address: loc.address ?? "",
+      contactPhone: loc.contactPhone ?? "",
+      active: loc.active ?? true,
+    });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditError(null);
+    setEditForm(INITIAL_FORM);
+  }
+
+  async function onSaveEdit(id: string) {
+    setEditError(null);
+
+    const name = editForm.name.trim();
+    const address = editForm.address.trim();
+    const contactPhone = editForm.contactPhone.trim();
+
+    if (!name) {
+      setEditError("請輸入門市名稱");
+      return;
+    }
+    if (!address) {
+      setEditError("請輸入門市地址");
+      return;
+    }
+
+    setEditSubmitting(true);
+    try {
+      await orderApi.updateStorePickupLocation(id, {
+        name,
+        address,
+        contactPhone: contactPhone || undefined,
+        active: editForm.active,
+      });
+      cancelEdit();
+      void loadLocations();
+    } catch (e: unknown) {
+      setEditError(getErrorMessage(e));
+    } finally {
+      setEditSubmitting(false);
+    }
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -308,59 +363,140 @@ export default function StorePickupLocationAdminPage() {
 
         {locations.length > 0 && (
           <div style={{ display: "grid", gap: 10 }}>
-            {locations.map((loc, index) => (
-              <div
-                key={loc.id ?? index}
-                style={{
-                  borderRadius: 12,
-                  border: "1px solid #e5d6c2",
-                  background: "#fff",
-                  padding: "14px 16px",
-                  display: "grid",
-                  gap: 4,
-                }}
-              >
+            {locations.map((loc, index) => {
+              const isEditing = !!loc.id && editingId === loc.id;
+              return (
                 <div
+                  key={loc.id ?? index}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    flexWrap: "wrap",
+                    borderRadius: 12,
+                    border: "1px solid #e5d6c2",
+                    background: "#fff",
+                    padding: "14px 16px",
+                    display: "grid",
+                    gap: isEditing ? 10 : 4,
                   }}
                 >
-                  <span
-                    style={{ fontSize: 15, fontWeight: 700, color: "#4b392a" }}
-                  >
-                    {loc.name ?? "-"}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 600,
-                      padding: "2px 8px",
-                      borderRadius: 999,
-                      background: loc.active
-                        ? "#e9f7ee"
-                        : "#f4f0ea",
-                      color: loc.active ? "#2f7f49" : "#7b6d60",
-                      border: loc.active
-                        ? "1px solid #b9e2c7"
-                        : "1px solid #d9cec0",
-                    }}
-                  >
-                    {loc.active ? "啟用中" : "已停用"}
-                  </span>
+                  {isEditing ? (
+                    <>
+                      <label style={{ display: "grid", gap: 6 }}>
+                        <span style={{ fontSize: 12, color: "#5f4c3b", fontWeight: 700 }}>門市名稱</span>
+                        <input
+                          value={editForm.name}
+                          onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
+                          maxLength={255}
+                          disabled={editSubmitting}
+                        />
+                      </label>
+                      <label style={{ display: "grid", gap: 6 }}>
+                        <span style={{ fontSize: 12, color: "#5f4c3b", fontWeight: 700 }}>門市地址</span>
+                        <textarea
+                          value={editForm.address}
+                          onChange={(e) => setEditForm((prev) => ({ ...prev, address: e.target.value }))}
+                          maxLength={1000}
+                          rows={2}
+                          disabled={editSubmitting}
+                        />
+                      </label>
+                      <label style={{ display: "grid", gap: 6 }}>
+                        <span style={{ fontSize: 12, color: "#5f4c3b", fontWeight: 700 }}>聯絡電話（選填）</span>
+                        <input
+                          value={editForm.contactPhone}
+                          onChange={(e) => setEditForm((prev) => ({ ...prev, contactPhone: e.target.value }))}
+                          maxLength={30}
+                          disabled={editSubmitting}
+                        />
+                      </label>
+                      <label style={{ display: "inline-flex", gap: 8, alignItems: "center", color: "#5f4c3b", fontSize: 14, fontWeight: 600 }}>
+                        <input
+                          type="checkbox"
+                          checked={editForm.active}
+                          disabled={editSubmitting}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setEditForm((prev) => ({ ...prev, active: checked }));
+                          }}
+                        />
+                        啟用此門市
+                      </label>
+                      {editError && (
+                        <p style={{ margin: 0, fontSize: 13, color: "#9f3e3e", background: "#fff1ef", border: "1px solid #efc1c1", borderRadius: 10, padding: "8px 10px" }}>
+                          {editError}
+                        </p>
+                      )}
+                      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                        <button
+                          type="button"
+                          onClick={cancelEdit}
+                          disabled={editSubmitting}
+                          style={{ padding: "6px 14px", fontSize: 13, borderRadius: 999, background: "transparent", border: "1px solid #d9cec0", color: "#5f4c3b" }}
+                        >
+                          取消
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void onSaveEdit(loc.id!)}
+                          disabled={editSubmitting}
+                          style={{ padding: "6px 14px", fontSize: 13, borderRadius: 999, minWidth: 72 }}
+                        >
+                          {editSubmitting ? "儲存中..." : "儲存"}
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <span
+                          style={{ fontSize: 15, fontWeight: 700, color: "#4b392a" }}
+                        >
+                          {loc.name ?? "-"}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            padding: "2px 8px",
+                            borderRadius: 999,
+                            background: loc.active
+                              ? "#e9f7ee"
+                              : "#f4f0ea",
+                            color: loc.active ? "#2f7f49" : "#7b6d60",
+                            border: loc.active
+                              ? "1px solid #b9e2c7"
+                              : "1px solid #d9cec0",
+                          }}
+                        >
+                          {loc.active ? "啟用中" : "已停用"}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => startEdit(loc)}
+                          disabled={!loc.id || editingId !== null}
+                          style={{ marginLeft: "auto", padding: "4px 12px", fontSize: 12, borderRadius: 999, background: "transparent", border: "1px solid #d9cec0", color: "#5f4c3b" }}
+                        >
+                          編輯
+                        </button>
+                      </div>
+                      <div style={{ fontSize: 13, color: "#5f4c3b" }}>
+                        {loc.address ?? "-"}
+                      </div>
+                      {loc.contactPhone && (
+                        <div style={{ fontSize: 12, color: "#7b6a59" }}>
+                          {loc.contactPhone}
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
-                <div style={{ fontSize: 13, color: "#5f4c3b" }}>
-                  {loc.address ?? "-"}
-                </div>
-                {loc.contactPhone && (
-                  <div style={{ fontSize: 12, color: "#7b6a59" }}>
-                    {loc.contactPhone}
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
