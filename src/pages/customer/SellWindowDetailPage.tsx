@@ -400,23 +400,19 @@ export default function SellWindowDetailPage() {
 
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <label style={{ fontSize: 14, color: "#8a6948", whiteSpace: "nowrap" }}>數量</label>
-          <input
-            type="number"
-            min={1}
-            value={qty}
-            disabled={!canReserve}
-            onChange={(e) => setQty(Number(e.target.value))}
-            style={{
-              width: 100,
-              padding: "8px 12px",
-              borderRadius: 8,
-              border: "1px solid #d8c8b5",
-              background: "#fff",
-              color: "#3f3228",
-              fontSize: 15,
-              boxSizing: "border-box",
-            }}
-          />
+          <div style={{ display: "flex", alignItems: "center", border: "1px solid #d8c8b5", borderRadius: 8, overflow: "hidden", background: canReserve ? "#fff" : "#f5ede2" }}>
+            <button
+              onClick={() => setQty((q) => Math.max(1, q - 1))}
+              disabled={!canReserve || qty <= 1}
+              style={{ width: 40, height: 40, fontSize: 20, fontWeight: 600, color: "#8a6948", background: "transparent", border: "none", cursor: canReserve && qty > 1 ? "pointer" : "default", lineHeight: 1 }}
+            >−</button>
+            <span style={{ width: 40, textAlign: "center", fontSize: 16, fontWeight: 600, color: "#3f3228", userSelect: "none" }}>{qty}</span>
+            <button
+              onClick={() => setQty((q) => (maxQty != null ? Math.min(maxQty - soldQty, q + 1) : q + 1))}
+              disabled={!canReserve || (maxQty != null && qty >= maxQty - soldQty)}
+              style={{ width: 40, height: 40, fontSize: 20, fontWeight: 600, color: "#8a6948", background: "transparent", border: "none", cursor: "pointer", lineHeight: 1 }}
+            >+</button>
+          </div>
           <button
             onClick={onReserve}
             disabled={!canReserve}
