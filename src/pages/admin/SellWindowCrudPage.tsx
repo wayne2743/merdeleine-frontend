@@ -864,249 +864,223 @@ export default function SellWindowCrudPage() {
             </div>
           </div>
 
-          <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 1100 }}>
-            <thead>
-              <tr style={{ background: "#f5f5f5", textAlign: "left" }}>
-                {["檔期名稱", "商品", "售價", "開始", "結束", "狀態 / 名額", "批次", "付款", "操作"].map((h) => (
-                  <th key={h} style={{ padding: "10px 12px", borderBottom: "2px solid #ddd" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredItems.length === 0 ? (
-                <tr>
-                  <td colSpan={9} style={{ padding: 16, color: "#888", textAlign: "center" }}>
-                    {items.length === 0 ? "目前沒有任何資料。" : "查無符合篩選條件的資料。"}
-                  </td>
-                </tr>
-              ) : (
-                filteredItems.map((item) => {
-                  const sellWindow = toSellWindowResponse(item);
-                  const status = getSellWindowStatus(item);
-                  const product = productById.get(item.productId);
-                  const unitPriceCents = typeof product?.unitPriceCents === "number"
-                    ? product.unitPriceCents
-                    : item.unitPriceCents;
-                  const currency = product?.currency ?? item.currency;
+          <div style={{ display: "grid", gap: 14 }}>
+            {filteredItems.length === 0 ? (
+              <div style={{ padding: 16, color: "#888", textAlign: "center", fontSize: 14 }}>
+                {items.length === 0 ? "目前沒有任何資料。" : "查無符合篩選條件的資料。"}
+              </div>
+            ) : (
+              filteredItems.map((item) => {
+                const sellWindow = toSellWindowResponse(item);
+                const status = getSellWindowStatus(item);
+                const product = productById.get(item.productId);
+                const unitPriceCents = typeof product?.unitPriceCents === "number"
+                  ? product.unitPriceCents
+                  : item.unitPriceCents;
+                const currency = product?.currency ?? item.currency;
 
-                  return (
-                    <tr
-                      key={item.productSellWindowId || item.sellWindowId}
-                      style={{
-                        borderBottom: "1px solid #eee",
-                      }}
-                    >
-                      <td style={{ padding: "10px 12px", fontWeight: 500 }}>{item.sellWindowName}</td>
-                      <td style={{ padding: "10px 12px" }}>
-                        <div>{item.productName || "-"}</div>
-                        <div style={{ marginTop: 4, display: "grid", gap: 2, fontSize: 12, color: "#777" }}>
-                          <span>最低預約數量：{item.minQty}</span>
-                          <span>最大預約數量：{item.maxQty ?? "-"}</span>
-                          <span>已預約數量：{item.soldQty}</span>
-                          <span>已保留數量：{item.reservedQty}</span>
-                          <span>已付款數量：{item.paidQty}</span>
-                        </div>
-                      </td>
-                      <td style={{ padding: "10px 12px" }}>{formatMoney(unitPriceCents, currency)}</td>
-                      <td style={{ padding: "10px 12px" }}>{fmt(item.startAt)}</td>
-                      <td style={{ padding: "10px 12px" }}>{fmt(item.endAt)}</td>
-                      <td style={{ padding: "10px 12px" }}>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-start" }}>
-                          <span
-                            style={{
-                              padding: "2px 8px",
-                              borderRadius: 4,
-                              fontSize: 12,
-                              background:
-                                status === "OPEN"
-                                  ? "#e6f4ea"
-                                  : status === "FINISHED"
-                                    ? "#e8ebf5"
-                                  : "#f0f0f0",
-                              color:
-                                status === "OPEN"
-                                  ? "#2e7d32"
-                                  : status === "FINISHED"
-                                    ? "#41507a"
-                                  : "#666",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {status ? (STATUS_LABEL[status] ?? status) : "-"}
-                          </span>
-                          <span style={{ fontSize: 12, color: "#777" }}>名額：{item.quotaStatus}</span>
-                        </div>
-                      </td>
-                      {/* 批次欄 */}
-                      <td style={{ padding: "10px 12px", verticalAlign: "top" }}>
-                        {(() => {
-                          // 三層比對：① sellWindowId ② name fallback ③ 包含 productSellWindowId 的全掃描
-                          let rowBatches = batchBySellWindowId.get(item.sellWindowId) ?? [];
-                          if (rowBatches.length === 0) {
-                            const nameId = rawSwIdByName.get(item.sellWindowName);
-                            if (nameId) rowBatches = batchBySellWindowId.get(nameId) ?? [];
-                          }
-                          if (rowBatches.length === 0) {
-                            // 終極 fallback：處理 sellWindowId / productSellWindowId 混用
-                            rowBatches = batches.filter((b) =>
-                              b.sellWindowId === item.sellWindowId ||
-                              b.sellWindowId === item.productSellWindowId ||
-                              b.sellWindowId.endsWith(item.sellWindowId) ||
-                              item.sellWindowId.endsWith(b.sellWindowId) ||
-                              b.sellWindowId.endsWith(item.productSellWindowId) ||
-                              item.productSellWindowId.endsWith(b.sellWindowId)
-                            );
-                          }
-                          const activeBatch = rowBatches[0];
-                          if (!activeBatch) return <span style={{ color: "#bbb", fontSize: 12 }}>-</span>;
-                          const meta = BATCH_STATUS_META[activeBatch.status] ?? { label: activeBatch.status, color: "#666", bg: "#eee", border: "#ccc" };
-                          const canConfirm = activeBatch.status === "CREATED";
-                          return (
-                            <div style={{ display: "grid", gap: 5 }}>
-                              <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 12, background: meta.bg, color: meta.color, border: `1px solid ${meta.border}`, whiteSpace: "nowrap", display: "inline-block" }}>
-                                {meta.label}
-                              </span>
-                              <div style={{ fontSize: 12, color: "#666" }}>目標：{activeBatch.targetQty}</div>
-                              <button
-                                type="button"
-                                onClick={() => onConfirmBatch(activeBatch)}
-                                disabled={!canConfirm || Boolean(batchSubmitting)}
-                                style={{
-                                  ...btnSmall,
-                                  background: canConfirm ? "#e5faf0" : "#f0f0f0",
-                                  color: canConfirm ? "#0f6c52" : "#7a7a7a",
-                                  borderColor: canConfirm ? "#9ad8c4" : "#d0d0d0",
-                                  fontSize: 12,
-                                  padding: "5px 10px",
-                                  minWidth: 68,
-                                  boxShadow: "none",
-                                }}
-                                title={canConfirm ? `確認批次 ${activeBatch.id}` : `目前狀態 ${activeBatch.status}，不可 Confirm`}
-                              >
-                                {batchSubmitting === activeBatch.id ? "處理中..." : "Confirm"}
-                              </button>
-                                  {/* ── 批次確認 Modal ── */}
-                                  {confirmModal.open && confirmModal.batch && (
-                                    <div
-                                      role="dialog"
-                                      aria-modal="true"
-                                      style={{
-                                        position: "fixed",
-                                        inset: 0,
-                                        background: "rgba(0,0,0,0.42)",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        zIndex: 1200,
-                                        padding: 16,
-                                      }}
-                                    >
-                                      <div
-                                        onClick={e => e.stopPropagation()}
-                                        style={{
-                                          width: "min(400px, 100%)",
-                                          background: "#fff",
-                                          borderRadius: 10,
-                                          boxShadow: "0 20px 50px rgba(0,0,0,0.2)",
-                                          padding: 28,
-                                          textAlign: "center",
-                                        }}
-                                      >
-                                        <h3 style={{ margin: 0, marginBottom: 16 }}>確認批次</h3>
-                                        <div style={{ marginBottom: 18, fontSize: 15 }}>
-                                          <div style={{ marginBottom: 8, fontWeight: 500 }}>
-                                            檔期名稱：<span style={{ color: "#0f6c52" }}>{confirmModal.sellWindowName}</span>
-                                          </div>
-                                          確定要確認批次 <b>{confirmModal.batch.id}</b>？<br />
-                                          此操作將無法還原。
-                                        </div>
-                                        <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
-                                          <button
-                                            type="button"
-                                            style={{ ...btnSmall, background: "#e5faf0", color: "#0f6c52", borderColor: "#9ad8c4", minWidth: 72 }}
-                                            disabled={Boolean(batchSubmitting)}
-                                            onClick={() => confirmModal.batch && doConfirmBatch(confirmModal.batch)}
-                                          >
-                                            {batchSubmitting === confirmModal.batch.id ? "處理中..." : "確定"}
-                                          </button>
-                                          <button
-                                            type="button"
-                                            style={{ ...btnSmall, background: "#f0f0f0", color: "#7a7a7a", borderColor: "#d0d0d0", minWidth: 72 }}
-                                            disabled={Boolean(batchSubmitting)}
-                                            onClick={() => setConfirmModal({ open: false, batch: null, sellWindowName: "" })}
-                                          >
-                                            取消
-                                          </button>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )}
-                            </div>
-                          );
-                        })()}
-                      </td>
-                      {/* 付款欄 */}
-                      <td style={{ padding: "10px 12px", verticalAlign: "top" }}>
-                        {(() => {
-                          const rowPayments = paymentsBySellWindowId.get(item.sellWindowId) ?? [];
-                          if (rowPayments.length === 0) return <span style={{ color: "#bbb", fontSize: 12 }}>-</span>;
-                          const initCount = rowPayments.filter((p) => p.status === "INIT").length;
-                          const succeededCount = rowPayments.filter((p) => p.status === "SUCCEEDED").length;
-                          const expiredCount = rowPayments.filter((p) => p.status === "EXPIRED").length;
-                          const hasPendingPayment = initCount > 0;
-                          return (
-                            <div style={{ display: "grid", gap: 5 }}>
-                              {succeededCount > 0 && <div style={{ fontSize: 12, color: "#2f6d47" }}>已付款 {succeededCount} 筆</div>}
-                              {initCount > 0 && <div style={{ fontSize: 12, color: "#8a5a14" }}>待付款 {initCount} 筆</div>}
-                              {expiredCount > 0 && <div style={{ fontSize: 12, color: "#b13a2d" }}>已逾期 {expiredCount} 筆</div>}
-                              {hasPendingPayment && (
-                                <button
-                                  type="button"
-                                  onClick={() => goToPaymentManagementForSellWindow(item.sellWindowId)}
-                                  style={{ ...btnSmall, background: "#e8f5e9", color: "#2f6d47", borderColor: "#9ad8c4", fontSize: 12, padding: "5px 10px", minWidth: 68, boxShadow: "none" }}
-                                >
-                                  確認收款
-                                </button>
-                              )}
-                            </div>
-                          );
-                        })()}
-                      </td>
-                      <td style={{ padding: "10px 12px" }}>
-                        <div style={{ display: "grid", gap: 8, justifyItems: "start" }}>
-                          <button
-                            type="button"
-                            onClick={() => openOrders(sellWindow)}
-                            style={{ ...btnSmall, ...btnSmallInfo }}
-                          >
-                            查看訂單
-                          </button>
-                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                let rowBatches = batchBySellWindowId.get(item.sellWindowId) ?? [];
+                if (rowBatches.length === 0) {
+                  const nameId = rawSwIdByName.get(item.sellWindowName);
+                  if (nameId) rowBatches = batchBySellWindowId.get(nameId) ?? [];
+                }
+                if (rowBatches.length === 0) {
+                  rowBatches = batches.filter((b) =>
+                    b.sellWindowId === item.sellWindowId ||
+                    b.sellWindowId === item.productSellWindowId ||
+                    b.sellWindowId.endsWith(item.sellWindowId) ||
+                    item.sellWindowId.endsWith(b.sellWindowId) ||
+                    b.sellWindowId.endsWith(item.productSellWindowId) ||
+                    item.productSellWindowId.endsWith(b.sellWindowId)
+                  );
+                }
+                const activeBatch = rowBatches[0];
+
+                const rowPayments = paymentsBySellWindowId.get(item.sellWindowId) ?? [];
+                const initCount = rowPayments.filter((p) => p.status === "INIT").length;
+                const succeededCount = rowPayments.filter((p) => p.status === "SUCCEEDED").length;
+                const expiredCount = rowPayments.filter((p) => p.status === "EXPIRED").length;
+
+                return (
+                  <div
+                    key={item.productSellWindowId || item.sellWindowId}
+                    style={{
+                      background: "#fff",
+                      borderRadius: 12,
+                      border: "1px solid #e4d8c4",
+                      padding: "14px 16px",
+                      display: "grid",
+                      gap: 10,
+                      fontSize: 14,
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, flexWrap: "wrap" }}>
+                      <div style={{ fontWeight: 700, fontSize: 15, color: "#2f241b" }}>{item.sellWindowName}</div>
+                      <span style={{
+                        padding: "2px 10px",
+                        borderRadius: 999,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        whiteSpace: "nowrap",
+                        background: status === "OPEN" ? "#e6f4ea" : status === "FINISHED" ? "#e8ebf5" : "#f0f0f0",
+                        color: status === "OPEN" ? "#2e7d32" : status === "FINISHED" ? "#41507a" : "#666",
+                      }}>
+                        {status ? (STATUS_LABEL[status] ?? status) : "-"}
+                      </span>
+                    </div>
+
+                    <div style={{ height: 1, background: "#f0e8dc" }} />
+
+                    <div>
+                      <div style={{ color: "#4a3420", fontWeight: 600, marginBottom: 4 }}>{item.productName || "-"}</div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: "2px 16px", fontSize: 12, color: "#777" }}>
+                        <span>最低預約：{item.minQty}</span>
+                        <span>最大預約：{item.maxQty ?? "-"}</span>
+                        <span>已預約：{item.soldQty}</span>
+                        <span>已保留：{item.reservedQty}</span>
+                        <span>已付款：{item.paidQty}</span>
+                        <span>名額：{item.quotaStatus}</span>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 8 }}>
+                      <div>
+                        <div style={{ fontSize: 12, color: "#9b7f62", marginBottom: 2 }}>售價</div>
+                        <div style={{ fontWeight: 600 }}>{formatMoney(unitPriceCents, currency)}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 12, color: "#9b7f62", marginBottom: 2 }}>開始時間</div>
+                        <div>{fmt(item.startAt)}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 12, color: "#9b7f62", marginBottom: 2 }}>結束時間</div>
+                        <div>{fmt(item.endAt)}</div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
+                      {activeBatch ? (() => {
+                        const meta = BATCH_STATUS_META[activeBatch.status] ?? { label: activeBatch.status, color: "#666", bg: "#eee", border: "#ccc" };
+                        const canConfirm = activeBatch.status === "CREATED";
+                        return (
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                            <span style={{ fontSize: 12, color: "#9b7f62" }}>批次：</span>
+                            <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 12, background: meta.bg, color: meta.color, border: `1px solid ${meta.border}` }}>
+                              {meta.label}
+                            </span>
+                            <span style={{ fontSize: 12, color: "#666" }}>目標 {activeBatch.targetQty}</span>
                             <button
                               type="button"
-                              onClick={() => startEdit(sellWindow)}
-                              style={{ ...btnSmall, ...btnSmallEdit }}
+                              onClick={() => onConfirmBatch(activeBatch)}
+                              disabled={!canConfirm || Boolean(batchSubmitting)}
+                              style={{
+                                ...btnSmall,
+                                background: canConfirm ? "#e5faf0" : "#f0f0f0",
+                                color: canConfirm ? "#0f6c52" : "#7a7a7a",
+                                borderColor: canConfirm ? "#9ad8c4" : "#d0d0d0",
+                                fontSize: 12,
+                                padding: "4px 10px",
+                                minWidth: 60,
+                                boxShadow: "none",
+                              }}
                             >
-                              編輯
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => onDelete(sellWindow)}
-                              style={{ ...btnSmall, ...btnSmallDanger }}
-                            >
-                              刪除
+                              {batchSubmitting === activeBatch.id ? "處理中..." : "Confirm"}
                             </button>
                           </div>
+                        );
+                      })() : (
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ fontSize: 12, color: "#9b7f62" }}>批次：</span>
+                          <span style={{ color: "#bbb", fontSize: 12 }}>-</span>
                         </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+                      )}
+
+                      {rowPayments.length > 0 && (
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                          <span style={{ fontSize: 12, color: "#9b7f62" }}>付款：</span>
+                          {succeededCount > 0 && <span style={{ fontSize: 12, color: "#2f6d47" }}>已付 {succeededCount}</span>}
+                          {initCount > 0 && <span style={{ fontSize: 12, color: "#8a5a14" }}>待付 {initCount}</span>}
+                          {expiredCount > 0 && <span style={{ fontSize: 12, color: "#b13a2d" }}>逾期 {expiredCount}</span>}
+                          {initCount > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => goToPaymentManagementForSellWindow(item.sellWindowId)}
+                              style={{ ...btnSmall, background: "#e8f5e9", color: "#2f6d47", borderColor: "#9ad8c4", fontSize: 12, padding: "4px 10px", minWidth: 60, boxShadow: "none" }}
+                            >
+                              確認收款
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
+                      <button type="button" onClick={() => openOrders(sellWindow)} style={{ ...btnSmall, ...btnSmallInfo }}>查看訂單</button>
+                      <button type="button" onClick={() => startEdit(sellWindow)} style={{ ...btnSmall, ...btnSmallEdit }}>編輯</button>
+                      <button type="button" onClick={() => void onDelete(sellWindow)} style={{ ...btnSmall, ...btnSmallDanger }}>刪除</button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
+
+          {/* 批次確認 Modal */}
+          {confirmModal.open && confirmModal.batch && (
+            <div
+              role="dialog"
+              aria-modal="true"
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(0,0,0,0.42)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1200,
+                padding: 16,
+              }}
+            >
+              <div
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  width: "min(400px, 100%)",
+                  background: "#fff",
+                  borderRadius: 10,
+                  boxShadow: "0 20px 50px rgba(0,0,0,0.2)",
+                  padding: 28,
+                  textAlign: "center",
+                }}
+              >
+                <h3 style={{ margin: 0, marginBottom: 16 }}>確認批次</h3>
+                <div style={{ marginBottom: 18, fontSize: 15 }}>
+                  <div style={{ marginBottom: 8, fontWeight: 500 }}>
+                    檔期名稱：<span style={{ color: "#0f6c52" }}>{confirmModal.sellWindowName}</span>
+                  </div>
+                  確定要確認批次 <b>{confirmModal.batch.id}</b>？<br />
+                  此操作將無法還原。
+                </div>
+                <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
+                  <button
+                    type="button"
+                    style={{ ...btnSmall, background: "#e5faf0", color: "#0f6c52", borderColor: "#9ad8c4", minWidth: 72 }}
+                    disabled={Boolean(batchSubmitting)}
+                    onClick={() => confirmModal.batch && doConfirmBatch(confirmModal.batch)}
+                  >
+                    {batchSubmitting === confirmModal.batch.id ? "處理中..." : "確定"}
+                  </button>
+                  <button
+                    type="button"
+                    style={{ ...btnSmall, background: "#f0f0f0", color: "#7a7a7a", borderColor: "#d0d0d0", minWidth: 72 }}
+                    disabled={Boolean(batchSubmitting)}
+                    onClick={() => setConfirmModal({ open: false, batch: null, sellWindowName: "" })}
+                  >
+                    取消
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
 
@@ -1391,37 +1365,29 @@ export default function SellWindowCrudPage() {
                     總訂單金額：{formatMoney(orderModalTotalAmountCents, "TWD")}
                   </div>
 
-                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                    <thead>
-                      <tr style={{ textAlign: "left", borderBottom: "1px solid #ececec" }}>
-                        <th style={{ padding: 8 }}>姓名</th>
-                        <th style={{ padding: 8 }}>電話</th>
-                        <th style={{ padding: 8 }}>訂購數量</th>
-                        <th style={{ padding: 8 }}>訂購金額</th>
-                        <th style={{ padding: 8 }}>狀態</th>
-                        <th style={{ padding: 8 }}>付款截止</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {orderModal.orders.map((o) => {
-                        const customerId = getOrderCustomerId(o);
-                        const mappedCustomer = customerId ? customerById[customerId] : undefined;
-                        const displayName = mappedCustomer?.name || getOrderContactName(o);
-                        const displayPhone = mappedCustomer?.phone || getOrderContactPhone(o);
+                  <div style={{ display: "grid", gap: 10 }}>
+                    {orderModal.orders.map((o) => {
+                      const customerId = getOrderCustomerId(o);
+                      const mappedCustomer = customerId ? customerById[customerId] : undefined;
+                      const displayName = mappedCustomer?.name || getOrderContactName(o);
+                      const displayPhone = mappedCustomer?.phone || getOrderContactPhone(o);
 
-                        return (
-                          <tr key={o.orderId} style={{ borderBottom: "1px solid #f5f5f5" }}>
-                            <td style={{ padding: 8 }}>{displayName}</td>
-                            <td style={{ padding: 8 }}>{displayPhone}</td>
-                            <td style={{ padding: 8 }}>{getOrderQty(o) ?? "-"}</td>
-                            <td style={{ padding: 8 }}>{formatMoney(getOrderTotalAmountCents(o), "TWD")}</td>
-                            <td style={{ padding: 8 }}>{o.status}</td>
-                            <td style={{ padding: 8 }}>{fmt(o.paymentDueAt)}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                      return (
+                        <div key={o.orderId} style={{ background: "#fffdf9", borderRadius: 8, border: "1px solid #f0e8dc", padding: "10px 12px", display: "grid", gap: 6, fontSize: 14 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                            <div style={{ fontWeight: 600, color: "#2f241b" }}>{displayName}</div>
+                            <div style={{ fontSize: 12, color: "#888", background: "#f0f0f0", borderRadius: 4, padding: "2px 8px" }}>{o.status}</div>
+                          </div>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "4px 12px", color: "#5f4a38", fontSize: 13 }}>
+                            <div>電話：{displayPhone}</div>
+                            <div>數量：{getOrderQty(o) ?? "-"}</div>
+                            <div>金額：{formatMoney(getOrderTotalAmountCents(o), "TWD")}</div>
+                            <div>付款截止：{fmt(o.paymentDueAt)}</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </>
               )}
             </div>

@@ -120,23 +120,6 @@ const filterInputStyle: CSSProperties = {
   background: "#fffdf9",
 };
 
-const tableHeaderStyle: CSSProperties = {
-  padding: "12px 10px",
-  fontSize: 14,
-  fontWeight: 700,
-  color: "#4d3826",
-  whiteSpace: "nowrap",
-  borderBottom: "1px solid #eee",
-  background: "#fff7ec",
-};
-
-const tableCellStyle: CSSProperties = {
-  padding: "12px 10px",
-  verticalAlign: "top",
-  fontSize: 14,
-  lineHeight: 1.6,
-  color: "#2f241b",
-};
 
 function getStatusBadgeStyle(status: PaymentStatus): CSSProperties {
   if (status === "SUCCEEDED") {
@@ -518,98 +501,113 @@ export default function PaymentAdminPage() {
         </div>
       </div>
 
-      <div style={{ borderRadius: 14, overflowX: "auto", border: "1px solid #eadfcd", background: "#fff" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", color: "#2f241b", minWidth: 1120 }}>
-          <thead>
-            <tr style={{ textAlign: "left" }}>
-              <th style={tableHeaderStyle}>檔期</th>
-              <th style={tableHeaderStyle}>客戶資訊</th>
-              <th style={tableHeaderStyle}>付款方式</th>
-              <th style={tableHeaderStyle}>狀態</th>
-              <th style={tableHeaderStyle}>付款時程</th>
-              <th style={tableHeaderStyle}>匯款末五碼</th>
-              <th style={{ ...tableHeaderStyle, width: 290 }}>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading && items.length === 0 && (
-              <tr>
-                <td colSpan={7} style={{ padding: 14, fontSize: 14 }}>載入中...</td>
-              </tr>
-            )}
+      <div style={{ display: "grid", gap: 14 }}>
+        {loading && items.length === 0 && (
+          <div style={{ padding: 14, fontSize: 14, color: "#6b5a47" }}>載入中...</div>
+        )}
 
-            {!loading && filteredItems.length === 0 && (
-              <tr>
-                <td colSpan={7} style={{ padding: 14, fontSize: 14 }}>
-                  {items.length === 0 ? "目前沒有 payment 資料" : "查無符合篩選條件的 payment 資料"}
-                </td>
-              </tr>
-            )}
+        {!loading && filteredItems.length === 0 && (
+          <div style={{ padding: 14, fontSize: 14, color: "#6b5a47" }}>
+            {items.length === 0 ? "目前沒有 payment 資料" : "查無符合篩選條件的 payment 資料"}
+          </div>
+        )}
 
-            {!loading && filteredItems.map((item) => (
-              <tr key={item.paymentId} style={{ borderBottom: "1px solid #f1ebe2" }}>
-                <td style={tableCellStyle}>
-                  <div style={{ fontWeight: 700 }}>{item.sellWindowName || "-"}</div>
-                  <div style={{ marginTop: 2, fontSize: 12, color: "#7e6957" }}>{item.sellWindowId || "-"}</div>
-                </td>
-                <td style={tableCellStyle}>
-                  <div style={{ fontWeight: 600 }}>{item.customerName || "-"}</div>
-                  <div style={{ marginTop: 2, color: "#5f4a38" }}>{item.customerPhone || "-"}</div>
-                  <div style={{ marginTop: 2, color: "#7e6957", fontSize: 13, wordBreak: "break-all" }}>{item.customerEmail || "-"}</div>
-                </td>
-                <td style={{ ...tableCellStyle, whiteSpace: "nowrap" }}>{formatProviderLabel(item.provider)}</td>
-                <td style={tableCellStyle}>
-                  <span style={{
-                    ...getStatusBadgeStyle(item.status),
-                    display: "inline-block",
-                    borderRadius: 999,
-                    padding: "2px 10px",
-                    fontSize: 12,
-                    fontWeight: 700,
-                    whiteSpace: "nowrap",
-                  }}>
-                    {formatStatusLabel(item.status)}
-                  </span>
-                </td>
-                <td style={tableCellStyle}>
-                  <div style={{ whiteSpace: "nowrap" }}>到期：{formatDateTime(item.expireAt)}</div>
-                  <div style={{ marginTop: 2, color: "#7e6957", whiteSpace: "nowrap" }}>匯款：{formatDateTime(item.remittedAt)}</div>
-                </td>
-                <td style={{ ...tableCellStyle, whiteSpace: "nowrap", textAlign: "center", fontWeight: 700 }}>{item.bankAccountLast5 || "-"}</td>
-                <td style={tableCellStyle}>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {item.provider === "BANK_TRANSFER" && item.status !== "SUCCEEDED" && (
-                      <button
-                        type="button"
-                        onClick={() => void onApprove(item)}
-                        disabled={submitting || approvingPaymentId === item.paymentId}
-                        style={{ ...actionBtnBase, background: "linear-gradient(180deg, #eef9f1 0%, #cfead8 100%)", color: "#2d6a4f", border: "1px solid #93c5a7" }}
-                      >
-                        {approvingPaymentId === item.paymentId ? "確認中..." : "確認收款"}
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => openEditForm(item)}
-                      disabled={submitting || Boolean(approvingPaymentId)}
-                      style={{ ...actionBtnBase, background: "linear-gradient(180deg, #f6ead6 0%, #ecd1ab 100%)", color: "#5f4528" }}
-                    >
-                      編輯
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => void onDelete(item)}
-                      disabled={submitting || Boolean(approvingPaymentId)}
-                      style={{ ...actionBtnBase, background: "linear-gradient(180deg, #fff4f2 0%, #ffdcd5 100%)", color: "#ba3b2f" }}
-                    >
-                      刪除
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {!loading && filteredItems.map((item) => (
+          <div
+            key={item.paymentId}
+            style={{
+              background: "#fff",
+              borderRadius: 12,
+              border: "1px solid #eadfcd",
+              padding: "14px 16px",
+              display: "grid",
+              gap: 10,
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, flexWrap: "wrap" }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 15, color: "#2f241b" }}>{item.sellWindowName || "-"}</div>
+                <div style={{ fontSize: 12, color: "#7e6957", marginTop: 2 }}>{item.sellWindowId || "-"}</div>
+              </div>
+              <span style={{
+                ...getStatusBadgeStyle(item.status),
+                display: "inline-block",
+                borderRadius: 999,
+                padding: "3px 12px",
+                fontSize: 12,
+                fontWeight: 700,
+                whiteSpace: "nowrap",
+              }}>
+                {formatStatusLabel(item.status)}
+              </span>
+            </div>
+
+            <div style={{ height: 1, background: "#f0e8dc" }} />
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 8, fontSize: 14 }}>
+              <div>
+                <div style={{ fontSize: 12, color: "#9b7f62", marginBottom: 2 }}>客戶姓名</div>
+                <div style={{ fontWeight: 600, color: "#2f241b" }}>{item.customerName || "-"}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 12, color: "#9b7f62", marginBottom: 2 }}>電話</div>
+                <div style={{ color: "#5f4a38" }}>{item.customerPhone || "-"}</div>
+              </div>
+              <div style={{ gridColumn: "1 / -1" }}>
+                <div style={{ fontSize: 12, color: "#9b7f62", marginBottom: 2 }}>Email</div>
+                <div style={{ color: "#7e6957", fontSize: 13, wordBreak: "break-all" }}>{item.customerEmail || "-"}</div>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 8, fontSize: 14 }}>
+              <div>
+                <div style={{ fontSize: 12, color: "#9b7f62", marginBottom: 2 }}>付款方式</div>
+                <div style={{ color: "#2f241b" }}>{formatProviderLabel(item.provider)}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 12, color: "#9b7f62", marginBottom: 2 }}>匯款末五碼</div>
+                <div style={{ fontWeight: 700, color: "#2f241b" }}>{item.bankAccountLast5 || "-"}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 12, color: "#9b7f62", marginBottom: 2 }}>到期時間</div>
+                <div style={{ color: "#2f241b" }}>{formatDateTime(item.expireAt)}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 12, color: "#9b7f62", marginBottom: 2 }}>匯款時間</div>
+                <div style={{ color: "#7e6957" }}>{formatDateTime(item.remittedAt)}</div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
+              {item.provider === "BANK_TRANSFER" && item.status !== "SUCCEEDED" && (
+                <button
+                  type="button"
+                  onClick={() => void onApprove(item)}
+                  disabled={submitting || approvingPaymentId === item.paymentId}
+                  style={{ ...actionBtnBase, background: "linear-gradient(180deg, #eef9f1 0%, #cfead8 100%)", color: "#2d6a4f", border: "1px solid #93c5a7" }}
+                >
+                  {approvingPaymentId === item.paymentId ? "確認中..." : "確認收款"}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => openEditForm(item)}
+                disabled={submitting || Boolean(approvingPaymentId)}
+                style={{ ...actionBtnBase, background: "linear-gradient(180deg, #f6ead6 0%, #ecd1ab 100%)", color: "#5f4528" }}
+              >
+                編輯
+              </button>
+              <button
+                type="button"
+                onClick={() => void onDelete(item)}
+                disabled={submitting || Boolean(approvingPaymentId)}
+                style={{ ...actionBtnBase, background: "linear-gradient(180deg, #fff4f2 0%, #ffdcd5 100%)", color: "#ba3b2f" }}
+              >
+                刪除
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
 
       <div
