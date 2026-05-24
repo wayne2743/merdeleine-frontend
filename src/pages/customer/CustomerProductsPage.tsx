@@ -644,7 +644,7 @@ export default function CustomerProductsPage() {
             </button>
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ fontWeight: 800, fontSize: 16, color: "#4a321f" }}>商品詳細</div>
+              <div style={{ fontWeight: 800, fontSize: 14, color: "#4a321f" }}>商品詳細</div>
             </div>
 
             <div
@@ -881,10 +881,10 @@ export default function CustomerProductsPage() {
 
               return (
                 <>
-                  <div style={{ marginTop: 18, fontSize: 22, fontWeight: 800, color: "#3d2c1f", lineHeight: 1.3 }}>
+                  <div style={{ marginTop: 16, fontSize: 18, fontWeight: 800, color: "#3d2c1f", lineHeight: 1.35 }}>
                     {detailSelected.name}
                   </div>
-                  <div style={{ marginTop: 6, fontSize: 18, fontWeight: 700, color: "#8c5425" }}>
+                  <div style={{ marginTop: 4, fontSize: 14, fontWeight: 700, color: "#8c5425" }}>
                     {formatPrice(detailSelected)}
                   </div>
 
@@ -904,15 +904,15 @@ export default function CustomerProductsPage() {
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 6 }}>成分</div>
                       {isLoadingIngredients ? (
-                        <div style={{ fontSize: 14, color: "#b0a090" }}>載入中…</div>
+                        <div style={{ fontSize: 13, color: "#b0a090" }}>載入中…</div>
                       ) : ingredientTags.length > 0 ? (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                           {ingredientTags.map((tag, i) => (
-                            <span key={i} style={{ background: "#fff", color: "#5b442f", borderRadius: 999, padding: "4px 11px", fontSize: 13, border: "1px solid #e3d3bd" }}>{tag}</span>
+                            <span key={i} style={{ background: "#fff", color: "#5b442f", borderRadius: 999, padding: "3px 10px", fontSize: 12, border: "1px solid #e3d3bd" }}>{tag}</span>
                           ))}
                         </div>
                       ) : (
-                        <div style={{ fontSize: 14, color: "#8a7560" }}>尚未提供</div>
+                        <div style={{ fontSize: 13, color: "#8a7560" }}>尚未提供</div>
                       )}
                     </div>
 
@@ -920,22 +920,22 @@ export default function CustomerProductsPage() {
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 6 }}>過敏原</div>
                       {isLoadingIngredients ? (
-                        <div style={{ fontSize: 14, color: "#b0a090" }}>載入中…</div>
+                        <div style={{ fontSize: 13, color: "#b0a090" }}>載入中…</div>
                       ) : allergenTags.length > 0 ? (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                           {allergenTags.map((tag, i) => (
-                            <span key={i} style={{ background: "#fdf0ec", color: "#b5532e", borderRadius: 999, padding: "4px 11px", fontSize: 13, fontWeight: 600, border: "1px solid #f1cdbf" }}>{tag}</span>
+                            <span key={i} style={{ background: "#fdf0ec", color: "#b5532e", borderRadius: 999, padding: "3px 10px", fontSize: 12, fontWeight: 600, border: "1px solid #f1cdbf" }}>{tag}</span>
                           ))}
                         </div>
                       ) : (
-                        <div style={{ fontSize: 14, color: "#8a7560" }}>尚未提供</div>
+                        <div style={{ fontSize: 13, color: "#8a7560" }}>尚未提供</div>
                       )}
                     </div>
 
                     {/* 熱量 */}
                     <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
                       <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54" }}>熱量</span>
-                      <span style={{ fontSize: 15, fontWeight: 700, color: "#5b442f" }}>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: "#5b442f" }}>
                         {isLoadingIngredients ? "載入中…" : info.calories}
                       </span>
                     </div>
@@ -945,7 +945,7 @@ export default function CustomerProductsPage() {
                   {description && (
                     <div style={{ marginTop: 18 }}>
                       <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 8 }}>商品介紹</div>
-                      <div style={{ fontSize: 15, lineHeight: 1.85, color: "#54402d", whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word" }}>
+                      <div style={{ fontSize: 14, lineHeight: 1.8, color: "#54402d", whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word" }}>
                         {description}
                       </div>
                     </div>
