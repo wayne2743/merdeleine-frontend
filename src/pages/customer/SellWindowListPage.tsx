@@ -222,7 +222,7 @@ export default function SellWindowListPage() {
 
                   <div className="sellwindow-card-meta">
                     <div>最後預約時間：{fmt(it.endAt)}</div>
-                    <div>付款截止：{fmt(it.paymentCloseAt)}</div>
+                    <div>預計付款日：{it.endAt ? new Date(new Date(it.endAt).getTime() + 8 * 3600 * 1000).toLocaleString() : "-"}</div>
                     <div>預計取貨時間：{fmt(predictedShipDate)}</div>
                     <div>最新下單日期：{fmt(it.quotaUpdatedAt)}</div>
                   </div>
