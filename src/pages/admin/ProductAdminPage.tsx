@@ -963,16 +963,16 @@ export default function ProductAdminPage() {
                 <label style={{ display: "grid", gap: 4 }}>
                   <span>狀態</span>
                   <select value={form.status} onChange={(e) => updateForm("status", e.target.value as ProductForm["status"])}>
-                    <option value="ACTIVE">ACTIVE</option>
-                    <option value="DRAFT">DRAFT</option>
-                    <option value="INACTIVE">INACTIVE</option>
+                    <option value="ACTIVE">上架中</option>
+                    <option value="DRAFT">草稿</option>
+                    <option value="INACTIVE">已下架</option>
                   </select>
                 </label>
               </div>
 
               <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
                 <label style={{ display: "grid", gap: 4 }}>
-                  <span>defaultMinQty</span>
+                  <span>預設最低數量</span>
                   <input
                     type="number"
                     min={1}
@@ -984,7 +984,7 @@ export default function ProductAdminPage() {
                 </label>
 
                 <label style={{ display: "grid", gap: 4 }}>
-                  <span>defaultMaxQty</span>
+                  <span>預設最高數量</span>
                   <input
                     type="number"
                     min={1}
@@ -996,7 +996,7 @@ export default function ProductAdminPage() {
                 </label>
 
                 <label style={{ display: "grid", gap: 4 }}>
-                  <span>defaultLeadDays</span>
+                  <span>預設前置天數</span>
                   <input
                     type="number"
                     min={0}
@@ -1008,7 +1008,7 @@ export default function ProductAdminPage() {
                 </label>
 
                 <label style={{ display: "grid", gap: 4 }}>
-                  <span>defaultOpenDays</span>
+                  <span>預設開團天數</span>
                   <input
                     type="number"
                     min={1}
@@ -1020,7 +1020,7 @@ export default function ProductAdminPage() {
                 </label>
 
                 <label style={{ display: "grid", gap: 4 }}>
-                  <span>defaultShipDays</span>
+                  <span>預設出貨天數</span>
                   <input
                     type="number"
                     min={0}
@@ -1032,7 +1032,7 @@ export default function ProductAdminPage() {
                 </label>
 
                 <label style={{ display: "grid", gap: 4 }}>
-                  <span>食譜數量（recipeQuantity）</span>
+                  <span>食譜總份量</span>
                   <input
                     type="number"
                     min={1}
@@ -1045,7 +1045,7 @@ export default function ProductAdminPage() {
               </div>
 
               <div style={{ fontSize: 12, color: "#6b5a47" }}>
-                `defaultMaxQty` 可留空，代表不限制上限。
+                「預設最高數量」可留空，代表不限制上限。
               </div>
 
               {/* ── 材料群組管理（僅編輯模式） ── */}
