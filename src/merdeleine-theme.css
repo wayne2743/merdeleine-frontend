@@ -231,7 +231,6 @@ input:focus, textarea:focus, select:focus {
 /* ===== Brand mark in nav (optional — show logo image next to text) =====
    Markup change required in NavBar.tsx — see HOW-TO-APPLY.md. */
 .nav-brand img {
-  height: 44px;
   width: auto;
   display: block;
   vertical-align: middle;
