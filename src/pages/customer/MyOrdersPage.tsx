@@ -29,11 +29,6 @@ function getOrderTotalAmountCents(order: OrderSummary): number | null {
   return Number.isFinite(raw) ? Number(raw) : null;
 }
 
-function getOrderPaymentDueAt(order: OrderSummary): string | null {
-  const raw = (order as OrderSummary & { payment_due_at?: string }).paymentDueAt
-    ?? (order as OrderSummary & { payment_due_at?: string }).payment_due_at;
-  return typeof raw === "string" && raw.trim() ? raw : null;
-}
 
 function getOrderMaxEditableQty(
   order: OrderSummary,
@@ -446,11 +441,7 @@ export default function MyOrdersPage() {
           const unitPrice = productById[o.productId]?.unitPriceCents;
           const totalCents = getOrderTotalAmountCents(o);
           const createdAt = getOrderCreatedAt(o);
-          const paymentDueAt = getOrderPaymentDueAt(o);
           const swEnd = sellWindowById[o.sellWindowId]?.endAt;
-          const isPaymentUrgent = paymentDueAt
-            ? new Date(paymentDueAt).getTime() - Date.now() < 24 * 60 * 60 * 1000
-            : false;
 
           return (
             <article key={o.orderId} className="myorders-card">
@@ -565,30 +556,16 @@ export default function MyOrdersPage() {
 
               {/* 時間資訊 */}
               <div style={{ marginTop: 10, display: "grid", gap: 6 }}>
-                {paymentDueAt && (
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      fontSize: 15,
-                      padding: "10px 12px",
-                      borderRadius: 8,
-                      background: isPaymentUrgent ? "rgba(199,68,68,0.1)" : "rgba(201,144,112,0.06)",
-                      border: isPaymentUrgent ? "1px solid rgba(199,68,68,0.35)" : "1px solid var(--md-border)",
-                    }}
-                  >
-                    <span style={{ color: isPaymentUrgent ? "#b03a3a" : "var(--md-ink-3)" }}>
-                      {isPaymentUrgent ? "⚠ 付款截止" : "付款截止"}
-                    </span>
-                    <span style={{ color: isPaymentUrgent ? "#b03a3a" : "var(--md-ink-2)", fontWeight: isPaymentUrgent ? 600 : 400 }}>
-                      {formatDateTime(paymentDueAt)}
-                    </span>
-                  </div>
-                )}
                 {swEnd && (
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "var(--md-ink-2)", padding: "0 2px" }}>
                     <span>販售結束時間</span>
                     <span>{formatDateTime(swEnd)}</span>
+                  </div>
+                )}
+                {swEnd && (
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "var(--md-ink-2)", padding: "0 2px" }}>
+                    <span>預計付款日</span>
+                    <span>{formatDateTime(new Date(new Date(swEnd).getTime() + 8 * 3600 * 1000).toISOString())}</span>
                   </div>
                 )}
                 {createdAt && (

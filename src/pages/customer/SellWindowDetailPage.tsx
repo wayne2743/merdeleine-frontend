@@ -376,9 +376,7 @@ export default function SellWindowDetailPage() {
           <div style={{ marginTop: 16, display: "grid", gap: 8, fontSize: 13.5 }}>
             <InfoRow label="預約價格" value={`TWD ${(data.unitPriceCents).toLocaleString()}`} highlight />
             <InfoRow label="最後預約時間" value={new Date(data.endAt).toLocaleString("zh-TW")} />
-            {data.paymentCloseAt && (
-              <InfoRow label="付款截止" value={new Date(data.paymentCloseAt).toLocaleString("zh-TW")} />
-            )}
+            <InfoRow label="預計付款日" value={new Date(new Date(data.endAt).getTime() + 8 * 3600 * 1000).toLocaleString("zh-TW")} />
             {data.quotaUpdatedAt && (
               <InfoRow label="最新下單日期" value={new Date(data.quotaUpdatedAt).toLocaleString("zh-TW")} />
             )}
