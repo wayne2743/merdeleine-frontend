@@ -293,9 +293,6 @@ export default function IngredientAdminPage() {
     setStockDeleteError(null);
     setStocksLoading(true);
     setStocksError(null);
-    setTimeout(() => {
-      document.getElementById("stock-management-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
     try {
       const data = await catalogApi.listIngredientStocks(ingredient.id);
       setStocks(data);
@@ -674,127 +671,142 @@ export default function IngredientAdminPage() {
         );
       })()}
 
-      {/* ── Stock management inline section ── */}
+      {/* ── Stock management modal ── */}
       {stockModalIngredient && (
-        <section
-          id="stock-management-section"
+        <div
+          role="dialog"
+          aria-modal="true"
           style={{
-            marginTop: 32,
-            borderRadius: 18,
-            border: "1px solid rgba(168, 206, 240, 0.5)",
-            background: "linear-gradient(160deg, rgba(240,247,255,0.95) 0%, rgba(213,232,250,0.6) 100%)",
-            padding: "28px 20px",
-            boxShadow: "0 4px 24px rgba(80, 120, 200, 0.08)",
-            scrollMarginTop: 80,
+            position: "fixed", inset: 0,
+            background: "rgba(43,28,14,0.5)",
+            display: "flex", alignItems: "flex-start", justifyContent: "center",
+            zIndex: 1000, overflowY: "auto", padding: "24px 12px",
           }}
+          onClick={closeStockModal}
         >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, paddingBottom: 14, borderBottom: "1px solid rgba(168, 206, 240, 0.3)" }}>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1d5fa4", margin: 0 }}>
-              庫存管理：{stockModalIngredient.name}
-            </h2>
-            <button onClick={closeStockModal}
-              style={{ background: "#fff", color: "#1d5fa4", border: "1px solid #a8cef0", borderRadius: 999, padding: "6px 16px", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
-              關閉
-            </button>
-          </div>
+          <div
+            style={{
+              background: "linear-gradient(160deg, rgba(240,247,255,0.98) 0%, rgba(213,232,250,0.95) 100%)",
+              borderRadius: 18,
+              border: "1px solid rgba(168,206,240,0.5)",
+              padding: "24px 20px",
+              width: "100%",
+              maxWidth: 560,
+              boxShadow: "0 12px 40px rgba(43,28,14,0.22)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, paddingBottom: 14, borderBottom: "1px solid rgba(168,206,240,0.3)" }}>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1d5fa4", margin: 0 }}>
+                庫存管理：{stockModalIngredient.name}
+              </h3>
+              <button
+                type="button"
+                onClick={closeStockModal}
+                style={{ background: "transparent", border: "none", fontSize: 22, color: "#4a6fa0", cursor: "pointer", lineHeight: 1, padding: "2px 6px" }}
+              >
+                ×
+              </button>
+            </div>
 
-          {/* Stock form */}
-          <div style={{ background: "#fff", border: "1px solid rgba(168,206,240,0.4)", borderRadius: 12, padding: "20px 16px", marginBottom: 24 }}>
-            <h4 style={{ fontSize: 14, fontWeight: 700, color: "#1d5fa4", marginBottom: 16 }}>
-              {isStockEditing ? "編輯庫存批次" : "新增庫存批次"}
-            </h4>
+            {/* Stock form */}
+            <div style={{ background: "#fff", border: "1px solid rgba(168,206,240,0.4)", borderRadius: 12, padding: "20px 16px", marginBottom: 24 }}>
+              <h4 style={{ fontSize: 14, fontWeight: 700, color: "#1d5fa4", marginBottom: 16 }}>
+                {isStockEditing ? "編輯庫存批次" : "新增庫存批次"}
+              </h4>
 
-            {stockFormSuccess && (
-              <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", color: "#15803d", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13 }}>
-                {stockFormSuccess}
-              </div>
-            )}
-            {stockFormError && (
-              <div style={{ background: "#fff1f2", border: "1px solid #fecdd3", color: "#be123c", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13 }}>
-                {stockFormError}
-              </div>
-            )}
+              {stockFormSuccess && (
+                <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", color: "#15803d", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13 }}>
+                  {stockFormSuccess}
+                </div>
+              )}
+              {stockFormError && (
+                <div style={{ background: "#fff1f2", border: "1px solid #fecdd3", color: "#be123c", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13 }}>
+                  {stockFormError}
+                </div>
+              )}
 
-            <form onSubmit={(e) => void onStockSubmit(e)}>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "10px 14px", marginBottom: 14 }}>
-                <div>
-                  <label style={{ fontSize: 12, color: "#4a6fa0", fontWeight: 600, display: "block", marginBottom: 3 }}>
-                    單價（分） <span style={{ color: "#be123c" }}>*</span>
-                  </label>
-                  <input name="unitPriceCents" type="number" min={0} step={1} value={stockForm.unitPriceCents} onChange={onStockChange} placeholder="例：350"
-                    style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid #a8cef0", fontSize: 13, boxSizing: "border-box" }} />
+              <form onSubmit={(e) => void onStockSubmit(e)}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "10px 14px", marginBottom: 14 }}>
+                  <div>
+                    <label style={{ fontSize: 12, color: "#4a6fa0", fontWeight: 600, display: "block", marginBottom: 3 }}>
+                      單價（分） <span style={{ color: "#be123c" }}>*</span>
+                    </label>
+                    <input name="unitPriceCents" type="number" min={0} step={1} value={stockForm.unitPriceCents} onChange={onStockChange} placeholder="例：350"
+                      style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid #a8cef0", fontSize: 13, boxSizing: "border-box" }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 12, color: "#4a6fa0", fontWeight: 600, display: "block", marginBottom: 3 }}>
+                      庫存數量 <span style={{ color: "#be123c" }}>*</span>
+                    </label>
+                    <input name="stockQuantity" type="number" min={0} step="0.001" value={stockForm.stockQuantity} onChange={onStockChange} placeholder="例：25.500"
+                      style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid #a8cef0", fontSize: 13, boxSizing: "border-box" }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 12, color: "#4a6fa0", fontWeight: 600, display: "block", marginBottom: 3 }}>進貨日</label>
+                    <input name="stockedAt" type="date" value={stockForm.stockedAt} onChange={onStockChange}
+                      style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid #a8cef0", fontSize: 13, boxSizing: "border-box" }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 12, color: "#4a6fa0", fontWeight: 600, display: "block", marginBottom: 3 }}>到期日</label>
+                    <input name="expiresAt" type="date" value={stockForm.expiresAt} onChange={onStockChange}
+                      style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid #a8cef0", fontSize: 13, boxSizing: "border-box" }} />
+                  </div>
                 </div>
-                <div>
-                  <label style={{ fontSize: 12, color: "#4a6fa0", fontWeight: 600, display: "block", marginBottom: 3 }}>
-                    庫存數量 <span style={{ color: "#be123c" }}>*</span>
-                  </label>
-                  <input name="stockQuantity" type="number" min={0} step="0.001" value={stockForm.stockQuantity} onChange={onStockChange} placeholder="例：25.500"
-                    style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid #a8cef0", fontSize: 13, boxSizing: "border-box" }} />
-                </div>
-                <div>
-                  <label style={{ fontSize: 12, color: "#4a6fa0", fontWeight: 600, display: "block", marginBottom: 3 }}>進貨日</label>
-                  <input name="stockedAt" type="date" value={stockForm.stockedAt} onChange={onStockChange}
-                    style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid #a8cef0", fontSize: 13, boxSizing: "border-box" }} />
-                </div>
-                <div>
-                  <label style={{ fontSize: 12, color: "#4a6fa0", fontWeight: 600, display: "block", marginBottom: 3 }}>到期日</label>
-                  <input name="expiresAt" type="date" value={stockForm.expiresAt} onChange={onStockChange}
-                    style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid #a8cef0", fontSize: 13, boxSizing: "border-box" }} />
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button type="submit" disabled={stockSubmitting}
-                  style={{ background: "linear-gradient(180deg, #d5e8fa 0%, #a8cef0 100%)", color: "#1d5fa4", border: "1px solid #a8cef0", borderRadius: 999, padding: "7px 22px", fontWeight: 700, fontSize: 13, cursor: stockSubmitting ? "not-allowed" : "pointer", opacity: stockSubmitting ? 0.7 : 1 }}>
-                  {stockSubmitting ? "送出中…" : isStockEditing ? "儲存變更" : "新增批次"}
-                </button>
-                {isStockEditing && (
-                  <button type="button" onClick={onCancelStockEdit}
-                    style={{ background: "#f5f5f5", color: "#555", border: "1px solid #ddd", borderRadius: 999, padding: "7px 16px", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
-                    取消
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button type="submit" disabled={stockSubmitting}
+                    style={{ background: "linear-gradient(180deg, #d5e8fa 0%, #a8cef0 100%)", color: "#1d5fa4", border: "1px solid #a8cef0", borderRadius: 999, padding: "7px 22px", fontWeight: 700, fontSize: 13, cursor: stockSubmitting ? "not-allowed" : "pointer", opacity: stockSubmitting ? 0.7 : 1 }}>
+                    {stockSubmitting ? "送出中…" : isStockEditing ? "儲存變更" : "新增批次"}
                   </button>
-                )}
-              </div>
-            </form>
-          </div>
+                  {isStockEditing && (
+                    <button type="button" onClick={onCancelStockEdit}
+                      style={{ background: "#f5f5f5", color: "#555", border: "1px solid #ddd", borderRadius: 999, padding: "7px 16px", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
+                      取消
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
 
-          {/* Stock list */}
-          <h4 style={{ fontSize: 14, fontWeight: 700, color: "#333", marginBottom: 12 }}>庫存批次列表</h4>
+            {/* Stock list */}
+            <h4 style={{ fontSize: 14, fontWeight: 700, color: "#333", marginBottom: 12 }}>庫存批次列表</h4>
 
-          {stocksLoading && <p style={{ color: "#999", fontSize: 13 }}>載入中…</p>}
-          {stocksError && <p style={{ color: "#be123c", fontSize: 13 }}>{stocksError}</p>}
-          {!stocksLoading && !stocksError && stocks.length === 0 && (
-            <p style={{ color: "#aaa", fontSize: 13 }}>尚無庫存批次，請先新增</p>
-          )}
+            {stocksLoading && <p style={{ color: "#999", fontSize: 13 }}>載入中…</p>}
+            {stocksError && <p style={{ color: "#be123c", fontSize: 13 }}>{stocksError}</p>}
+            {!stocksLoading && !stocksError && stocks.length === 0 && (
+              <p style={{ color: "#aaa", fontSize: 13 }}>尚無庫存批次，請先新增</p>
+            )}
 
-          {!stocksLoading && stocks.length > 0 && (
-            <div style={{ display: "grid", gap: 10 }}>
-              {stocks.map((stock, idx) => (
-                <div key={stock.id}
-                  style={{ background: idx % 2 === 0 ? "#fff" : "#f4f9ff", borderRadius: 10, border: "1px solid #d5e8fa", padding: "12px 14px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, flexWrap: "wrap" }}>
-                    <div style={{ fontSize: 14, color: "#1d5fa4", fontWeight: 700 }}>{formatMoney(stock.unitPriceCents)}</div>
-                    <div style={{ display: "flex", gap: 6 }}>
-                      <button style={{ ...actionButtonBase, ...actionButtonEdit, minWidth: 52, fontSize: 12, padding: "4px 10px" }} onClick={() => onStockEdit(stock)}>編輯</button>
-                      <button style={{ ...actionButtonBase, ...actionButtonDelete, minWidth: 52, fontSize: 12, padding: "4px 10px" }} onClick={() => { setStockDeleteConfirm(stock.id); setStockDeleteError(null); }}>刪除</button>
+            {!stocksLoading && stocks.length > 0 && (
+              <div style={{ display: "grid", gap: 10 }}>
+                {stocks.map((stock, idx) => (
+                  <div key={stock.id}
+                    style={{ background: idx % 2 === 0 ? "#fff" : "#f4f9ff", borderRadius: 10, border: "1px solid #d5e8fa", padding: "12px 14px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, flexWrap: "wrap" }}>
+                      <div style={{ fontSize: 14, color: "#1d5fa4", fontWeight: 700 }}>{formatMoney(stock.unitPriceCents)}</div>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <button style={{ ...actionButtonBase, ...actionButtonEdit, minWidth: 52, fontSize: 12, padding: "4px 10px" }} onClick={() => onStockEdit(stock)}>編輯</button>
+                        <button style={{ ...actionButtonBase, ...actionButtonDelete, minWidth: 52, fontSize: 12, padding: "4px 10px" }} onClick={() => { setStockDeleteConfirm(stock.id); setStockDeleteError(null); }}>刪除</button>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 16, fontSize: 13, color: "#4a6fa0", marginTop: 6, flexWrap: "wrap" }}>
+                      <span>數量：{stock.stockQuantity}</span>
+                      {stock.stockedAt && <span>進貨：{normalizeDateInput(stock.stockedAt)}</span>}
+                      {stock.expiresAt && <span>到期：{normalizeDateInput(stock.expiresAt)}</span>}
+                      <span style={{ color: "#aaa", fontSize: 11 }}>建立：{formatDateTime(stock.createdAt)}</span>
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: 16, fontSize: 13, color: "#4a6fa0", marginTop: 6, flexWrap: "wrap" }}>
-                    <span>數量：{stock.stockQuantity}</span>
-                    {stock.stockedAt && <span>進貨：{normalizeDateInput(stock.stockedAt)}</span>}
-                    {stock.expiresAt && <span>到期：{normalizeDateInput(stock.expiresAt)}</span>}
-                    <span style={{ color: "#aaa", fontSize: 11 }}>建立：{formatDateTime(stock.createdAt)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* ── Stock delete confirm modal ── */}
       {stockDeleteConfirm && (
         <div
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100 }}
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1200 }}
           onClick={() => setStockDeleteConfirm(null)}
         >
           <div
