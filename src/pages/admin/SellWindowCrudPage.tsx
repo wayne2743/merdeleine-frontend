@@ -282,7 +282,7 @@ export default function SellWindowCrudPage() {
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<"ALL" | SellWindowStatus>("ALL");
-  const [productKeyword, setProductKeyword] = useState("");
+  const [productIdFilter, setProductIdFilter] = useState<"ALL" | string>("ALL");
   const [orderModal, setOrderModal] = useState<OrderModalState>({
     open: false,
     loading: false,
@@ -742,13 +742,11 @@ export default function SellWindowCrudPage() {
 
   const isEdit = editingId !== null;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const normalizedProductKeyword = productKeyword.trim().toLowerCase();
-  const hasActiveFilters = statusFilter !== "ALL" || normalizedProductKeyword.length > 0;
+  const hasActiveFilters = statusFilter !== "ALL" || productIdFilter !== "ALL";
   const filteredItems = items.filter((item) => {
     const itemStatus = getSellWindowStatus(item);
     const matchesStatus = statusFilter === "ALL" || itemStatus === statusFilter;
-    const productName = typeof item.productName === "string" ? item.productName : "";
-    const matchesProduct = !normalizedProductKeyword || productName.toLowerCase().includes(normalizedProductKeyword);
+    const matchesProduct = productIdFilter === "ALL" || item.productId === productIdFilter;
     return matchesStatus && matchesProduct;
   });
 
@@ -836,13 +834,17 @@ export default function SellWindowCrudPage() {
 
               <label style={{ ...labelStyle, minWidth: 220, flex: "1 1 240px", color: "#4f3927", fontSize: 13 }}>
                 商品名稱篩選
-                <input
-                  type="text"
-                  value={productKeyword}
-                  onChange={(e) => setProductKeyword(e.target.value)}
-                  placeholder="輸入商品名稱關鍵字"
+                <select
+                  value={productIdFilter}
+                  onChange={(e) => setProductIdFilter(e.target.value)}
                   style={inputStyle}
-                />
+                  disabled={productsLoading}
+                >
+                  <option value="ALL">{productsLoading ? "商品載入中..." : "全部商品"}</option>
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
               </label>
             </div>
 
@@ -854,7 +856,7 @@ export default function SellWindowCrudPage() {
                 type="button"
                 onClick={() => {
                   setStatusFilter("ALL");
-                  setProductKeyword("");
+                  setProductIdFilter("ALL");
                 }}
                 style={btnSecondary}
                 disabled={!hasActiveFilters}
