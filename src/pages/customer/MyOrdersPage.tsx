@@ -447,7 +447,6 @@ export default function MyOrdersPage() {
           const totalCents = getOrderTotalAmountCents(o);
           const createdAt = getOrderCreatedAt(o);
           const paymentDueAt = getOrderPaymentDueAt(o);
-          const swStart = sellWindowById[o.sellWindowId]?.startAt;
           const swEnd = sellWindowById[o.sellWindowId]?.endAt;
           const isPaymentUrgent = paymentDueAt
             ? new Date(paymentDueAt).getTime() - Date.now() < 24 * 60 * 60 * 1000
@@ -586,10 +585,10 @@ export default function MyOrdersPage() {
                     </span>
                   </div>
                 )}
-                {(swStart || swEnd) && (
+                {swEnd && (
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "var(--md-ink-2)", padding: "0 2px" }}>
-                    <span>販售期間</span>
-                    <span>{formatDateTime(swStart)} ～ {formatDateTime(swEnd)}</span>
+                    <span>販售結束時間</span>
+                    <span>{formatDateTime(swEnd)}</span>
                   </div>
                 )}
                 {createdAt && (
