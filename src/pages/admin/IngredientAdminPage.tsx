@@ -73,14 +73,14 @@ function normalizeEnumValue(value: string): string {
 }
 
 const actionButtonBase: CSSProperties = {
-  minWidth: 72,
+  minWidth: 60,
   padding: "6px 12px",
   borderRadius: 999,
   cursor: "pointer",
   fontSize: 13,
   fontWeight: 700,
   border: "1px solid #d7b283",
-  boxShadow: "0 4px 10px rgba(56, 33, 8, 0.10)",
+  boxShadow: "0 2px 6px rgba(56, 33, 8, 0.08)",
 };
 
 const actionButtonEdit: CSSProperties = {
@@ -132,12 +132,12 @@ function getErrorMessage(error: unknown): string {
 
 export default function IngredientAdminPage() {
   const [form, setForm] = useState<IngredientForm>(INITIAL_INGREDIENT_FORM);
+  const [showFormModal, setShowFormModal] = useState(false);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [formSuccess, setFormSuccess] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -186,6 +186,12 @@ export default function IngredientAdminPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
+  function openNewModal() {
+    setForm(INITIAL_INGREDIENT_FORM);
+    setFormError(null);
+    setShowFormModal(true);
+  }
+
   function onEdit(ingredient: Ingredient) {
     setForm({
       id: ingredient.id,
@@ -198,20 +204,18 @@ export default function IngredientAdminPage() {
       allergens: ingredient.allergens ?? "",
     });
     setFormError(null);
-    setFormSuccess(null);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setShowFormModal(true);
   }
 
-  function onCancelEdit() {
+  function closeFormModal() {
+    setShowFormModal(false);
     setForm(INITIAL_INGREDIENT_FORM);
     setFormError(null);
-    setFormSuccess(null);
   }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setFormError(null);
-    setFormSuccess(null);
 
     const name = form.name.trim();
     if (!name) {
@@ -254,13 +258,11 @@ export default function IngredientAdminPage() {
 
       if (form.id) {
         await catalogApi.updateIngredient(form.id, payload);
-        setFormSuccess(`已更新「${name}」`);
       } else {
         await catalogApi.createIngredient(payload);
-        setFormSuccess(`已新增「${name}」`);
       }
 
-      setForm(INITIAL_INGREDIENT_FORM);
+      closeFormModal();
       void loadIngredients();
     } catch (err: unknown) {
       setFormError(getErrorMessage(err));
@@ -405,319 +407,247 @@ export default function IngredientAdminPage() {
   }
 
   const isEditing = !!form.id;
-  const editingName = isEditing
-    ? (ingredients.find((i) => i.id === form.id)?.name ?? "")
-    : "";
-
   const isStockEditing = !!stockForm.id;
 
   return (
     <div className="page-container" style={{ maxWidth: 820 }}>
-      {/* ── Ingredient Form ── */}
-      <section
-        style={{
-          borderRadius: 18,
-          border: "1px solid rgba(233, 210, 176, 0.28)",
-          background: "linear-gradient(160deg, rgba(255,248,240,0.9) 0%, rgba(255,243,228,0.7) 100%)",
-          padding: "28px 32px",
-          marginBottom: 32,
-          boxShadow: "0 4px 24px rgba(180, 120, 40, 0.08)",
-        }}
-      >
-        <h2 style={{ fontSize: 18, fontWeight: 700, color: "#5f4528", marginBottom: 20 }}>
-          {isEditing ? `編輯原物料：${editingName}` : "新增原物料"}
-        </h2>
 
-        {formSuccess && (
-          <div
-            style={{
-              background: "#f0fdf4",
-              border: "1px solid #bbf7d0",
-              color: "#15803d",
-              borderRadius: 8,
-              padding: "10px 16px",
-              marginBottom: 16,
-              fontSize: 14,
-            }}
-          >
-            {formSuccess}
-          </div>
-        )}
-        {formError && (
-          <div
-            style={{
-              background: "#fff1f2",
-              border: "1px solid #fecdd3",
-              color: "#be123c",
-              borderRadius: 8,
-              padding: "10px 16px",
-              marginBottom: 16,
-              fontSize: 14,
-            }}
-          >
-            {formError}
-          </div>
-        )}
+      {/* ── Header + New button ── */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: "#5f4528", margin: 0 }}>原物料列表</h2>
+        <button
+          type="button"
+          onClick={openNewModal}
+          style={{
+            background: "linear-gradient(180deg, #f7e4c2 0%, #e9c07a 100%)",
+            color: "#5a3e1b",
+            border: "1px solid #d5a85a",
+            borderRadius: 999,
+            padding: "9px 22px",
+            fontWeight: 700,
+            fontSize: 14,
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(180,120,40,0.15)",
+          }}
+        >
+          + 新增原物料
+        </button>
+      </div>
 
-        <form onSubmit={(e) => void onSubmit(e)}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "12px 20px", marginBottom: 12 }}>
-            <div>
-              <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
-                名稱 <span style={{ color: "#be123c" }}>*</span>
-              </label>
-              <input
-                name="name"
-                value={form.name}
-                onChange={onChange}
-                placeholder="例：有機全脂牛奶"
-                style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
-                屬性（attribute） <span style={{ color: "#be123c" }}>*</span>
-              </label>
-              <input
-                name="attribute"
-                value={form.attribute}
-                onChange={onChange}
-                placeholder="例：RAW_MATERIAL"
-                list="ingredient-attribute-options"
-                style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }}
-              />
-              <datalist id="ingredient-attribute-options">
-                {attributeOptions.map((option) => (
-                  <option key={option} value={option} />
-                ))}
-              </datalist>
-              <div style={{ marginTop: 4, color: "#9a7a55", fontSize: 12 }}>
-                需填後端 enum 值（會自動轉大寫與底線）
+      {/* ── Ingredient List (cards) ── */}
+      {listLoading && <p style={{ color: "#999", fontSize: 14 }}>載入中…</p>}
+      {listError && <p style={{ color: "#be123c", fontSize: 14 }}>{listError}</p>}
+      {!listLoading && !listError && ingredients.length === 0 && (
+        <p style={{ color: "#aaa", fontSize: 14 }}>尚無原物料，請先新增</p>
+      )}
+
+      {!listLoading && ingredients.length > 0 && (
+        <div style={{ display: "grid", gap: 12 }}>
+          {ingredients.map((ing) => (
+            <div
+              key={ing.id}
+              style={{
+                borderRadius: 14,
+                border: "1px solid #e8d9c2",
+                background: "linear-gradient(180deg, #fffdf9 0%, #faf5ec 100%)",
+                padding: "14px 16px",
+                boxShadow: "0 2px 8px rgba(180,120,40,0.06)",
+              }}
+            >
+              {/* Name + attribute */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+                <span style={{ fontSize: 16, fontWeight: 700, color: "#4b392a" }}>{ing.name}</span>
+                <span style={{
+                  fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 999,
+                  background: "#f0e8d5", color: "#7a5c3a", border: "1px solid #ddc99e",
+                }}>
+                  {ing.attribute ?? "-"}
+                </span>
+              </div>
+
+              {/* Info rows */}
+              <div style={{ display: "grid", gap: 3, fontSize: 13, color: "#5f4c3b", marginBottom: 12 }}>
+                {(ing.caloriesPer100g != null || ing.allergens) && (
+                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                    {ing.caloriesPer100g != null && (
+                      <span style={{ color: "#6e5131" }}>
+                        熱量：<strong>{ing.caloriesPer100g} kcal</strong>／100g
+                      </span>
+                    )}
+                    {ing.allergens && (
+                      <span style={{ color: "#7a5c3a" }}>
+                        {ing.caloriesPer100g != null ? "・" : ""}過敏原：{ing.allergens}
+                      </span>
+                    )}
+                  </div>
+                )}
+                {(ing.brand || ing.origin) && (
+                  <div style={{ color: "#7a6248" }}>
+                    {[ing.brand && `品牌：${ing.brand}`, ing.origin && `產地：${ing.origin}`].filter(Boolean).join("　")}
+                  </div>
+                )}
+                {ing.governmentRegistrationInfo && (
+                  <div style={{ color: "#8c7a64", fontSize: 12 }}>
+                    登記資訊：{ing.governmentRegistrationInfo}
+                  </div>
+                )}
+                <div style={{ color: "#aaa", fontSize: 11, marginTop: 2 }}>
+                  建立：{formatDateTime(ing.createdAt)}
+                  {ing.updatedAt && ing.updatedAt !== ing.createdAt && (
+                    <span>　更新：{formatDateTime(ing.updatedAt)}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button style={{ ...actionButtonBase, ...actionButtonStock }} onClick={() => void openStockModal(ing)}>
+                  庫存
+                </button>
+                <button style={{ ...actionButtonBase, ...actionButtonEdit }} onClick={() => onEdit(ing)}>
+                  編輯
+                </button>
+                <button style={{ ...actionButtonBase, ...actionButtonDelete }} onClick={() => { setDeleteConfirm(ing.id); setDeleteError(null); }}>
+                  刪除
+                </button>
               </div>
             </div>
-            <div>
-              <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
-                品牌
-              </label>
-              <input
-                name="brand"
-                value={form.brand}
-                onChange={onChange}
-                placeholder="例：在地農場 A"
-                style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
-                產地
-              </label>
-              <input
-                name="origin"
-                value={form.origin}
-                onChange={onChange}
-                placeholder="例：台灣雲林"
-                style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
-                每 100g 熱量
-              </label>
-              <input
-                name="caloriesPer100g"
-                type="number"
-                min={0}
-                step={1}
-                value={form.caloriesPer100g}
-                onChange={onChange}
-                placeholder="例：364"
-                style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
-                過敏原
-              </label>
-              <input
-                name="allergens"
-                value={form.allergens}
-                onChange={onChange}
-                placeholder="例：小麥、麩質"
-                style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }}
-              />
-            </div>
-          </div>
+          ))}
+        </div>
+      )}
 
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
-              政府登記資訊
-            </label>
-            <textarea
-              name="governmentRegistrationInfo"
-              value={form.governmentRegistrationInfo}
-              onChange={onChange}
-              rows={2}
-              placeholder="可填寫字號、許可文件或追溯資訊"
-              style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, resize: "vertical", boxSizing: "border-box" }}
-            />
-          </div>
-
-          <div style={{ display: "flex", gap: 10 }}>
-            <button
-              type="submit"
-              disabled={submitting}
-              style={{
-                background: "linear-gradient(180deg, #f7e4c2 0%, #e9c07a 100%)",
-                color: "#5a3e1b",
-                border: "1px solid #d5a85a",
-                borderRadius: 999,
-                padding: "9px 28px",
-                fontWeight: 700,
-                fontSize: 14,
-                cursor: submitting ? "not-allowed" : "pointer",
-                opacity: submitting ? 0.7 : 1,
-              }}
-            >
-              {submitting ? "送出中…" : isEditing ? "儲存變更" : "新增原物料"}
-            </button>
-            {isEditing && (
+      {/* ── New / Edit modal ── */}
+      {showFormModal && (
+        <div
+          style={{
+            position: "fixed", inset: 0, background: "rgba(43,28,14,0.5)",
+            display: "flex", alignItems: "flex-start", justifyContent: "center",
+            zIndex: 1000, overflowY: "auto", padding: "24px 12px",
+          }}
+          onClick={closeFormModal}
+        >
+          <div
+            style={{
+              background: "linear-gradient(160deg, #fffdf9 0%, #faf5ec 100%)",
+              borderRadius: 18,
+              border: "1px solid #e8d9c2",
+              padding: "24px 20px",
+              width: "100%",
+              maxWidth: 560,
+              boxShadow: "0 12px 40px rgba(43,28,14,0.22)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#5f4528" }}>
+                {isEditing ? "編輯原物料" : "新增原物料"}
+              </h3>
               <button
                 type="button"
-                onClick={onCancelEdit}
-                style={{
-                  background: "#f5f5f5",
-                  color: "#555",
-                  border: "1px solid #ddd",
-                  borderRadius: 999,
-                  padding: "9px 20px",
-                  fontWeight: 600,
-                  fontSize: 14,
-                  cursor: "pointer",
-                }}
+                onClick={closeFormModal}
+                style={{ background: "transparent", border: "none", fontSize: 22, color: "#9a7a55", cursor: "pointer", lineHeight: 1, padding: "2px 6px" }}
               >
-                取消編輯
+                ×
               </button>
+            </div>
+
+            {formError && (
+              <div style={{ background: "#fff1f2", border: "1px solid #fecdd3", color: "#be123c", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 14 }}>
+                {formError}
+              </div>
             )}
+
+            <form onSubmit={(e) => void onSubmit(e)}>
+              <div style={{ display: "grid", gap: 12, marginBottom: 12 }}>
+                <div>
+                  <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
+                    名稱 <span style={{ color: "#be123c" }}>*</span>
+                  </label>
+                  <input name="name" value={form.name} onChange={onChange} placeholder="例：有機全脂牛奶"
+                    style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }} />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>
+                    屬性 <span style={{ color: "#be123c" }}>*</span>
+                  </label>
+                  <input name="attribute" value={form.attribute} onChange={onChange} placeholder="例：RAW_MATERIAL"
+                    list="ingredient-attribute-options"
+                    style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }} />
+                  <datalist id="ingredient-attribute-options">
+                    {attributeOptions.map((option) => <option key={option} value={option} />)}
+                  </datalist>
+                  <div style={{ marginTop: 4, color: "#9a7a55", fontSize: 12 }}>需填後端 enum 值（會自動轉大寫與底線）</div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div>
+                    <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>品牌</label>
+                    <input name="brand" value={form.brand} onChange={onChange} placeholder="例：在地農場 A"
+                      style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>產地</label>
+                    <input name="origin" value={form.origin} onChange={onChange} placeholder="例：台灣雲林"
+                      style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }} />
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div>
+                    <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>每 100g 熱量</label>
+                    <input name="caloriesPer100g" type="number" min={0} step={1} value={form.caloriesPer100g} onChange={onChange} placeholder="例：364"
+                      style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>過敏原</label>
+                    <input name="allergens" value={form.allergens} onChange={onChange} placeholder="例：小麥、麩質"
+                      style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, boxSizing: "border-box" }} />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 13, color: "#7a5c3a", fontWeight: 600, display: "block", marginBottom: 4 }}>政府登記資訊</label>
+                  <textarea name="governmentRegistrationInfo" value={form.governmentRegistrationInfo} onChange={onChange}
+                    rows={2} placeholder="可填寫字號、許可文件或追溯資訊"
+                    style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #e2c9a3", fontSize: 14, resize: "vertical", boxSizing: "border-box" }} />
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+                <button type="button" onClick={closeFormModal}
+                  style={{ background: "#f5f5f5", color: "#555", border: "1px solid #ddd", borderRadius: 999, padding: "9px 20px", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>
+                  取消
+                </button>
+                <button type="submit" disabled={submitting}
+                  style={{
+                    background: "linear-gradient(180deg, #f7e4c2 0%, #e9c07a 100%)",
+                    color: "#5a3e1b", border: "1px solid #d5a85a",
+                    borderRadius: 999, padding: "9px 28px", fontWeight: 700, fontSize: 14,
+                    cursor: submitting ? "not-allowed" : "pointer", opacity: submitting ? 0.7 : 1,
+                  }}>
+                  {submitting ? "送出中…" : isEditing ? "儲存變更" : "新增原物料"}
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
-      </section>
-
-      {/* ── Ingredient List ── */}
-      <section>
-        <h2 style={{ fontSize: 17, fontWeight: 700, color: "#5f4528", marginBottom: 16 }}>
-          原物料列表
-        </h2>
-
-        {listLoading && <p style={{ color: "#999", fontSize: 14 }}>載入中…</p>}
-        {listError && <p style={{ color: "#be123c", fontSize: 14 }}>{listError}</p>}
-
-        {!listLoading && !listError && ingredients.length === 0 && (
-          <p style={{ color: "#aaa", fontSize: 14 }}>尚無原物料，請先新增</p>
-        )}
-
-        {!listLoading && ingredients.length > 0 && (
-          <div style={{ overflowX: "auto" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                fontSize: 14,
-                background: "#fffdf9",
-                borderRadius: 12,
-                overflow: "hidden",
-                boxShadow: "0 2px 12px rgba(180,120,40,0.07)",
-              }}
-            >
-              <thead>
-                <tr style={{ background: "linear-gradient(180deg, #f7e9d0 0%, #f0d9b5 100%)", color: "#5f4528" }}>
-                  <th style={thStyle}>名稱</th>
-                  <th style={thStyle}>屬性</th>
-                  <th style={thStyle}>熱量 / 過敏原</th>
-                  <th style={thStyle}>品牌 / 產地</th>
-                  <th style={thStyle}>登記資訊</th>
-                  <th style={thStyle}>建立 / 更新</th>
-                  <th style={{ ...thStyle, textAlign: "center" }}>操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ingredients.map((ing, idx) => (
-                  <tr
-                    key={ing.id}
-                    style={{ background: idx % 2 === 0 ? "#fffdf8" : "#fdf7ef" }}
-                  >
-                    <td style={tdStyle}>{ing.name}</td>
-                    <td style={tdStyle}>{ing.attribute}</td>
-                    <td style={{ ...tdStyle, maxWidth: 220 }}>
-                      {(ing.caloriesPer100g ?? "-")}
-                      <span style={{ color: "#999" }}> kcal</span>
-                      <br />
-                      <span style={{ color: "#777" }} title={ing.allergens ?? ""}>{ing.allergens ?? "-"}</span>
-                    </td>
-                    <td style={tdStyle}>{[ing.brand, ing.origin].filter(Boolean).join(" / ") || "-"}</td>
-                    <td style={{ ...tdStyle, maxWidth: 200, color: "#888" }}>
-                      {ing.governmentRegistrationInfo ? (
-                        <span title={ing.governmentRegistrationInfo}>
-                          {ing.governmentRegistrationInfo.length > 40
-                            ? `${ing.governmentRegistrationInfo.slice(0, 40)}…`
-                            : ing.governmentRegistrationInfo}
-                        </span>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
-                    <td style={{ ...tdStyle, color: "#777", fontSize: 12 }}>
-                      {formatDateTime(ing.createdAt)} / {formatDateTime(ing.updatedAt)}
-                    </td>
-                    <td style={{ ...tdStyle, textAlign: "center", whiteSpace: "nowrap" }}>
-                      <div style={{ display: "inline-flex", gap: 6 }}>
-                        <button
-                          style={{ ...actionButtonBase, ...actionButtonStock }}
-                          onClick={() => void openStockModal(ing)}
-                        >
-                          庫存
-                        </button>
-                        <button
-                          style={{ ...actionButtonBase, ...actionButtonEdit }}
-                          onClick={() => onEdit(ing)}
-                        >
-                          編輯
-                        </button>
-                        <button
-                          style={{ ...actionButtonBase, ...actionButtonDelete }}
-                          onClick={() => { setDeleteConfirm(ing.id); setDeleteError(null); }}
-                        >
-                          刪除
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+        </div>
+      )}
 
       {/* ── Delete confirm modal ── */}
       {deleteConfirm && (() => {
         const target = ingredients.find((i) => i.id === deleteConfirm);
         return (
           <div
-            style={{
-              position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
-              display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000,
-            }}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}
             onClick={() => setDeleteConfirm(null)}
           >
             <div
-              style={{
-                background: "#fff", borderRadius: 16, padding: "28px 32px", maxWidth: 380,
-                width: "90%", boxShadow: "0 8px 40px rgba(0,0,0,0.2)",
-              }}
+              style={{ background: "#fff", borderRadius: 16, padding: "28px 32px", maxWidth: 380, width: "90%", boxShadow: "0 8px 40px rgba(0,0,0,0.2)" }}
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1a1a1a", marginBottom: 12 }}>
-                確認刪除
-              </h3>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: "#1a1a1a", marginBottom: 12 }}>確認刪除</h3>
               <p style={{ fontSize: 14, color: "#444", marginBottom: 8 }}>
                 確定要刪除原物料「<strong>{target?.name}</strong>」嗎？
               </p>
@@ -725,33 +655,17 @@ export default function IngredientAdminPage() {
                 ※ 若此原物料已被商品使用，系統將會擋下刪除操作。
               </p>
               {deleteError && (
-                <div
-                  style={{
-                    background: "#fff1f2", border: "1px solid #fecdd3", color: "#be123c",
-                    borderRadius: 8, padding: "8px 12px", marginBottom: 16, fontSize: 13,
-                  }}
-                >
+                <div style={{ background: "#fff1f2", border: "1px solid #fecdd3", color: "#be123c", borderRadius: 8, padding: "8px 12px", marginBottom: 16, fontSize: 13 }}>
                   {deleteError}
                 </div>
               )}
               <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-                <button
-                  onClick={() => setDeleteConfirm(null)}
-                  style={{
-                    background: "#f5f5f5", color: "#555", border: "1px solid #ddd",
-                    borderRadius: 999, padding: "8px 18px", fontWeight: 600, fontSize: 13, cursor: "pointer",
-                  }}
-                >
+                <button onClick={() => setDeleteConfirm(null)}
+                  style={{ background: "#f5f5f5", color: "#555", border: "1px solid #ddd", borderRadius: 999, padding: "8px 18px", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
                   取消
                 </button>
-                <button
-                  onClick={() => void onDeleteConfirmed(deleteConfirm)}
-                  style={{
-                    background: "linear-gradient(180deg, #fff4f2 0%, #ffdcd5 100%)",
-                    color: "#ba3b2f", border: "1px solid #f1b8b0",
-                    borderRadius: 999, padding: "8px 18px", fontWeight: 700, fontSize: 13, cursor: "pointer",
-                  }}
-                >
+                <button onClick={() => void onDeleteConfirmed(deleteConfirm)}
+                  style={{ background: "linear-gradient(180deg, #fff4f2 0%, #ffdcd5 100%)", color: "#ba3b2f", border: "1px solid #f1b8b0", borderRadius: 999, padding: "8px 18px", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
                   確認刪除
                 </button>
               </div>
@@ -769,51 +683,23 @@ export default function IngredientAdminPage() {
             borderRadius: 18,
             border: "1px solid rgba(168, 206, 240, 0.5)",
             background: "linear-gradient(160deg, rgba(240,247,255,0.95) 0%, rgba(213,232,250,0.6) 100%)",
-            padding: "28px 32px",
+            padding: "28px 20px",
             boxShadow: "0 4px 24px rgba(80, 120, 200, 0.08)",
             scrollMarginTop: 80,
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 20,
-              paddingBottom: 14,
-              borderBottom: "1px solid rgba(168, 206, 240, 0.3)",
-            }}
-          >
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1d5fa4" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, paddingBottom: 14, borderBottom: "1px solid rgba(168, 206, 240, 0.3)" }}>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1d5fa4", margin: 0 }}>
               庫存管理：{stockModalIngredient.name}
             </h2>
-            <button
-              onClick={closeStockModal}
-              style={{
-                background: "#fff",
-                color: "#1d5fa4",
-                border: "1px solid #a8cef0",
-                borderRadius: 999,
-                padding: "6px 16px",
-                fontWeight: 600,
-                fontSize: 13,
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={closeStockModal}
+              style={{ background: "#fff", color: "#1d5fa4", border: "1px solid #a8cef0", borderRadius: 999, padding: "6px 16px", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
               關閉
             </button>
           </div>
 
           {/* Stock form */}
-          <div
-            style={{
-              background: "#fff",
-              border: "1px solid rgba(168,206,240,0.4)",
-              borderRadius: 12,
-              padding: "20px 24px",
-              marginBottom: 24,
-            }}
-          >
+          <div style={{ background: "#fff", border: "1px solid rgba(168,206,240,0.4)", borderRadius: 12, padding: "20px 16px", marginBottom: 24 }}>
             <h4 style={{ fontSize: 14, fontWeight: 700, color: "#1d5fa4", marginBottom: 16 }}>
               {isStockEditing ? "編輯庫存批次" : "新增庫存批次"}
             </h4>
@@ -830,89 +716,40 @@ export default function IngredientAdminPage() {
             )}
 
             <form onSubmit={(e) => void onStockSubmit(e)}>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px 16px", marginBottom: 14 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "10px 14px", marginBottom: 14 }}>
                 <div>
                   <label style={{ fontSize: 12, color: "#4a6fa0", fontWeight: 600, display: "block", marginBottom: 3 }}>
                     單價（分） <span style={{ color: "#be123c" }}>*</span>
                   </label>
-                  <input
-                    name="unitPriceCents"
-                    type="number"
-                    min={0}
-                    step={1}
-                    value={stockForm.unitPriceCents}
-                    onChange={onStockChange}
-                    placeholder="例：350"
-                    style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid #a8cef0", fontSize: 13, boxSizing: "border-box" }}
-                  />
+                  <input name="unitPriceCents" type="number" min={0} step={1} value={stockForm.unitPriceCents} onChange={onStockChange} placeholder="例：350"
+                    style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid #a8cef0", fontSize: 13, boxSizing: "border-box" }} />
                 </div>
                 <div>
                   <label style={{ fontSize: 12, color: "#4a6fa0", fontWeight: 600, display: "block", marginBottom: 3 }}>
                     庫存數量 <span style={{ color: "#be123c" }}>*</span>
                   </label>
-                  <input
-                    name="stockQuantity"
-                    type="number"
-                    min={0}
-                    step="0.001"
-                    value={stockForm.stockQuantity}
-                    onChange={onStockChange}
-                    placeholder="例：25.500"
-                    style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid #a8cef0", fontSize: 13, boxSizing: "border-box" }}
-                  />
+                  <input name="stockQuantity" type="number" min={0} step="0.001" value={stockForm.stockQuantity} onChange={onStockChange} placeholder="例：25.500"
+                    style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid #a8cef0", fontSize: 13, boxSizing: "border-box" }} />
                 </div>
                 <div>
-                  <label style={{ fontSize: 12, color: "#4a6fa0", fontWeight: 600, display: "block", marginBottom: 3 }}>
-                    進貨日
-                  </label>
-                  <input
-                    name="stockedAt"
-                    type="date"
-                    value={stockForm.stockedAt}
-                    onChange={onStockChange}
-                    style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid #a8cef0", fontSize: 13, boxSizing: "border-box" }}
-                  />
+                  <label style={{ fontSize: 12, color: "#4a6fa0", fontWeight: 600, display: "block", marginBottom: 3 }}>進貨日</label>
+                  <input name="stockedAt" type="date" value={stockForm.stockedAt} onChange={onStockChange}
+                    style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid #a8cef0", fontSize: 13, boxSizing: "border-box" }} />
                 </div>
                 <div>
-                  <label style={{ fontSize: 12, color: "#4a6fa0", fontWeight: 600, display: "block", marginBottom: 3 }}>
-                    到期日
-                  </label>
-                  <input
-                    name="expiresAt"
-                    type="date"
-                    value={stockForm.expiresAt}
-                    onChange={onStockChange}
-                    style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid #a8cef0", fontSize: 13, boxSizing: "border-box" }}
-                  />
+                  <label style={{ fontSize: 12, color: "#4a6fa0", fontWeight: 600, display: "block", marginBottom: 3 }}>到期日</label>
+                  <input name="expiresAt" type="date" value={stockForm.expiresAt} onChange={onStockChange}
+                    style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid #a8cef0", fontSize: 13, boxSizing: "border-box" }} />
                 </div>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button
-                  type="submit"
-                  disabled={stockSubmitting}
-                  style={{
-                    background: "linear-gradient(180deg, #d5e8fa 0%, #a8cef0 100%)",
-                    color: "#1d5fa4",
-                    border: "1px solid #a8cef0",
-                    borderRadius: 999,
-                    padding: "7px 22px",
-                    fontWeight: 700,
-                    fontSize: 13,
-                    cursor: stockSubmitting ? "not-allowed" : "pointer",
-                    opacity: stockSubmitting ? 0.7 : 1,
-                  }}
-                >
+                <button type="submit" disabled={stockSubmitting}
+                  style={{ background: "linear-gradient(180deg, #d5e8fa 0%, #a8cef0 100%)", color: "#1d5fa4", border: "1px solid #a8cef0", borderRadius: 999, padding: "7px 22px", fontWeight: 700, fontSize: 13, cursor: stockSubmitting ? "not-allowed" : "pointer", opacity: stockSubmitting ? 0.7 : 1 }}>
                   {stockSubmitting ? "送出中…" : isStockEditing ? "儲存變更" : "新增批次"}
                 </button>
                 {isStockEditing && (
-                  <button
-                    type="button"
-                    onClick={onCancelStockEdit}
-                    style={{
-                      background: "#f5f5f5", color: "#555", border: "1px solid #ddd",
-                      borderRadius: 999, padding: "7px 16px", fontWeight: 600, fontSize: 13, cursor: "pointer",
-                    }}
-                  >
+                  <button type="button" onClick={onCancelStockEdit}
+                    style={{ background: "#f5f5f5", color: "#555", border: "1px solid #ddd", borderRadius: 999, padding: "7px 16px", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
                     取消
                   </button>
                 )}
@@ -930,46 +767,25 @@ export default function IngredientAdminPage() {
           )}
 
           {!stocksLoading && stocks.length > 0 && (
-            <div style={{ overflowX: "auto", background: "#fff", borderRadius: 12, padding: 4 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-                <thead>
-                  <tr style={{ background: "#f0f7ff", color: "#1d5fa4" }}>
-                    <th style={stockThStyle}>單價</th>
-                    <th style={stockThStyle}>庫存數量</th>
-                    <th style={stockThStyle}>進貨日</th>
-                    <th style={stockThStyle}>到期日</th>
-                    <th style={stockThStyle}>建立時間</th>
-                    <th style={{ ...stockThStyle, textAlign: "center" }}>操作</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stocks.map((stock, idx) => (
-                    <tr key={stock.id} style={{ background: idx % 2 === 0 ? "#fff" : "#f8fbff" }}>
-                      <td style={stockTdStyle}>{formatMoney(stock.unitPriceCents)}</td>
-                      <td style={stockTdStyle}>{stock.stockQuantity}</td>
-                      <td style={stockTdStyle}>{stock.stockedAt ? normalizeDateInput(stock.stockedAt) : "-"}</td>
-                      <td style={stockTdStyle}>{stock.expiresAt ? normalizeDateInput(stock.expiresAt) : "-"}</td>
-                      <td style={{ ...stockTdStyle, color: "#888", fontSize: 11 }}>{formatDateTime(stock.createdAt)}</td>
-                      <td style={{ ...stockTdStyle, textAlign: "center", whiteSpace: "nowrap" }}>
-                        <div style={{ display: "inline-flex", gap: 5 }}>
-                          <button
-                            style={{ ...actionButtonBase, ...actionButtonEdit, minWidth: 52, fontSize: 12, padding: "4px 10px" }}
-                            onClick={() => onStockEdit(stock)}
-                          >
-                            編輯
-                          </button>
-                          <button
-                            style={{ ...actionButtonBase, ...actionButtonDelete, minWidth: 52, fontSize: 12, padding: "4px 10px" }}
-                            onClick={() => { setStockDeleteConfirm(stock.id); setStockDeleteError(null); }}
-                          >
-                            刪除
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div style={{ display: "grid", gap: 10 }}>
+              {stocks.map((stock, idx) => (
+                <div key={stock.id}
+                  style={{ background: idx % 2 === 0 ? "#fff" : "#f4f9ff", borderRadius: 10, border: "1px solid #d5e8fa", padding: "12px 14px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, flexWrap: "wrap" }}>
+                    <div style={{ fontSize: 14, color: "#1d5fa4", fontWeight: 700 }}>{formatMoney(stock.unitPriceCents)}</div>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button style={{ ...actionButtonBase, ...actionButtonEdit, minWidth: 52, fontSize: 12, padding: "4px 10px" }} onClick={() => onStockEdit(stock)}>編輯</button>
+                      <button style={{ ...actionButtonBase, ...actionButtonDelete, minWidth: 52, fontSize: 12, padding: "4px 10px" }} onClick={() => { setStockDeleteConfirm(stock.id); setStockDeleteError(null); }}>刪除</button>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 16, fontSize: 13, color: "#4a6fa0", marginTop: 6, flexWrap: "wrap" }}>
+                    <span>數量：{stock.stockQuantity}</span>
+                    {stock.stockedAt && <span>進貨：{normalizeDateInput(stock.stockedAt)}</span>}
+                    {stock.expiresAt && <span>到期：{normalizeDateInput(stock.expiresAt)}</span>}
+                    <span style={{ color: "#aaa", fontSize: 11 }}>建立：{formatDateTime(stock.createdAt)}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </section>
@@ -978,17 +794,11 @@ export default function IngredientAdminPage() {
       {/* ── Stock delete confirm modal ── */}
       {stockDeleteConfirm && (
         <div
-          style={{
-            position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
-            display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100,
-          }}
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100 }}
           onClick={() => setStockDeleteConfirm(null)}
         >
           <div
-            style={{
-              background: "#fff", borderRadius: 16, padding: "24px 28px", maxWidth: 360,
-              width: "90%", boxShadow: "0 8px 40px rgba(0,0,0,0.2)",
-            }}
+            style={{ background: "#fff", borderRadius: 16, padding: "24px 28px", maxWidth: 360, width: "90%", boxShadow: "0 8px 40px rgba(0,0,0,0.2)" }}
             onClick={(e) => e.stopPropagation()}
           >
             <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a1a", marginBottom: 12 }}>確認刪除庫存批次</h3>
@@ -999,16 +809,12 @@ export default function IngredientAdminPage() {
               </div>
             )}
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-              <button
-                onClick={() => setStockDeleteConfirm(null)}
-                style={{ background: "#f5f5f5", color: "#555", border: "1px solid #ddd", borderRadius: 999, padding: "7px 16px", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
-              >
+              <button onClick={() => setStockDeleteConfirm(null)}
+                style={{ background: "#f5f5f5", color: "#555", border: "1px solid #ddd", borderRadius: 999, padding: "7px 16px", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>
                 取消
               </button>
-              <button
-                onClick={() => void onStockDeleteConfirmed(stockDeleteConfirm)}
-                style={{ background: "linear-gradient(180deg, #fff4f2 0%, #ffdcd5 100%)", color: "#ba3b2f", border: "1px solid #f1b8b0", borderRadius: 999, padding: "7px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer" }}
-              >
+              <button onClick={() => void onStockDeleteConfirmed(stockDeleteConfirm)}
+                style={{ background: "linear-gradient(180deg, #fff4f2 0%, #ffdcd5 100%)", color: "#ba3b2f", border: "1px solid #f1b8b0", borderRadius: 999, padding: "7px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
                 確認刪除
               </button>
             </div>
@@ -1018,31 +824,3 @@ export default function IngredientAdminPage() {
     </div>
   );
 }
-
-const thStyle: CSSProperties = {
-  padding: "10px 14px",
-  textAlign: "left",
-  fontWeight: 700,
-  fontSize: 13,
-  borderBottom: "1px solid rgba(200, 160, 80, 0.2)",
-};
-
-const tdStyle: CSSProperties = {
-  padding: "10px 14px",
-  borderBottom: "1px solid rgba(200, 160, 80, 0.10)",
-  verticalAlign: "middle",
-};
-
-const stockThStyle: CSSProperties = {
-  padding: "8px 12px",
-  textAlign: "left",
-  fontWeight: 700,
-  fontSize: 12,
-  borderBottom: "1px solid #d5e8fa",
-};
-
-const stockTdStyle: CSSProperties = {
-  padding: "8px 12px",
-  borderBottom: "1px solid #e8f3fd",
-  verticalAlign: "middle",
-};
