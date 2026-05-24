@@ -660,54 +660,57 @@ export default function CustomerProductsPage() {
             >
               {detailImageByProductId[detailSelected.id]?.length ? (
                 <>
-                  <button
-                    onClick={() => scrollDetailImages("left")}
-                    aria-label="上一張"
-                    type="button"
-                    style={{
-                      position: "absolute",
-                      left: 10,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      zIndex: 2,
-                      width: 40,
-                      height: 40,
-                      borderRadius: "50%",
-                      border: "1px solid rgba(255,255,255,0.7)",
-                      background: "linear-gradient(135deg, #5c3d20 0%, #3e2710 100%)",
-                      boxShadow: "0 4px 14px rgba(0,0,0,0.4)",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <span
-                      aria-hidden="true"
+                  {detailImageByProductId[detailSelected.id].length > 1 && (
+                    <button
+                      onClick={() => scrollDetailImages("left")}
+                      aria-label="上一張"
+                      type="button"
                       style={{
-                        color: "#fff",
-                        fontSize: 28,
-                        fontWeight: 900,
-                        lineHeight: 1,
-                        textShadow: "0 1px 3px rgba(0,0,0,0.45)",
-                        marginTop: -2,
+                        position: "absolute",
+                        left: 10,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        zIndex: 2,
+                        width: 40,
+                        height: 40,
+                        borderRadius: "50%",
+                        border: "1px solid rgba(255,255,255,0.7)",
+                        background: "linear-gradient(135deg, #5c3d20 0%, #3e2710 100%)",
+                        boxShadow: "0 4px 14px rgba(0,0,0,0.4)",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
                       }}
                     >
-                      ‹
-                    </span>
-                  </button>
+                      <span
+                        aria-hidden="true"
+                        style={{
+                          color: "#fff",
+                          fontSize: 28,
+                          fontWeight: 900,
+                          lineHeight: 1,
+                          textShadow: "0 1px 3px rgba(0,0,0,0.45)",
+                          marginTop: -2,
+                        }}
+                      >
+                        ‹
+                      </span>
+                    </button>
+                  )}
 
                   <div
                     ref={detailStripRef}
                     style={{
                       width: "100%",
                       height: "100%",
-                      overflowX: "auto",
+                      overflowX: detailImageByProductId[detailSelected.id].length > 1 ? "auto" : "hidden",
                       overflowY: "hidden",
                       display: "flex",
+                      justifyContent: detailImageByProductId[detailSelected.id].length === 1 ? "center" : "flex-start",
                       gap: 8,
-                      padding: "14px 46px",
+                      padding: detailImageByProductId[detailSelected.id].length === 1 ? "14px" : "14px 46px",
                       boxSizing: "border-box",
                       scrollBehavior: "smooth",
                     }}
@@ -745,43 +748,45 @@ export default function CustomerProductsPage() {
                     ))}
                   </div>
 
-                  <button
-                    onClick={() => scrollDetailImages("right")}
-                    aria-label="下一張"
-                    type="button"
-                    style={{
-                      position: "absolute",
-                      right: 10,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      zIndex: 2,
-                      width: 40,
-                      height: 40,
-                      borderRadius: "50%",
-                      border: "1px solid rgba(255,255,255,0.7)",
-                      background: "linear-gradient(135deg, #5c3d20 0%, #3e2710 100%)",
-                      boxShadow: "0 4px 14px rgba(0,0,0,0.4)",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <span
-                      aria-hidden="true"
+                  {detailImageByProductId[detailSelected.id].length > 1 && (
+                    <button
+                      onClick={() => scrollDetailImages("right")}
+                      aria-label="下一張"
+                      type="button"
                       style={{
-                        color: "#fff",
-                        fontSize: 28,
-                        fontWeight: 900,
-                        lineHeight: 1,
-                        textShadow: "0 1px 3px rgba(0,0,0,0.45)",
-                        marginTop: -2,
+                        position: "absolute",
+                        right: 10,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        zIndex: 2,
+                        width: 40,
+                        height: 40,
+                        borderRadius: "50%",
+                        border: "1px solid rgba(255,255,255,0.7)",
+                        background: "linear-gradient(135deg, #5c3d20 0%, #3e2710 100%)",
+                        boxShadow: "0 4px 14px rgba(0,0,0,0.4)",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
                       }}
                     >
-                      ›
-                    </span>
-                  </button>
+                      <span
+                        aria-hidden="true"
+                        style={{
+                          color: "#fff",
+                          fontSize: 28,
+                          fontWeight: 900,
+                          lineHeight: 1,
+                          textShadow: "0 1px 3px rgba(0,0,0,0.45)",
+                          marginTop: -2,
+                        }}
+                      >
+                        ›
+                      </span>
+                    </button>
+                  )}
                 </>
               ) : (
                 <div
