@@ -115,12 +115,11 @@ export default function ProductDetailModal({
                     type="button"
                     aria-label="上一張"
                     onClick={() => scroll("left")}
+                    className="gallery-nav-btn gallery-nav-btn--left"
                     style={{
                       position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)",
-                      zIndex: 2, width: 40, height: 40, borderRadius: "50%",
-                      border: "1px solid rgba(255,255,255,0.7)",
-                      background: "linear-gradient(135deg,#5c3d20 0%,#3e2710 100%)",
-                      boxShadow: "0 4px 14px rgba(0,0,0,0.4)", cursor: "pointer",
+                      zIndex: 2, width: 40, height: 40,
+                      cursor: "pointer",
                       display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                     }}
                   >
@@ -163,12 +162,11 @@ export default function ProductDetailModal({
                     type="button"
                     aria-label="下一張"
                     onClick={() => scroll("right")}
+                    className="gallery-nav-btn gallery-nav-btn--right"
                     style={{
                       position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
-                      zIndex: 2, width: 40, height: 40, borderRadius: "50%",
-                      border: "1px solid rgba(255,255,255,0.7)",
-                      background: "linear-gradient(135deg,#5c3d20 0%,#3e2710 100%)",
-                      boxShadow: "0 4px 14px rgba(0,0,0,0.4)", cursor: "pointer",
+                      zIndex: 2, width: 40, height: 40,
+                      cursor: "pointer",
                       display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                     }}
                   >
