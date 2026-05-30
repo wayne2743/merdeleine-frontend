@@ -547,7 +547,7 @@ export default function CustomerProductsPage() {
                   {checkingOpenProductId === p.id
                     ? "檢查檔期中..."
                     : isAuthenticated
-                      ? "發起開團 / 立即預約"
+                      ? "立即預購"
                       : "登入後即可預約"}
                 </button>
               </div>

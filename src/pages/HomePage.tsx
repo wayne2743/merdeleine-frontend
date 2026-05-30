@@ -325,8 +325,8 @@ export default function HomePage() {
         <div className="hero-overlay" />
         <div className="hero-content">
           <p className="hero-kicker">{hero.kicker}</p>
-          <h1 className="hero-title">{hero.title}</h1>
-          <p className="hero-subtitle">{hero.subtitle}</p>
+          <h1 className="hero-title">純粹手作<br />法式甜點</h1>
+          <p className="hero-subtitle">無人工香料，無防腐劑。以細緻奶油香與低糖配方，呈現適合日常與送禮的法式甜點。</p>
           <div className="hero-actions">
             <Link to="/customer/products" className="hero-btn hero-btn-primary">
               立即選購
@@ -338,9 +338,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="home-section" />
-
-      <section className="home-section">
+      <section className="home-section home-band home-band--milk">
         <div className="home-section-head">
           <h2>本週熱賣</h2>
           <span>店內最受歡迎的甜點風味</span>
@@ -358,17 +356,16 @@ export default function HomePage() {
                 <div className="featured-body">
                   <h3>{item.name}</h3>
                   <p>{item.desc}</p>
-                  <div className="featured-row">
-                    <strong>{item.price}</strong>
-                    <Link
-                      to={item.actionTo}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                    >
-                      加入清單
-                    </Link>
-                  </div>
+                  <strong className="featured-price">{item.price}</strong>
+                  <Link
+                    to={item.actionTo}
+                    className="featured-cta"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  >
+                    立即預購
+                  </Link>
                 </div>
               </article>
             ))}
@@ -376,8 +373,17 @@ export default function HomePage() {
         )}
       </section>
 
+      {/* ── 品牌理念 ── */}
+      <section className="home-section home-band home-band--green brand-story">
+        <p className="brand-story-kicker">Mermaid × Madeleine</p>
+        <h2 className="brand-story-title">MERDELEINE</h2>
+        <p className="brand-story-text">
+          MERDELEINE 來自 Mermaid 與 Madeleine 的結合，象徵純粹、優雅與手作甜點的細緻工藝。每一份甜點皆選用天然食材製作，不添加人工香料與防腐劑，將溫柔甜點融入日常生活。
+        </p>
+      </section>
+
       {/* ── 訂購流程 ── */}
-      <section className="home-section" style={{ paddingTop: 40, paddingBottom: 40 }}>
+      <section className="home-section home-band home-band--cream" style={{ paddingTop: 40, paddingBottom: 40 }}>
         <div style={{ marginBottom: 32 }}>
           <h2 style={{ margin: 0, marginBottom: 6, fontSize: 32, fontWeight: 700, color: "#4a321f" }}>訂購流程</h2>
           <p style={{ margin: 0, fontSize: 14, color: "#888" }}>五個步驟，從挑選到取貨</p>
@@ -436,7 +442,7 @@ export default function HomePage() {
       </section>
 
       {/* ── 聯絡我們 ── */}
-      <section className="home-section" style={{ paddingTop: 40, paddingBottom: 40 }}>
+      <section className="home-section home-band home-band--milk" style={{ paddingTop: 40, paddingBottom: 40 }}>
         <div style={{ marginBottom: 24 }}>
           <h2 style={{ margin: 0, marginBottom: 6, fontSize: 32, fontWeight: 700, color: "#4a321f" }}>聯絡我們</h2>
           <p style={{ margin: 0, fontSize: 14, color: "#888" }}>有任何問題歡迎透過以下方式與我們聯繫</p>
