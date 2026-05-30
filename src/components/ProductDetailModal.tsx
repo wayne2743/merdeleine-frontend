@@ -101,10 +101,10 @@ export default function ProductDetailModal({
             style={{
               width: "100%",
               height: 220,
-              borderRadius: 12,
+              borderRadius: 16,
               overflow: "hidden",
-              background: "#f4f4f4",
-              border: "1px solid #eee",
+              background: "#F4F6F0",
+              border: "1px solid rgba(199, 212, 199, 0.6)",
               position: "relative",
             }}
           >
@@ -144,7 +144,7 @@ export default function ProductDetailModal({
                       key={i}
                       style={{
                         width: 190, height: 190, borderRadius: 10, overflow: "hidden",
-                        border: "1px solid #eee", background: "#fff", flexShrink: 0,
+                        border: "1px solid rgba(199, 212, 199, 0.5)", background: "#FFFDF9", flexShrink: 0,
                       }}
                     >
                       <img
@@ -182,10 +182,10 @@ export default function ProductDetailModal({
           </div>
 
           {/* Name & price */}
-          <div style={{ marginTop: 18, fontSize: 22, fontWeight: 800, color: "#3d2c1f", lineHeight: 1.3 }}>
+          <div style={{ marginTop: 18, fontSize: 22, fontWeight: 800, color: "#4A2E1F", lineHeight: 1.3 }}>
             {name}
           </div>
-          <div style={{ marginTop: 6, fontSize: 18, fontWeight: 700, color: "#8c5425" }}>
+          <div style={{ marginTop: 6, fontSize: 18, fontWeight: 700, color: "#7A4A2A" }}>
             {price}
           </div>
 
@@ -193,19 +193,20 @@ export default function ProductDetailModal({
           <div
             style={{
               marginTop: 20, display: "grid", gap: 18,
-              padding: "20px", borderRadius: 14,
-              background: "#faf6f0", border: "1px solid #ece0cf",
+              padding: "20px", borderRadius: 20,
+              background: "linear-gradient(135deg, #F7F2EC 0%, #E3EBE3 100%)",
+              border: "1px solid rgba(199, 212, 199, 0.75)",
             }}
           >
             {/* 成分 */}
             <div>
-              <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 10 }}>成分</div>
+              <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "0.04em", color: "#2F4A3F", marginBottom: 10 }}>成分</div>
               {isLoadingIngredients ? (
                 <div style={{ fontSize: 14, color: "#b0a090" }}>載入中…</div>
               ) : ingredientTags.length > 0 ? (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {ingredientTags.map((tag, i) => (
-                    <span key={i} style={{ background: "#fff", color: "#5b442f", borderRadius: 999, padding: "7px 16px", fontSize: 15, border: "1px solid #e3d3bd" }}>{tag}</span>
+                    <span key={i} style={{ background: "rgba(255, 253, 249, 0.9)", color: "#2F4A3F", borderRadius: 999, padding: "7px 16px", fontSize: 15, border: "1px solid #C7D4C7" }}>{tag}</span>
                   ))}
                 </div>
               ) : (
@@ -215,13 +216,13 @@ export default function ProductDetailModal({
 
             {/* 過敏原 */}
             <div>
-              <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 10 }}>過敏原</div>
+              <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "0.04em", color: "#2F4A3F", marginBottom: 10 }}>過敏原</div>
               {isLoadingIngredients ? (
                 <div style={{ fontSize: 14, color: "#b0a090" }}>載入中…</div>
               ) : allergenTags.length > 0 ? (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {allergenTags.map((tag, i) => (
-                    <span key={i} style={{ background: "#fdf0ec", color: "#b5532e", borderRadius: 999, padding: "7px 16px", fontSize: 15, fontWeight: 600, border: "1px solid #f1cdbf" }}>{tag}</span>
+                    <span key={i} style={{ background: "#E3EBE3", color: "#103A33", borderRadius: 999, padding: "7px 16px", fontSize: 15, fontWeight: 600, border: "1px solid #C7D4C7" }}>{tag}</span>
                   ))}
                 </div>
               ) : (
@@ -232,7 +233,7 @@ export default function ProductDetailModal({
             {/* 熱量 */}
             <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
               <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54" }}>熱量</span>
-              <span style={{ fontSize: 17, fontWeight: 700, color: "#5b442f" }}>
+              <span style={{ fontSize: 17, fontWeight: 700, color: "#2F4A3F" }}>
                 {isLoadingIngredients ? "載入中…" : calories}
               </span>
             </div>
@@ -241,8 +242,8 @@ export default function ProductDetailModal({
           {/* 商品介紹 */}
           {description && (
             <div style={{ marginTop: 18 }}>
-              <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 10 }}>商品介紹</div>
-              <div style={{ fontSize: 16, lineHeight: 1.9, color: "#54402d", whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word" }}>
+              <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "0.04em", color: "#2F4A3F", marginBottom: 10 }}>商品介紹</div>
+              <div style={{ fontSize: 16, lineHeight: 1.9, color: "#4A2E1F", whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word" }}>
                 {description}
               </div>
             </div>
