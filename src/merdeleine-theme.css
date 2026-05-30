@@ -246,21 +246,78 @@ input:focus, textarea:focus, select:focus {
 }
 .hero-btn-secondary:hover { background: #fff !important; }
 
+/* Product detail sticky "加入清單" CTA — elegant, max 64px tall */
+.home-featured-detail-cta {
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: calc(100% - 32px) !important;
+  height: 64px !important;
+  max-height: 64px !important;
+  margin: 16px auto !important;
+  padding: 0 32px !important;
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  border-radius: 999px !important;
+  border: 1px solid #B8944A !important;
+  background: linear-gradient(135deg, #D3B77D, #C8A977) !important;
+  color: #103A33 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+  text-decoration: none !important;
+}
+.home-featured-detail-cta:hover {
+  background: linear-gradient(135deg, #E0C48A, #D3B77D) !important;
+}
+.home-featured-detail-cta:active {
+  transform: scale(0.98);
+}
+
 /* ======================= Gallery navigation arrows ======================= */
 .gallery-nav-btn {
-  background: linear-gradient(135deg, #5c3d20 0%, #3e2710 100%) !important;
-  border: 1px solid rgba(255,255,255,0.7) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 2px solid #C8A977 !important;
   border-radius: 50% !important;
-  color: #fff !important;
+  color: #103A33 !important;
   padding: 0 !important;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.4) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  transition: transform 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease !important;
 }
 .gallery-nav-btn:hover {
-  background: linear-gradient(135deg, #7a5530 0%, #5c3d20 100%) !important;
-  filter: none;
-  transform: none;
+  background: #C8A977 !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16) !important;
+  transform: translateY(-50%) scale(1.04) !important;
 }
-.gallery-nav-btn span { color: #fff !important; }
+.gallery-nav-btn:active {
+  background: #C8A977 !important;
+  transform: translateY(-50%) scale(0.96) !important;
+}
+.gallery-nav-btn span { color: #103A33 !important; }
+
+/* ── Carousel pagination dots ── */
+.gallery-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.gallery-dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+  border: none !important;
+  background: rgba(16, 58, 51, 0.22) !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  transition: width 0.16s ease, background-color 0.16s ease !important;
+}
+.gallery-dot.is-active {
+  width: 22px !important;
+  border-radius: 999px !important;
+  background: #C8A977 !important;
+}
 
 /* ======================= Modal close button ======================= */
 .modal-close-btn {

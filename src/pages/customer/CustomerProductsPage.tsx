@@ -224,7 +224,10 @@ export default function CustomerProductsPage() {
   const [originalModalUrl, setOriginalModalUrl] = useState<string | null>(null);
 
   const detailStripRef = useRef<HTMLDivElement | null>(null);
+  const [activeDetailIndex, setActiveDetailIndex] = useState(0);
   const [reserving, setReserving] = useState<string | null>(null);
+
+  const GALLERY_ITEM_STEP = 198; // 190px image + 8px gap
 
   const [orderOpen, setOrderOpen] = useState(false);
   const [orderSelected, setOrderSelected] = useState<Product | null>(null);
@@ -459,6 +462,7 @@ export default function CustomerProductsPage() {
     setDetailSelected(p);
     setOriginalModalUrl(null);
     setDetailOpen(true);
+    setActiveDetailIndex(0);
 
     if (detailStripRef.current) {
       detailStripRef.current.scrollLeft = 0;
@@ -476,8 +480,19 @@ export default function CustomerProductsPage() {
 
   function scrollDetailImages(direction: "left" | "right") {
     if (!detailStripRef.current) return;
-    const delta = direction === "left" ? -220 : 220;
+    const delta = direction === "left" ? -GALLERY_ITEM_STEP : GALLERY_ITEM_STEP;
     detailStripRef.current.scrollBy({ left: delta, behavior: "smooth" });
+  }
+
+  function handleDetailStripScroll() {
+    if (!detailStripRef.current) return;
+    const index = Math.round(detailStripRef.current.scrollLeft / GALLERY_ITEM_STEP);
+    setActiveDetailIndex(index);
+  }
+
+  function scrollDetailToIndex(index: number) {
+    if (!detailStripRef.current) return;
+    detailStripRef.current.scrollTo({ left: index * GALLERY_ITEM_STEP, behavior: "smooth" });
   }
 
   function closeRedirectingModal() {
@@ -668,17 +683,18 @@ export default function CustomerProductsPage() {
                       type="button"
                       className="gallery-nav-btn gallery-nav-btn--left"
                       style={{
-                        position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)",
-                        zIndex: 2, width: 40, height: 40, cursor: "pointer",
+                        position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)",
+                        zIndex: 10, width: 48, height: 48, cursor: "pointer",
                         display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                       }}
                     >
-                      <span aria-hidden="true" style={{ color: "#fff", fontSize: 28, fontWeight: 900, lineHeight: 1, textShadow: "0 1px 3px rgba(0,0,0,0.45)", marginTop: -2 }}>‹</span>
+                      <span aria-hidden="true" style={{ fontSize: 26, fontWeight: 700, lineHeight: 1, marginTop: -2 }}>‹</span>
                     </button>
                   )}
 
                   <div
                     ref={detailStripRef}
+                    onScroll={handleDetailStripScroll}
                     style={{
                       width: "100%",
                       height: "100%",
@@ -732,12 +748,12 @@ export default function CustomerProductsPage() {
                       type="button"
                       className="gallery-nav-btn gallery-nav-btn--right"
                       style={{
-                        position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
-                        zIndex: 2, width: 40, height: 40, cursor: "pointer",
+                        position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)",
+                        zIndex: 10, width: 48, height: 48, cursor: "pointer",
                         display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                       }}
                     >
-                      <span aria-hidden="true" style={{ color: "#fff", fontSize: 28, fontWeight: 900, lineHeight: 1, textShadow: "0 1px 3px rgba(0,0,0,0.45)", marginTop: -2 }}>›</span>
+                      <span aria-hidden="true" style={{ fontSize: 26, fontWeight: 700, lineHeight: 1, marginTop: -2 }}>›</span>
                     </button>
                   )}
                 </>
@@ -757,6 +773,22 @@ export default function CustomerProductsPage() {
                 </div>
               )}
             </div>
+
+            {(detailImageByProductId[detailSelected.id]?.length ?? 0) > 1 && (
+              <div className="gallery-dots" role="tablist" aria-label="商品圖片導覽">
+                {detailImageByProductId[detailSelected.id].map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    role="tab"
+                    aria-selected={index === activeDetailIndex}
+                    aria-label={`第 ${index + 1} 張圖片`}
+                    onClick={() => scrollDetailToIndex(index)}
+                    className={`gallery-dot${index === activeDetailIndex ? " is-active" : ""}`}
+                  />
+                ))}
+              </div>
+            )}
 
             {originalModalUrl && (
               <div

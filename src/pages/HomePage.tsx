@@ -183,7 +183,10 @@ export default function HomePage() {
   const [originalImageByProductId, setOriginalImageByProductId] = useState<Record<string, string>>({});
   const [originalModalUrl, setOriginalModalUrl] = useState<string | null>(null);
   const [openModal, setOpenModal] = useState<string | null>(null);
+  const [activeDetailIndex, setActiveDetailIndex] = useState(0);
   const detailStripRef = useRef<HTMLDivElement | null>(null);
+
+  const GALLERY_ITEM_STEP = 198; // 190px image + 8px gap
 
   useEffect(() => {
     const shouldLockScroll = Boolean(featuredDetail) || Boolean(originalModalUrl);
@@ -201,6 +204,7 @@ export default function HomePage() {
   function openDetailModal(item: FeaturedProductCard) {
     setFeaturedDetail(item);
     setOriginalModalUrl(null);
+    setActiveDetailIndex(0);
 
     if (detailStripRef.current) {
       detailStripRef.current.scrollLeft = 0;
@@ -209,8 +213,19 @@ export default function HomePage() {
 
   function scrollDetailImages(direction: "left" | "right") {
     if (!detailStripRef.current) return;
-    const delta = direction === "left" ? -220 : 220;
+    const delta = direction === "left" ? -GALLERY_ITEM_STEP : GALLERY_ITEM_STEP;
     detailStripRef.current.scrollBy({ left: delta, behavior: "smooth" });
+  }
+
+  function handleDetailStripScroll() {
+    if (!detailStripRef.current) return;
+    const index = Math.round(detailStripRef.current.scrollLeft / GALLERY_ITEM_STEP);
+    setActiveDetailIndex(index);
+  }
+
+  function scrollDetailToIndex(index: number) {
+    if (!detailStripRef.current) return;
+    detailStripRef.current.scrollTo({ left: index * GALLERY_ITEM_STEP, behavior: "smooth" });
   }
 
   useEffect(() => {
@@ -662,6 +677,7 @@ export default function HomePage() {
 
                   <div
                     ref={detailStripRef}
+                    onScroll={handleDetailStripScroll}
                     className={`home-detail-gallery-strip${shouldCenterDetailImages ? " is-centered" : ""}`}
                     style={{
                       width: "100%",
@@ -735,6 +751,22 @@ export default function HomePage() {
                 </div>
               )}
             </div>
+
+            {showGalleryNav && (
+              <div className="home-detail-gallery-dots" role="tablist" aria-label="商品圖片導覽">
+                {featuredDetailImages.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    role="tab"
+                    aria-selected={index === activeDetailIndex}
+                    aria-label={`第 ${index + 1} 張圖片`}
+                    onClick={() => scrollDetailToIndex(index)}
+                    className={`home-detail-gallery-dot${index === activeDetailIndex ? " is-active" : ""}`}
+                  />
+                ))}
+              </div>
+            )}
 
             {originalModalUrl && (
               <div
