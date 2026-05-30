@@ -608,10 +608,11 @@ export default function HomePage() {
               maxHeight: "calc(100dvh - 32px)",
               overflowY: "auto",
               overflowX: "hidden",
-              background: "#fff",
-              borderRadius: 16,
+              background: "#FFFDF9",
+              borderRadius: 28,
               padding: "20px 20px 24px",
               position: "relative",
+              boxShadow: "0 24px 70px rgba(0,0,0,0.18)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -637,10 +638,10 @@ export default function HomePage() {
               style={{
                 width: "100%",
                 height: 220,
-                borderRadius: 12,
+                borderRadius: 16,
                 overflow: "hidden",
-                background: "#f4f4f4",
-                border: "1px solid #eee",
+                background: "#F4F6F0",
+                border: "1px solid rgba(199, 212, 199, 0.6)",
                 position: "relative",
               }}
             >
@@ -682,8 +683,8 @@ export default function HomePage() {
                           height: 190,
                           borderRadius: 10,
                           overflow: "hidden",
-                          border: "1px solid #eee",
-                          background: "#fff",
+                          border: "1px solid rgba(199, 212, 199, 0.5)",
+                          background: "#FFFDF9",
                           flexShrink: 0,
                         }}
                       >
@@ -803,21 +804,21 @@ export default function HomePage() {
               </div>
             )}
 
-            <div style={{ marginTop: 14, fontSize: 18, fontWeight: 700, color: "#4a321f", lineHeight: 1.35 }}>{featuredDetail.name}</div>
+            <div style={{ marginTop: 14, fontSize: 18, fontWeight: 700, color: "#4A2E1F", lineHeight: 1.35 }}>{featuredDetail.name}</div>
             <div
               style={{
                 marginTop: 10,
                 display: "inline-flex",
                 alignItems: "baseline",
                 gap: 6,
-                background: "#f8efe3",
-                border: "1px solid #e8d3b5",
+                background: "#F7F2EC",
+                border: "1px solid rgba(200, 169, 119, 0.3)",
                 borderRadius: 999,
                 padding: "7px 12px",
               }}
             >
-              <span style={{ fontSize: 13, color: "#7c6146", fontWeight: 600 }}>售價</span>
-              <span style={{ fontSize: 14, color: "#5b2d08", fontWeight: 800 }}>{featuredDetail.price}</span>
+              <span style={{ fontSize: 13, color: "#8A7A68", fontWeight: 600 }}>售價</span>
+              <span style={{ fontSize: 14, color: "#7A4A2A", fontWeight: 800 }}>{featuredDetail.price}</span>
             </div>
 
             {(() => {
@@ -830,43 +831,43 @@ export default function HomePage() {
                     display: "grid",
                     gap: 18,
                     padding: "20px 20px",
-                    borderRadius: 14,
-                    background: "#faf6f0",
-                    border: "1px solid #ece0cf",
+                    borderRadius: 20,
+                    background: "linear-gradient(135deg, #F7F2EC 0%, #E3EBE3 100%)",
+                    border: "1px solid rgba(199, 212, 199, 0.75)",
                   }}
                 >
                   {/* 成分 */}
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 6 }}>成分</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#2F4A3F", marginBottom: 6 }}>成分</div>
                     {ingredientTags.length > 0 ? (
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                         {ingredientTags.map((tag, i) => (
-                          <span key={i} style={{ background: "#fff", color: "#5b442f", borderRadius: 999, padding: "3px 10px", fontSize: 12, border: "1px solid #e3d3bd" }}>{tag}</span>
+                          <span key={i} style={{ background: "rgba(255, 253, 249, 0.9)", color: "#2F4A3F", borderRadius: 999, padding: "3px 10px", fontSize: 12, border: "1px solid #C7D4C7" }}>{tag}</span>
                         ))}
                       </div>
                     ) : (
-                      <div style={{ fontSize: 13, color: "#8a7560" }}>尚未提供</div>
+                      <div style={{ fontSize: 13, color: "#8A7A68" }}>尚未提供</div>
                     )}
                   </div>
 
                   {/* 過敏原 */}
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 6 }}>過敏原</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#2F4A3F", marginBottom: 6 }}>過敏原</div>
                     {allergenTags.length > 0 ? (
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                         {allergenTags.map((tag, i) => (
-                          <span key={i} style={{ background: "#fdf0ec", color: "#b5532e", borderRadius: 999, padding: "3px 10px", fontSize: 12, fontWeight: 600, border: "1px solid #f1cdbf" }}>{tag}</span>
+                          <span key={i} style={{ background: "#E3EBE3", color: "#103A33", borderRadius: 999, padding: "3px 10px", fontSize: 12, fontWeight: 600, border: "1px solid #C7D4C7" }}>{tag}</span>
                         ))}
                       </div>
                     ) : (
-                      <div style={{ fontSize: 13, color: "#8a7560" }}>尚未提供</div>
+                      <div style={{ fontSize: 13, color: "#8A7A68" }}>尚未提供</div>
                     )}
                   </div>
 
                   {/* 熱量 */}
                   <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54" }}>熱量</span>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#5b442f" }}>{featuredDetail.calories}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#2F4A3F" }}>熱量</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#2F4A3F" }}>{featuredDetail.calories}</span>
                   </div>
                 </div>
               );
@@ -874,8 +875,8 @@ export default function HomePage() {
 
             {featuredDetail.fullDesc && featuredDetail.fullDesc !== "（無描述）" && (
               <div style={{ marginTop: 18 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 8 }}>商品介紹</div>
-                <div style={{ fontSize: 14, lineHeight: 1.8, color: "#54402d", whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word" }}>
+                <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#2F4A3F", marginBottom: 8 }}>商品介紹</div>
+                <div style={{ fontSize: 14, lineHeight: 1.8, color: "#4A2E1F", whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word" }}>
                   {featuredDetail.fullDesc}
                 </div>
               </div>

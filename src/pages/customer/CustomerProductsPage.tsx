@@ -626,10 +626,11 @@ export default function CustomerProductsPage() {
               maxHeight: "calc(100dvh - 32px)",
               overflowY: "auto",
               overflowX: "hidden",
-              background: "#fff",
-              borderRadius: 12,
-              padding: 16,
+              background: "#FFFDF9",
+              borderRadius: 28,
+              padding: 20,
               position: "relative",
+              boxShadow: "0 24px 70px rgba(0,0,0,0.18)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -651,10 +652,10 @@ export default function CustomerProductsPage() {
               style={{
                 width: "100%",
                 height: 220,
-                borderRadius: 12,
+                borderRadius: 16,
                 overflow: "hidden",
-                background: "#f4f4f4",
-                border: "1px solid #eee",
+                background: "#F4F6F0",
+                border: "1px solid rgba(199, 212, 199, 0.6)",
                 position: "relative",
               }}
             >
@@ -665,38 +666,14 @@ export default function CustomerProductsPage() {
                       onClick={() => scrollDetailImages("left")}
                       aria-label="上一張"
                       type="button"
+                      className="gallery-nav-btn gallery-nav-btn--left"
                       style={{
-                        position: "absolute",
-                        left: 10,
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        zIndex: 2,
-                        width: 40,
-                        height: 40,
-                        borderRadius: "50%",
-                        border: "1px solid rgba(255,255,255,0.7)",
-                        background: "linear-gradient(135deg, #5c3d20 0%, #3e2710 100%)",
-                        boxShadow: "0 4px 14px rgba(0,0,0,0.4)",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
+                        position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)",
+                        zIndex: 2, width: 40, height: 40, cursor: "pointer",
+                        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                       }}
                     >
-                      <span
-                        aria-hidden="true"
-                        style={{
-                          color: "#fff",
-                          fontSize: 28,
-                          fontWeight: 900,
-                          lineHeight: 1,
-                          textShadow: "0 1px 3px rgba(0,0,0,0.45)",
-                          marginTop: -2,
-                        }}
-                      >
-                        ‹
-                      </span>
+                      <span aria-hidden="true" style={{ color: "#fff", fontSize: 28, fontWeight: 900, lineHeight: 1, textShadow: "0 1px 3px rgba(0,0,0,0.45)", marginTop: -2 }}>‹</span>
                     </button>
                   )}
 
@@ -723,8 +700,8 @@ export default function CustomerProductsPage() {
                           height: 190,
                           borderRadius: 10,
                           overflow: "hidden",
-                          border: "1px solid #eee",
-                          background: "#fff",
+                          border: "1px solid rgba(199, 212, 199, 0.5)",
+                          background: "#FFFDF9",
                           flexShrink: 0,
                         }}
                       >
@@ -753,38 +730,14 @@ export default function CustomerProductsPage() {
                       onClick={() => scrollDetailImages("right")}
                       aria-label="下一張"
                       type="button"
+                      className="gallery-nav-btn gallery-nav-btn--right"
                       style={{
-                        position: "absolute",
-                        right: 10,
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        zIndex: 2,
-                        width: 40,
-                        height: 40,
-                        borderRadius: "50%",
-                        border: "1px solid rgba(255,255,255,0.7)",
-                        background: "linear-gradient(135deg, #5c3d20 0%, #3e2710 100%)",
-                        boxShadow: "0 4px 14px rgba(0,0,0,0.4)",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
+                        position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
+                        zIndex: 2, width: 40, height: 40, cursor: "pointer",
+                        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                       }}
                     >
-                      <span
-                        aria-hidden="true"
-                        style={{
-                          color: "#fff",
-                          fontSize: 28,
-                          fontWeight: 900,
-                          lineHeight: 1,
-                          textShadow: "0 1px 3px rgba(0,0,0,0.45)",
-                          marginTop: -2,
-                        }}
-                      >
-                        ›
-                      </span>
+                      <span aria-hidden="true" style={{ color: "#fff", fontSize: 28, fontWeight: 900, lineHeight: 1, textShadow: "0 1px 3px rgba(0,0,0,0.45)", marginTop: -2 }}>›</span>
                     </button>
                   )}
                 </>
@@ -881,10 +834,10 @@ export default function CustomerProductsPage() {
 
               return (
                 <>
-                  <div style={{ marginTop: 16, fontSize: 18, fontWeight: 800, color: "#3d2c1f", lineHeight: 1.35 }}>
+                  <div style={{ marginTop: 16, fontSize: 18, fontWeight: 800, color: "#4A2E1F", lineHeight: 1.35 }}>
                     {detailSelected.name}
                   </div>
-                  <div style={{ marginTop: 4, fontSize: 14, fontWeight: 700, color: "#8c5425" }}>
+                  <div style={{ marginTop: 4, fontSize: 14, fontWeight: 700, color: "#7A4A2A" }}>
                     {formatPrice(detailSelected)}
                   </div>
 
@@ -895,47 +848,47 @@ export default function CustomerProductsPage() {
                       display: "grid",
                       gap: 14,
                       padding: "16px 18px",
-                      borderRadius: 14,
-                      background: "#faf6f0",
-                      border: "1px solid #ece0cf",
+                      borderRadius: 20,
+                      background: "linear-gradient(135deg, #F7F2EC 0%, #E3EBE3 100%)",
+                      border: "1px solid rgba(199, 212, 199, 0.75)",
                     }}
                   >
                     {/* 成分 */}
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 6 }}>成分</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#2F4A3F", marginBottom: 6 }}>成分</div>
                       {isLoadingIngredients ? (
-                        <div style={{ fontSize: 13, color: "#b0a090" }}>載入中…</div>
+                        <div style={{ fontSize: 13, color: "#8A7A68" }}>載入中…</div>
                       ) : ingredientTags.length > 0 ? (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                           {ingredientTags.map((tag, i) => (
-                            <span key={i} style={{ background: "#fff", color: "#5b442f", borderRadius: 999, padding: "3px 10px", fontSize: 12, border: "1px solid #e3d3bd" }}>{tag}</span>
+                            <span key={i} style={{ background: "rgba(255, 253, 249, 0.9)", color: "#2F4A3F", borderRadius: 999, padding: "3px 10px", fontSize: 12, border: "1px solid #C7D4C7" }}>{tag}</span>
                           ))}
                         </div>
                       ) : (
-                        <div style={{ fontSize: 13, color: "#8a7560" }}>尚未提供</div>
+                        <div style={{ fontSize: 13, color: "#8A7A68" }}>尚未提供</div>
                       )}
                     </div>
 
                     {/* 過敏原 */}
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 6 }}>過敏原</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#2F4A3F", marginBottom: 6 }}>過敏原</div>
                       {isLoadingIngredients ? (
-                        <div style={{ fontSize: 13, color: "#b0a090" }}>載入中…</div>
+                        <div style={{ fontSize: 13, color: "#8A7A68" }}>載入中…</div>
                       ) : allergenTags.length > 0 ? (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                           {allergenTags.map((tag, i) => (
-                            <span key={i} style={{ background: "#fdf0ec", color: "#b5532e", borderRadius: 999, padding: "3px 10px", fontSize: 12, fontWeight: 600, border: "1px solid #f1cdbf" }}>{tag}</span>
+                            <span key={i} style={{ background: "#E3EBE3", color: "#103A33", borderRadius: 999, padding: "3px 10px", fontSize: 12, fontWeight: 600, border: "1px solid #C7D4C7" }}>{tag}</span>
                           ))}
                         </div>
                       ) : (
-                        <div style={{ fontSize: 13, color: "#8a7560" }}>尚未提供</div>
+                        <div style={{ fontSize: 13, color: "#8A7A68" }}>尚未提供</div>
                       )}
                     </div>
 
                     {/* 熱量 */}
                     <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54" }}>熱量</span>
-                      <span style={{ fontSize: 14, fontWeight: 700, color: "#5b442f" }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#2F4A3F" }}>熱量</span>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: "#2F4A3F" }}>
                         {isLoadingIngredients ? "載入中…" : info.calories}
                       </span>
                     </div>
@@ -944,8 +897,8 @@ export default function CustomerProductsPage() {
                   {/* 商品介紹 */}
                   {description && (
                     <div style={{ marginTop: 18 }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#a07d54", marginBottom: 8 }}>商品介紹</div>
-                      <div style={{ fontSize: 14, lineHeight: 1.8, color: "#54402d", whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word" }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#2F4A3F", marginBottom: 8 }}>商品介紹</div>
+                      <div style={{ fontSize: 14, lineHeight: 1.8, color: "#4A2E1F", whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word" }}>
                         {description}
                       </div>
                     </div>
@@ -978,8 +931,8 @@ export default function CustomerProductsPage() {
               maxWidth: 400,
               maxHeight: "calc(100dvh - 32px)",
               overflowY: "auto",
-              background: "#fff",
-              borderRadius: 16,
+              background: "#FFFDF9",
+              borderRadius: 24,
               padding: "24px 20px",
               position: "relative",
             }}
