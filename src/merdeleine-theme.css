@@ -241,92 +241,210 @@ input:focus, textarea:focus, select:focus {
   gap: 0;
 }
 
-/* ===== Badge logo accent — deep forest green + gold palette ===== */
-/* Navbar: deep green background to complement the badge */
-.nav-shell {
-  background: rgba(18, 42, 32, 0.97) !important;
-  border-bottom-color: rgba(201, 150, 60, 0.35) !important;
-  backdrop-filter: blur(12px);
+/* ==========================================================================
+   Patisserie UI Refresh — deep green / cream / champagne-gold palette
+   ========================================================================== */
+:root {
+  --brand-green:      #103A33;
+  --brand-green-soft: #1a4a41;
+  --brand-cream:      #F7F2EC;
+  --brand-milk:       #F3ECE4;
+  --brand-gold:       #C8A977;
+  --brand-gold-deep:  #b6965f;
+  --brand-caramel:    #7A4A2A;
+  --brand-card:       #FFFDF9;
 }
 
-/* Nav links on dark bg */
+/* ---- Page wash: calm cream ---- */
+body {
+  background: var(--brand-cream) !important;
+  color: #2e2a24;
+}
+
+/* ---- Typography: serif headings (Chinese), sans body ---- */
+h1, h2, h3,
+.hero-title,
+.brand-story-title,
+.home-section-head h2 {
+  font-family: "Noto Serif TC", "Playfair Display", serif;
+  line-height: 1.3;
+}
+body, button, input, textarea, select, p, a, span, div {
+  font-family: "Manrope", "Noto Sans TC", "PingFang TC", sans-serif;
+}
+
+/* ======================= Navbar: deep green + gold ======================= */
+.nav-shell {
+  background: var(--brand-green) !important;
+  border-bottom: 1px solid rgba(200, 169, 119, 0.35) !important;
+  backdrop-filter: blur(10px);
+}
+.nav-inner {
+  padding-top: 13px !important;
+  padding-bottom: 13px !important;
+}
+
 .nav-link {
-  color: rgba(248, 235, 200, 0.88) !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(201, 150, 60, 0.28) !important;
+  color: rgba(247, 242, 236, 0.9) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  border-color: rgba(200, 169, 119, 0.3) !important;
 }
 .nav-link:hover {
-  color: #f8ebc8 !important;
-  background: rgba(201, 150, 60, 0.18) !important;
-  border-color: rgba(201, 150, 60, 0.55) !important;
+  color: #fff !important;
+  background: rgba(200, 169, 119, 0.18) !important;
+  border-color: rgba(200, 169, 119, 0.6) !important;
 }
 .nav-link.is-active {
-  color: #1a2e22 !important;
-  background: linear-gradient(180deg, #d4a84b 0%, #c9963c 100%) !important;
-  border-color: #b8832a !important;
+  color: var(--brand-green) !important;
+  background: var(--brand-gold) !important;
+  border-color: var(--brand-gold-deep) !important;
 }
 
-/* Login button: gold on dark nav */
 .nav-login-btn {
-  background: linear-gradient(180deg, #d4a84b 0%, #c9963c 100%) !important;
-  border-color: #b8832a !important;
-  color: #1a2e22 !important;
-  box-shadow: 0 3px 10px rgba(201, 150, 60, 0.35) !important;
+  background: var(--brand-gold) !important;
+  border: 1px solid var(--brand-gold-deep) !important;
+  color: var(--brand-green) !important;
+  box-shadow: 0 3px 10px rgba(200, 169, 119, 0.3) !important;
 }
-.nav-login-btn:hover {
-  background: linear-gradient(180deg, #dcb55c 0%, #d4a84b 100%) !important;
-}
+.nav-login-btn:hover { background: #d4b78c !important; }
 
-/* Hamburger on dark nav */
 .nav-toggle {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(201, 150, 60, 0.4) !important;
-  color: #f0d898 !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid var(--brand-gold) !important;
+  color: var(--brand-gold) !important;
 }
 
-/* User chip on dark nav */
-.nav-user-chip {
-  color: rgba(248, 235, 200, 0.85) !important;
-}
-.nav-icon-btn {
-  color: rgba(240, 216, 152, 0.85) !important;
-}
+.nav-user-chip { color: rgba(247, 242, 236, 0.88) !important; }
+.nav-icon-btn { color: var(--brand-gold) !important; }
 .nav-icon-btn:hover {
-  color: #f8ebc8 !important;
-  background: rgba(201, 150, 60, 0.18) !important;
+  color: #fff !important;
+  background: rgba(200, 169, 119, 0.18) !important;
 }
 
-/* Mobile dropdown: dark green */
 .nav-menu {
-  background: #122a20 !important;
-  border-color: rgba(201, 150, 60, 0.25) !important;
+  background: var(--brand-green) !important;
+  border-color: rgba(200, 169, 119, 0.25) !important;
 }
 .nav-dropdown-auth button {
-  background: linear-gradient(180deg, #d4a84b 0%, #c9963c 100%) !important;
-  border-color: #b8832a !important;
-  color: #1a2e22 !important;
+  background: var(--brand-gold) !important;
+  border: 1px solid var(--brand-gold-deep) !important;
+  color: var(--brand-green) !important;
+}
+.nav-user { color: rgba(247, 242, 236, 0.7) !important; }
+
+/* ======================= Section background rhythm ======================= */
+.home-band {
+  border-radius: 24px;
+  padding: 48px 24px;
+}
+.home-band--cream { background: var(--brand-cream); }
+.home-band--milk  { background: var(--brand-milk); }
+.home-band--green {
+  background: var(--brand-green);
+  color: var(--brand-cream);
 }
 
-/* Section headings: gold accent */
-.home-section-head h2,
-.home-featured-head h2 {
-  color: #8b5c1a;
+/* ======================= Brand story (green band) ======================= */
+.brand-story {
+  text-align: center;
+  display: block;
+}
+.brand-story-kicker {
+  margin: 0;
+  color: var(--brand-gold);
+  letter-spacing: 0.22em;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+.brand-story-title {
+  margin: 12px 0 18px;
+  color: var(--brand-cream) !important;
+  font-size: 30px;
+  letter-spacing: 0.16em;
+  font-weight: 600;
+}
+.brand-story-text {
+  margin: 0 auto;
+  max-width: 640px;
+  color: rgba(247, 242, 236, 0.86);
+  line-height: 1.9;
+  font-size: 15px;
 }
 
-/* Hero primary button: gold */
-.hero-btn-primary {
-  background: linear-gradient(180deg, #d4a84b 0%, #c9963c 100%) !important;
-  border-color: #b8832a !important;
-  color: #1a2e22 !important;
-}
-.hero-btn-primary:hover {
-  background: linear-gradient(180deg, #dcb55c 0%, #d4a84b 100%) !important;
-}
-
-/* "加入清單" & primary CTA buttons */
+/* ======================= Buttons ======================= */
+.hero-btn-primary,
+.featured-cta,
+.product-action-btn,
+.customer-product-btn,
 .home-featured-detail-cta,
 .customer-order-submit-btn {
-  background: linear-gradient(180deg, #d4a84b 0%, #c9963c 100%) !important;
-  border-color: #b8832a !important;
-  color: #1a2e22 !important;
+  background: var(--brand-gold) !important;
+  color: var(--brand-green) !important;
+  border: 1px solid var(--brand-gold) !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+  padding: 14px 24px !important;
+  box-shadow: 0 4px 14px rgba(200, 169, 119, 0.28) !important;
 }
+.hero-btn-primary:hover,
+.featured-cta:hover,
+.product-action-btn:hover,
+.customer-product-btn:hover {
+  background: #d4b78c !important;
+}
+
+.hero-btn-secondary {
+  background: var(--brand-card) !important;
+  color: var(--brand-caramel) !important;
+  border: 1px solid var(--brand-gold) !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+}
+
+/* ======================= Section headings ======================= */
+.home-section-head h2 {
+  color: var(--brand-caramel);
+}
+.home-section-head span { color: #9a8268; }
+
+/* ======================= Product / featured cards ======================= */
+.featured-card,
+.customer-product-card {
+  background: var(--brand-card) !important;
+  border-radius: 22px !important;
+  border: 1px solid rgba(200, 169, 119, 0.22) !important;
+  box-shadow: 0 6px 20px rgba(16, 58, 51, 0.07) !important;
+}
+.featured-card:hover,
+.customer-product-card:hover {
+  box-shadow: 0 10px 28px rgba(16, 58, 51, 0.12) !important;
+}
+.featured-card img,
+.customer-product-media {
+  height: 240px !important;
+}
+.featured-body { padding: 18px !important; }
+.featured-body h3 { color: #38302a !important; }
+.featured-price {
+  display: block;
+  margin: 4px 0 14px;
+  color: var(--brand-caramel);
+  font-size: 18px;
+  font-weight: 700;
+}
+.featured-cta {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+}
+.customer-product-body h3 { color: #38302a !important; }
+.featured-row strong,
+.customer-product-row strong { color: var(--brand-caramel) !important; }
+
+/* ======================= Hero refinement ======================= */
+.hero-content {
+  background: rgba(247, 242, 236, 0.86) !important;
+  border: 1px solid rgba(200, 169, 119, 0.5) !important;
+}
+.hero-title { color: var(--brand-green) !important; }
+.hero-kicker { color: var(--brand-caramel) !important; }
