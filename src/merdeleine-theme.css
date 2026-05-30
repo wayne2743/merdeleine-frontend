@@ -231,7 +231,6 @@ input:focus, textarea:focus, select:focus {
 /* ===== Brand mark in nav (optional — show logo image next to text) =====
    Markup change required in NavBar.tsx — see HOW-TO-APPLY.md. */
 .nav-brand img {
-  width: auto;
   display: block;
   vertical-align: middle;
   margin-right: 0;
@@ -240,4 +239,94 @@ input:focus, textarea:focus, select:focus {
   display: inline-flex;
   align-items: center;
   gap: 0;
+}
+
+/* ===== Badge logo accent — deep forest green + gold palette ===== */
+/* Navbar: deep green background to complement the badge */
+.nav-shell {
+  background: rgba(18, 42, 32, 0.97) !important;
+  border-bottom-color: rgba(201, 150, 60, 0.35) !important;
+  backdrop-filter: blur(12px);
+}
+
+/* Nav links on dark bg */
+.nav-link {
+  color: rgba(248, 235, 200, 0.88) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(201, 150, 60, 0.28) !important;
+}
+.nav-link:hover {
+  color: #f8ebc8 !important;
+  background: rgba(201, 150, 60, 0.18) !important;
+  border-color: rgba(201, 150, 60, 0.55) !important;
+}
+.nav-link.is-active {
+  color: #1a2e22 !important;
+  background: linear-gradient(180deg, #d4a84b 0%, #c9963c 100%) !important;
+  border-color: #b8832a !important;
+}
+
+/* Login button: gold on dark nav */
+.nav-login-btn {
+  background: linear-gradient(180deg, #d4a84b 0%, #c9963c 100%) !important;
+  border-color: #b8832a !important;
+  color: #1a2e22 !important;
+  box-shadow: 0 3px 10px rgba(201, 150, 60, 0.35) !important;
+}
+.nav-login-btn:hover {
+  background: linear-gradient(180deg, #dcb55c 0%, #d4a84b 100%) !important;
+}
+
+/* Hamburger on dark nav */
+.nav-toggle {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(201, 150, 60, 0.4) !important;
+  color: #f0d898 !important;
+}
+
+/* User chip on dark nav */
+.nav-user-chip {
+  color: rgba(248, 235, 200, 0.85) !important;
+}
+.nav-icon-btn {
+  color: rgba(240, 216, 152, 0.85) !important;
+}
+.nav-icon-btn:hover {
+  color: #f8ebc8 !important;
+  background: rgba(201, 150, 60, 0.18) !important;
+}
+
+/* Mobile dropdown: dark green */
+.nav-menu {
+  background: #122a20 !important;
+  border-color: rgba(201, 150, 60, 0.25) !important;
+}
+.nav-dropdown-auth button {
+  background: linear-gradient(180deg, #d4a84b 0%, #c9963c 100%) !important;
+  border-color: #b8832a !important;
+  color: #1a2e22 !important;
+}
+
+/* Section headings: gold accent */
+.home-section-head h2,
+.home-featured-head h2 {
+  color: #8b5c1a;
+}
+
+/* Hero primary button: gold */
+.hero-btn-primary {
+  background: linear-gradient(180deg, #d4a84b 0%, #c9963c 100%) !important;
+  border-color: #b8832a !important;
+  color: #1a2e22 !important;
+}
+.hero-btn-primary:hover {
+  background: linear-gradient(180deg, #dcb55c 0%, #d4a84b 100%) !important;
+}
+
+/* "加入清單" & primary CTA buttons */
+.home-featured-detail-cta,
+.customer-order-submit-btn {
+  background: linear-gradient(180deg, #d4a84b 0%, #c9963c 100%) !important;
+  border-color: #b8832a !important;
+  color: #1a2e22 !important;
 }
