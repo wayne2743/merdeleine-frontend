@@ -374,8 +374,6 @@ body, button, input, textarea, select, p, a, span, div {
 /* ======================= Buttons ======================= */
 .hero-btn-primary,
 .featured-cta,
-.product-action-btn,
-.customer-product-btn,
 .home-featured-detail-cta,
 .customer-order-submit-btn {
   background: var(--brand-gold) !important;
@@ -386,11 +384,40 @@ body, button, input, textarea, select, p, a, span, div {
   padding: 14px 24px !important;
   box-shadow: 0 4px 14px rgba(200, 169, 119, 0.28) !important;
 }
+.product-action-btn,
+.customer-product-btn {
+  background: var(--brand-gold) !important;
+  color: var(--brand-green) !important;
+  border: 1px solid var(--brand-gold) !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+  padding: 10px 18px !important;
+  font-size: 14px !important;
+  box-shadow: 0 4px 14px rgba(200, 169, 119, 0.28) !important;
+}
 .hero-btn-primary:hover,
 .featured-cta:hover,
 .product-action-btn:hover,
 .customer-product-btn:hover {
   background: #d4b78c !important;
+}
+
+/* ======================= Gallery navigation arrows ======================= */
+.gallery-nav-btn {
+  background: linear-gradient(135deg, #5c3d20 0%, #3e2710 100%) !important;
+  border: 1px solid rgba(255,255,255,0.7) !important;
+  border-radius: 50% !important;
+  color: #fff !important;
+  padding: 0 !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4) !important;
+}
+.gallery-nav-btn:hover {
+  background: linear-gradient(135deg, #7a5530 0%, #5c3d20 100%) !important;
+  filter: none;
+  transform: none;
+}
+.gallery-nav-btn span {
+  color: #fff !important;
 }
 
 .hero-btn-secondary {
