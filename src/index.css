@@ -281,10 +281,8 @@ table {
 }
 
 .nav-brand img {
-  height: 52px;
-  width: 52px;
-  border-radius: 50%;
-  object-fit: cover;
+  height: 46px;
+  width: auto;
 }
 
 .nav-link {
@@ -2791,8 +2789,8 @@ table {
   }
 
   .nav-brand img {
-    height: 48px;
-    width: 48px;
+    height: 42px;
+    width: auto;
   }
 
   /* Hide center links on mobile */

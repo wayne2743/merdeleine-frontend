@@ -25,7 +25,7 @@ export default function NavBar() {
 
           {/* ── Brand ── */}
           <NavLink to="/" className="nav-brand" aria-label="Merdeleine 首頁">
-            <img src="/logo-badge.png" alt="Merdeleine" />
+            <img src="/logo-wordmark-gold.png" alt="Merdeleine" />
           </NavLink>
 
           {/* ── Center links (desktop only) ── */}
