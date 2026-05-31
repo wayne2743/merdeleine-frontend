@@ -246,24 +246,25 @@ input:focus, textarea:focus, select:focus {
 }
 .hero-btn-secondary:hover { background: #fff !important; }
 
-/* Product detail sticky "加入清單" CTA — elegant, max 64px tall */
+/* Product detail sticky "加入清單" CTA — elegant, compact */
 .home-featured-detail-cta {
   box-sizing: border-box !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  width: calc(100% - 32px) !important;
-  height: 64px !important;
-  max-height: 64px !important;
-  margin: 16px auto !important;
-  padding: 0 32px !important;
-  font-size: 24px !important;
+  width: 100% !important;
+  height: 52px !important;
+  max-height: 52px !important;
+  margin: 0 !important;
+  padding: 0 24px !important;
+  font-size: 18px !important;
   font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
   border-radius: 999px !important;
   border: 1px solid #B8944A !important;
   background: linear-gradient(135deg, #D3B77D, #C8A977) !important;
   color: #103A33 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08) !important;
   text-decoration: none !important;
 }
 .home-featured-detail-cta:hover {
