@@ -206,10 +206,9 @@ input:focus, textarea:focus, select:focus {
 .home-section-head span { color: #9A8A78; }
 
 /* ======================= Buttons ======================= */
-/* Hero / featured / sticky CTA — large */
+/* Hero / featured CTA — large */
 .hero-btn-primary,
 .featured-cta,
-.home-featured-detail-cta,
 .customer-order-submit-btn {
   background: linear-gradient(135deg, #D3B77D 0%, #C8A977 100%) !important;
   color: var(--color-deep-green) !important;
@@ -246,8 +245,8 @@ input:focus, textarea:focus, select:focus {
 }
 .hero-btn-secondary:hover { background: #fff !important; }
 
-/* Product detail sticky "加入清單" CTA — elegant, compact */
-.home-featured-detail-cta {
+/* Product detail modal sticky CTA — shared by HomePage & CustomerProductsPage */
+.product-detail-modal-cta {
   box-sizing: border-box !important;
   display: flex !important;
   align-items: center !important;
@@ -266,11 +265,12 @@ input:focus, textarea:focus, select:focus {
   color: #103A33 !important;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08) !important;
   text-decoration: none !important;
+  cursor: pointer !important;
 }
-.home-featured-detail-cta:hover {
+.product-detail-modal-cta:hover {
   background: linear-gradient(135deg, #E0C48A, #D3B77D) !important;
 }
-.home-featured-detail-cta:active {
+.product-detail-modal-cta:active {
   transform: scale(0.98);
 }
 
