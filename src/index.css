@@ -3672,10 +3672,8 @@ body.modal-scroll-lock {
   bottom: -24px;
   left: 0;
   right: 0;
-  margin-left: -20px;
-  margin-right: -20px;
-  padding-top: 12px;
-  padding-bottom: env(safe-area-inset-bottom, 12px);
+  margin: 16px -20px -24px;
+  padding: 12px 20px env(safe-area-inset-bottom, 12px);
   background: rgba(255, 253, 249, 0.95);
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   backdrop-filter: blur(8px);
