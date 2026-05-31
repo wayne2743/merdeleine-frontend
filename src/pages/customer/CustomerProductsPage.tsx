@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { catalogApi } from "../../api/catalogApi";
 import { fetchImageWithCache } from "../../utils/imageCache";
-import { decodeProductDescription, extractSupplementalInfo, splitInfoTags } from "../../utils/productInfo";
+import { decodeProductDescription, extractSupplementalInfo } from "../../utils/productInfo";
+import ProductDetailModal from "../../components/ProductDetailModal";
 import { useAuth } from "../../auth/AuthProvider";
 import type {
   Product,
@@ -221,13 +222,8 @@ export default function CustomerProductsPage() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailSelected, setDetailSelected] = useState<Product | null>(null);
   const [detailLoadingFull, setDetailLoadingFull] = useState(false);
-  const [originalModalUrl, setOriginalModalUrl] = useState<string | null>(null);
 
-  const detailStripRef = useRef<HTMLDivElement | null>(null);
-  const [activeDetailIndex, setActiveDetailIndex] = useState(0);
   const [reserving, setReserving] = useState<string | null>(null);
-
-  const GALLERY_ITEM_STEP = 198; // 190px image + 8px gap
 
   const [orderOpen, setOrderOpen] = useState(false);
   const [orderSelected, setOrderSelected] = useState<Product | null>(null);
@@ -243,8 +239,7 @@ export default function CustomerProductsPage() {
   const [autoTriggeredProductId, setAutoTriggeredProductId] = useState<string | null>(null);
 
   useEffect(() => {
-    const shouldLockScroll = detailOpen || orderOpen || !!originalModalUrl;
-    if (shouldLockScroll) {
+    if (detailOpen || orderOpen) {
       document.documentElement.classList.add("modal-scroll-lock");
       document.body.classList.add("modal-scroll-lock");
     }
@@ -253,7 +248,7 @@ export default function CustomerProductsPage() {
       document.documentElement.classList.remove("modal-scroll-lock");
       document.body.classList.remove("modal-scroll-lock");
     };
-  }, [detailOpen, orderOpen, originalModalUrl]);
+  }, [detailOpen, orderOpen]);
 
   useEffect(() => {
     let cancelled = false;
@@ -460,13 +455,7 @@ export default function CustomerProductsPage() {
 
   function openDetailModal(p: Product) {
     setDetailSelected(p);
-    setOriginalModalUrl(null);
     setDetailOpen(true);
-    setActiveDetailIndex(0);
-
-    if (detailStripRef.current) {
-      detailStripRef.current.scrollLeft = 0;
-    }
 
     setDetailLoadingFull(true);
     catalogApi.getProduct(p.id).then((full) => {
@@ -476,23 +465,6 @@ export default function CustomerProductsPage() {
     }).finally(() => {
       setDetailLoadingFull(false);
     });
-  }
-
-  function scrollDetailImages(direction: "left" | "right") {
-    if (!detailStripRef.current) return;
-    const delta = direction === "left" ? -GALLERY_ITEM_STEP : GALLERY_ITEM_STEP;
-    detailStripRef.current.scrollBy({ left: delta, behavior: "smooth" });
-  }
-
-  function handleDetailStripScroll() {
-    if (!detailStripRef.current) return;
-    const index = Math.round(detailStripRef.current.scrollLeft / GALLERY_ITEM_STEP);
-    setActiveDetailIndex(index);
-  }
-
-  function scrollDetailToIndex(index: number) {
-    if (!detailStripRef.current) return;
-    detailStripRef.current.scrollTo({ left: index * GALLERY_ITEM_STEP, behavior: "smooth" });
   }
 
   function closeRedirectingModal() {
@@ -615,332 +587,39 @@ export default function CustomerProductsPage() {
         </div>
       )}
 
-      {detailOpen && detailSelected && (
-        <div
-          className="customer-modal-backdrop customer-detail-modal-backdrop"
-          style={{
-            position: "fixed",
-            left: 0,
-            top: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0,0,0,0.35)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16,
-            overflowY: "auto",
-            zIndex: 120,
-          }}
-        >
-          <div
-            className="customer-modal-panel customer-detail-modal"
-            style={{
-              width: "100%",
-              maxWidth: 680,
-              maxHeight: "calc(100dvh - 32px)",
-              overflowY: "auto",
-              overflowX: "hidden",
-              background: "#FFFDF9",
-              borderRadius: 28,
-              padding: 20,
-              position: "relative",
-              boxShadow: "0 24px 70px rgba(0,0,0,0.18)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => setDetailOpen(false)}
-              aria-label="關閉視窗"
-              title="關閉"
-              className="modal-close-btn"
-            >
-              ×
-            </button>
-
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ fontWeight: 800, fontSize: 14, color: "#4a321f" }}>商品詳細</div>
-            </div>
-
-            <div
-              style={{
-                width: "100%",
-                height: 220,
-                borderRadius: 16,
-                overflow: "hidden",
-                background: "#F4F6F0",
-                border: "1px solid rgba(199, 212, 199, 0.6)",
-                position: "relative",
-              }}
-            >
-              {detailImageByProductId[detailSelected.id]?.length ? (
-                <>
-                  {detailImageByProductId[detailSelected.id].length > 1 && (
-                    <button
-                      onClick={() => scrollDetailImages("left")}
-                      aria-label="上一張"
-                      type="button"
-                      className="gallery-nav-btn gallery-nav-btn--left"
-                      style={{
-                        position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)",
-                        zIndex: 10, width: 48, height: 48, cursor: "pointer",
-                        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                      }}
-                    >
-                      <span aria-hidden="true" style={{ fontSize: 26, fontWeight: 700, lineHeight: 1, marginTop: -2 }}>‹</span>
-                    </button>
-                  )}
-
-                  <div
-                    ref={detailStripRef}
-                    onScroll={handleDetailStripScroll}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      overflowX: detailImageByProductId[detailSelected.id].length > 1 ? "auto" : "hidden",
-                      overflowY: "hidden",
-                      display: "flex",
-                      justifyContent: detailImageByProductId[detailSelected.id].length === 1 ? "center" : "flex-start",
-                      gap: 8,
-                      padding: detailImageByProductId[detailSelected.id].length === 1 ? "14px" : "14px 46px",
-                      boxSizing: "border-box",
-                      scrollBehavior: "smooth",
-                    }}
-                  >
-                    {detailImageByProductId[detailSelected.id].map((item, index) => (
-                      <div
-                        key={`${detailSelected.id}-${index}`}
-                        style={{
-                          width: 190,
-                          height: 190,
-                          borderRadius: 10,
-                          overflow: "hidden",
-                          border: "1px solid rgba(199, 212, 199, 0.5)",
-                          background: "#FFFDF9",
-                          flexShrink: 0,
-                        }}
-                      >
-                        <img
-                          src={item.detailUrl}
-                          alt={`${detailSelected.name}-detail-${index + 1}`}
-                          onClick={() => {
-                            setOriginalModalUrl(
-                              item.originalUrl || originalImageByProductId[detailSelected.id] || null
-                            );
-                          }}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                            display: "block",
-                            cursor: "zoom-in",
-                          }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-
-                  {detailImageByProductId[detailSelected.id].length > 1 && (
-                    <button
-                      onClick={() => scrollDetailImages("right")}
-                      aria-label="下一張"
-                      type="button"
-                      className="gallery-nav-btn gallery-nav-btn--right"
-                      style={{
-                        position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)",
-                        zIndex: 10, width: 48, height: 48, cursor: "pointer",
-                        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                      }}
-                    >
-                      <span aria-hidden="true" style={{ fontSize: 26, fontWeight: 700, lineHeight: 1, marginTop: -2 }}>›</span>
-                    </button>
-                  )}
-                </>
-              ) : (
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 13,
-                    color: "#999",
-                  }}
-                >
-                  暫無 DETAIL 圖片
-                </div>
-              )}
-            </div>
-
-            {(detailImageByProductId[detailSelected.id]?.length ?? 0) > 1 && (
-              <div className="gallery-dots" role="tablist" aria-label="商品圖片導覽">
-                {detailImageByProductId[detailSelected.id].map((_, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    role="tab"
-                    aria-selected={index === activeDetailIndex}
-                    aria-label={`第 ${index + 1} 張圖片`}
-                    onClick={() => scrollDetailToIndex(index)}
-                    className={`gallery-dot${index === activeDetailIndex ? " is-active" : ""}`}
-                  />
-                ))}
-              </div>
-            )}
-
-            {originalModalUrl && (
-              <div
-                className="customer-modal-backdrop customer-original-modal-backdrop"
-                style={{
-                  position: "fixed",
-                  left: 0,
-                  top: 0,
-                  right: 0,
-                  bottom: 0,
-                  background: "rgba(0,0,0,0.65)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: 16,
-                  zIndex: 130,
-                }}
-              >
-                <div
-                  className="customer-modal-panel customer-original-modal"
-                  style={{
-                    width: "min(92vw, 1200px)",
-                    height: "min(88vh, 860px)",
-                    borderRadius: 12,
-                    overflow: "hidden",
-                    background: "#111",
-                    border: "1px solid rgba(255,255,255,0.18)",
-                    position: "relative",
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setOriginalModalUrl(null)}
-                    aria-label="關閉視窗"
-                    title="關閉"
-                    className="modal-close-btn modal-close-btn-dark"
-                  >
-                    ×
-                  </button>
-                  <div
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      padding: 8,
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    <img
-                      src={originalModalUrl}
-                      alt={`${detailSelected.name}-original`}
-                      style={{
-                        maxWidth: "100%",
-                        maxHeight: "100%",
-                        width: "auto",
-                        height: "auto",
-                        objectFit: "contain",
-                        display: "block",
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {(() => {
-              const info = extractSupplementalInfo(detailSelected);
-              const description = decodeProductDescription(detailSelected.description).trim();
-              const ingredientTags = splitInfoTags(info.ingredients);
-              const allergenTags = splitInfoTags(info.allergens);
-              const isLoadingIngredients = detailLoadingFull && (detailSelected.productIngredients ?? []).length === 0;
-
-              return (
-                <>
-                  <div style={{ marginTop: 16, fontSize: 18, fontWeight: 800, color: "#4A2E1F", lineHeight: 1.35 }}>
-                    {detailSelected.name}
-                  </div>
-                  <div style={{ marginTop: 4, fontSize: 14, fontWeight: 700, color: "#7A4A2A" }}>
-                    {formatPrice(detailSelected)}
-                  </div>
-
-                  {/* Info card */}
-                  <div
-                    style={{
-                      marginTop: 16,
-                      display: "grid",
-                      gap: 14,
-                      padding: "16px 18px",
-                      borderRadius: 20,
-                      background: "linear-gradient(135deg, #F7F2EC 0%, #E3EBE3 100%)",
-                      border: "1px solid rgba(199, 212, 199, 0.75)",
-                    }}
-                  >
-                    {/* 成分 */}
-                    <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#2F4A3F", marginBottom: 6 }}>成分</div>
-                      {isLoadingIngredients ? (
-                        <div style={{ fontSize: 13, color: "#8A7A68" }}>載入中…</div>
-                      ) : ingredientTags.length > 0 ? (
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                          {ingredientTags.map((tag, i) => (
-                            <span key={i} style={{ background: "rgba(255, 253, 249, 0.9)", color: "#2F4A3F", borderRadius: 999, padding: "3px 10px", fontSize: 12, border: "1px solid #C7D4C7" }}>{tag}</span>
-                          ))}
-                        </div>
-                      ) : (
-                        <div style={{ fontSize: 13, color: "#8A7A68" }}>尚未提供</div>
-                      )}
-                    </div>
-
-                    {/* 過敏原 */}
-                    <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#2F4A3F", marginBottom: 6 }}>過敏原</div>
-                      {isLoadingIngredients ? (
-                        <div style={{ fontSize: 13, color: "#8A7A68" }}>載入中…</div>
-                      ) : allergenTags.length > 0 ? (
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                          {allergenTags.map((tag, i) => (
-                            <span key={i} style={{ background: "#E3EBE3", color: "#103A33", borderRadius: 999, padding: "3px 10px", fontSize: 12, fontWeight: 600, border: "1px solid #C7D4C7" }}>{tag}</span>
-                          ))}
-                        </div>
-                      ) : (
-                        <div style={{ fontSize: 13, color: "#8A7A68" }}>尚未提供</div>
-                      )}
-                    </div>
-
-                    {/* 熱量 */}
-                    <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#2F4A3F" }}>熱量</span>
-                      <span style={{ fontSize: 14, fontWeight: 700, color: "#2F4A3F" }}>
-                        {isLoadingIngredients ? "載入中…" : info.calories}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* 商品介紹 */}
-                  {description && (
-                    <div style={{ marginTop: 18 }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "#2F4A3F", marginBottom: 8 }}>商品介紹</div>
-                      <div style={{ fontSize: 14, lineHeight: 1.8, color: "#4A2E1F", whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word" }}>
-                        {description}
-                      </div>
-                    </div>
-                  )}
-                </>
-              );
-            })()}
-          </div>
-        </div>
-      )}
+      {(() => {
+        const detailInfo = detailSelected ? extractSupplementalInfo(detailSelected) : null;
+        const detailDescription = detailSelected ? decodeProductDescription(detailSelected.description).trim() : "";
+        const detailIsLoadingIngredients = detailLoadingFull && (detailSelected?.productIngredients ?? []).length === 0;
+        const detailImages = detailSelected
+          ? (detailImageByProductId[detailSelected.id] ?? []).map((img) => ({
+              detailUrl: img.detailUrl,
+              originalUrl: img.originalUrl ?? originalImageByProductId[detailSelected.id] ?? null,
+            }))
+          : [];
+        return (
+          <ProductDetailModal
+            open={detailOpen && Boolean(detailSelected)}
+            name={detailSelected?.name ?? ""}
+            price={detailSelected ? formatPrice(detailSelected) : ""}
+            ingredients={detailInfo?.ingredients ?? ""}
+            allergens={detailInfo?.allergens ?? ""}
+            calories={detailInfo?.calories ?? ""}
+            description={detailDescription}
+            images={detailImages}
+            isLoadingIngredients={detailIsLoadingIngredients}
+            onClose={() => setDetailOpen(false)}
+            cta={detailSelected ? {
+              label: checkingOpenProductId === detailSelected.id ? "檢查檔期中..." : "立即預購",
+              onClick: () => {
+                setDetailOpen(false);
+                void handleStartGroup(detailSelected);
+              },
+              disabled: checkingOpenProductId === detailSelected.id,
+            } : undefined}
+          />
+        );
+      })()}
 
       {orderOpen && orderSelected && (
         <div
