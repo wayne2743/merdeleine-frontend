@@ -8,6 +8,7 @@ import MyOrdersPage from "./pages/customer/MyOrdersPage";
 import PaymentPage from "./pages/customer/PaymentPage";
 import CustomerProductsPage from "./pages/customer/CustomerProductsPage";
 import ProfilePage from "./pages/customer/ProfilePage";
+import LineLinkPage from "./pages/customer/LineLinkPage";
 import HomePage from "./pages/HomePage.tsx";
 
 // admin pages
@@ -44,6 +45,7 @@ export default function App() {
             <Route path="/customer/orders" element={<MyOrdersPage />} />
             <Route path="/customer/orders/:orderId/payment" element={<PaymentPage />} />
             <Route path="/customer/profile" element={<ProfilePage />} />
+            <Route path="/line-link" element={<LineLinkPage />} />
           </Route>
 
           <Route element={<RequireRole allow={["ADMIN"]} />}>

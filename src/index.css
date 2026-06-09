@@ -3561,3 +3561,98 @@ body.modal-scroll-lock {
   backdrop-filter: blur(8px);
 }
 
+/* ── LINE 帳號綁定頁 ── */
+.line-link-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 6px;
+}
+
+.line-link-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  color: #5a4a36;
+}
+
+.line-link-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.line-link-spinner {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 3px solid rgba(6, 199, 85, 0.25);
+  border-top-color: #06c755;
+  animation: line-link-spin 0.8s linear infinite;
+}
+
+@keyframes line-link-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.line-link-qr {
+  border-radius: 14px;
+  border: 1px solid rgba(224, 210, 189, 0.8);
+  background: #fff;
+  padding: 8px;
+}
+
+.line-link-bind-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+  padding: 14px 20px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: #06c755;
+  border: none;
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(6, 199, 85, 0.28);
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.05s ease;
+}
+
+.line-link-bind-btn:hover {
+  filter: brightness(1.05);
+}
+
+.line-link-bind-btn:active {
+  transform: scale(0.98);
+}
+
+.line-link-unbind-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 320px;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #9a5b4a;
+  background: transparent;
+  border: 1px solid rgba(154, 91, 74, 0.5);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.line-link-unbind-btn:hover {
+  background: rgba(154, 91, 74, 0.08);
+}
+
