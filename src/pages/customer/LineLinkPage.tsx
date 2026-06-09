@@ -49,11 +49,17 @@ export default function LineLinkPage() {
       if (status === 409) {
         setErrorMessage(message ?? "此 LINE 帳號已被其他會員綁定，或您已綁定其他 LINE 帳號");
       } else if (status === 400) {
-        setErrorMessage("LINE 使用者資訊有誤，請重新嘗試");
+        setErrorMessage(message ?? "LINE 使用者資訊有誤，請重新嘗試");
       } else if (status === 503) {
         setErrorMessage("LINE 綁定服務尚未開通，請稍後再試或聯絡客服");
+      } else if (status === 401 || status === 403) {
+        setErrorMessage("尚未登入或登入已過期，請先登入網站會員再進行綁定");
+      } else if (status) {
+        // 其他非預期狀態碼（例如 404 後端未實作、500 後端錯誤）
+        setErrorMessage(message ?? `綁定失敗（${status}），請稍後再試或聯絡客服`);
       } else {
-        setErrorMessage("綁定失敗，請稍後再試");
+        // 完全沒有 response（網路 / CORS / 逾時）
+        setErrorMessage("無法連線到伺服器，請確認網路後再試");
       }
       setView("error");
     }
