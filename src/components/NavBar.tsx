@@ -36,6 +36,7 @@ export default function NavBar() {
                 <NavLink to="/customer/sell-windows" className={navLinkClass}>檔期</NavLink>
                 <NavLink to="/customer/orders" className={navLinkClass}>訂單</NavLink>
                 <NavLink to="/customer/profile" className={navLinkClass}>個人資料</NavLink>
+                <NavLink to="/line-link" className={navLinkClass}>LINE 綁定</NavLink>
               </>
             )}
             {isAdmin && (
@@ -115,6 +116,7 @@ export default function NavBar() {
                     <NavLink to="/customer/sell-windows" className={navLinkClass}>檔期列表</NavLink>
                     <NavLink to="/customer/orders" className={navLinkClass}>我的訂單</NavLink>
                     <NavLink to="/customer/profile" className={navLinkClass}>個人資料</NavLink>
+                    <NavLink to="/line-link" className={navLinkClass}>LINE 綁定</NavLink>
                   </>
                 )}
                 {isAdmin && (
