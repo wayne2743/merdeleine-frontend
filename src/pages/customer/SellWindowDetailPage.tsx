@@ -83,6 +83,7 @@ export default function SellWindowDetailPage() {
 
   const [msg, setMsg] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [submittingReservation, setSubmittingReservation] = useState(false);
   const [pickupLocations, setPickupLocations] = useState<StorePickupLocationResponse[]>([]);
   const [selectedPickupLocationId, setSelectedPickupLocationId] = useState<string>("");
   const [deliveryForm, setDeliveryForm] = useState<DeliveryForm>({
@@ -204,7 +205,7 @@ export default function SellWindowDetailPage() {
   }
 
   async function onConfirmReserve() {
-    if (!data) return;
+    if (!data || submittingReservation) return;
 
     let delivery: any;
     if (deliveryForm.deliveryMethod === "STORE_PICKUP") {
@@ -255,25 +256,38 @@ export default function SellWindowDetailPage() {
       };
     }
 
+    setSubmittingReservation(true);
     try {
       const res = await orderApi.reserveOrder({
         sellWindowId: data.sellWindowId,
         productId: data.productId,
         quantity: qty,
-        currency: "TWD",
+        currency: data.currency || "TWD",
         unitPriceCents: data.unitPriceCents,
         customerId: user!.id,
         delivery,
       });
 
       setShowConfirmModal(false);
-      nav(`/customer/orders`);
-      console.log("reserved orderId:", res.orderId);
+      nav(`/customer/orders/${res.orderId}/payment`, {
+        state: {
+          checkout: {
+            productName: data.productName,
+            unitPriceCents: data.unitPriceCents,
+            currency: data.currency || "TWD",
+            qty,
+            totalAmountCents: data.unitPriceCents * qty,
+            paymentDueAt: data.paymentCloseAt ?? null,
+          },
+        },
+      });
     } catch (e: any) {
       const status = e?.response?.status;
       if (status === 409) setMsg("名額不足或已關閉（409）");
       else setMsg("預約失敗，請稍後再試");
       setShowConfirmModal(false);
+    } finally {
+      setSubmittingReservation(false);
     }
   }
 
@@ -703,6 +717,7 @@ export default function SellWindowDetailPage() {
               </button>
               <button
                 onClick={onConfirmReserve}
+                disabled={submittingReservation}
                 style={{
                   flex: 1,
                   padding: "10px 16px",
@@ -722,7 +737,7 @@ export default function SellWindowDetailPage() {
                   (e.currentTarget as HTMLButtonElement).style.filter = "brightness(1)";
                 }}
               >
-                確認預約
+                {submittingReservation ? "建立訂單中…" : "確認預約並前往付款"}
               </button>
             </div>
           </div>

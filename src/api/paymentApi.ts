@@ -59,6 +59,14 @@ function normalizePaymentProvider(...values: unknown[]): PaymentInfo["provider"]
     return "ECPAY";
   }
 
+  if (normalized === "CREDIT_CARD" || normalized === "CREDITCARD" || raw.includes("信用卡")) {
+    return "CREDIT_CARD";
+  }
+
+  if (normalized === "NEWEBPAY" || normalized === "NEWEB_PAY" || raw.includes("藍新")) {
+    return "NEWEBPAY";
+  }
+
   return "BANK_TRANSFER";
 }
 
@@ -430,6 +438,12 @@ export const paymentApi = {
       ...((data && typeof data === "object") ? data : {}),
       approveUrl,
     };
+  },
+
+  getNewebPayCheckoutUrl(paymentId: string): string {
+    const path = `/api/payment/payments/newebpay/checkout/${encodeURIComponent(paymentId)}`;
+    const baseUrl = String(import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+    return `${baseUrl}${path}`;
   },
 
   async capturePaypalPayment(paypalOrderId: string): Promise<unknown> {

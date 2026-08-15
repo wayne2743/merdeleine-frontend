@@ -105,7 +105,7 @@ export interface OrderSummary {
 
 export type PaymentStatus = "INIT" | "SUCCEEDED" | "FAILED" | "EXPIRED";
 
-export type PaymentProvider = "BANK_TRANSFER" | "PAYPAL" | "ECPAY" | string;
+export type PaymentProvider = "NEWEBPAY" | "CREDIT_CARD" | "BANK_TRANSFER" | "PAYPAL" | "ECPAY" | string;
 
 export interface PaymentInfo {
   paymentId: string;

@@ -113,10 +113,6 @@ export default function MyOrdersPage() {
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
   const [editingQty, setEditingQty] = useState<string>("1");
   const [actionMessage, setActionMessage] = useState<string | null>(null);
-  const [paymentMethodModal, setPaymentMethodModal] = useState<{ open: boolean; order: OrderSummary | null }>({
-    open: false,
-    order: null,
-  });
   const [qtyLimitModal, setQtyLimitModal] = useState<{ open: boolean; maxAllowed: number | null }>({
     open: false,
     maxAllowed: null,
@@ -291,24 +287,7 @@ export default function MyOrdersPage() {
     }
 
     setActionMessage(null);
-    setPaymentMethodModal({ open: true, order });
-  }
-
-  function closePaymentMethodModal() {
-    setPaymentMethodModal({ open: false, order: null });
-  }
-
-  function onSelectPaymentMethod(method: "BANK_TRANSFER" | "PAYPAL" | "ECPAY") {
-    const selectedOrder = paymentMethodModal.order;
-    if (!selectedOrder) return;
-
-    if (method !== "BANK_TRANSFER") {
-      setActionMessage("目前僅開放銀行轉帳付款，PayPal 與綠界 EcPay 尚未開放");
-      return;
-    }
-
-    closePaymentMethodModal();
-    navigate(`/customer/orders/${selectedOrder.orderId}/payment?method=bank-transfer`);
+    navigate(`/customer/orders/${order.orderId}/payment`);
   }
 
   function closeQtyLimitModal() {
@@ -662,64 +641,6 @@ export default function MyOrdersPage() {
           );
         })}
       </div>
-
-      {paymentMethodModal.open && paymentMethodModal.order && (
-        <div className="myorders-modal-backdrop" onClick={closePaymentMethodModal}>
-          <div
-            className="myorders-modal myorders-payment-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="myorders-payment-method-title"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="myorders-modal-kicker">付款方式</div>
-            <h3 id="myorders-payment-method-title" className="myorders-modal-title">
-              選擇付款方式
-            </h3>
-            <p className="myorders-modal-body">
-              請為訂單 <strong>{paymentMethodModal.order.orderId}</strong> 選擇付款方式。
-              目前僅開放 <strong>銀行轉帳</strong>。
-            </p>
-
-            <div className="myorders-payment-methods">
-              <button
-                type="button"
-                className="myorders-payment-method-btn is-available"
-                onClick={() => onSelectPaymentMethod("BANK_TRANSFER")}
-              >
-                <strong>銀行轉帳</strong>
-                <span>目前開放，可查看匯款資訊並完成付款</span>
-              </button>
-
-              <button
-                type="button"
-                className="myorders-payment-method-btn"
-                onClick={() => onSelectPaymentMethod("PAYPAL")}
-                disabled
-              >
-                <strong>PayPal</strong>
-                <span>尚未開放</span>
-              </button>
-
-              <button
-                type="button"
-                className="myorders-payment-method-btn"
-                onClick={() => onSelectPaymentMethod("ECPAY")}
-                disabled
-              >
-                <strong>綠界 EcPay</strong>
-                <span>尚未開放</span>
-              </button>
-            </div>
-
-            <div className="myorders-modal-actions">
-              <button type="button" onClick={closePaymentMethodModal} className="myorders-modal-btn">
-                取消
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {qtyLimitModal.open && (
         <div className="myorders-modal-backdrop" onClick={closeQtyLimitModal}>

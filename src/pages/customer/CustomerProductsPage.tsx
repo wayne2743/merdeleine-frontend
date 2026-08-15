@@ -386,8 +386,21 @@ export default function CustomerProductsPage() {
         contactName: user?.displayName || undefined,
         contactEmail: user?.email || undefined,
       };
-      await catalogApi.autoGroupOrder(payload);
-      setReserveSuccess(true);
+      const result = await catalogApi.autoGroupOrder(payload);
+      if (!result.orderId) throw new Error("訂單已建立，但未取得訂單編號");
+
+      nav(`/customer/orders/${result.orderId}/payment`, {
+        state: {
+          checkout: {
+            productName: orderSelected.name,
+            unitPriceCents: Number(orderSelected.unitPriceCents ?? 0),
+            currency: orderSelected.currency || "TWD",
+            qty,
+            totalAmountCents: Number(orderSelected.unitPriceCents ?? 0) * qty,
+            paymentDueAt: predictedGroupEndAt,
+          },
+        },
+      });
     } catch (e: unknown) {
       const err = e as { message?: string };
       console.error(e);
