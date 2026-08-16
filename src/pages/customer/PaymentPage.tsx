@@ -67,14 +67,6 @@ function formatDateTime(value?: string | null): string {
   return Number.isNaN(date.getTime()) ? "尚未設定" : date.toLocaleString("zh-TW");
 }
 
-function getPaymentExpireAt(preferred?: string | null): string {
-  const preferredDate = preferred ? new Date(preferred) : null;
-  if (preferredDate && !Number.isNaN(preferredDate.getTime()) && preferredDate.getTime() > Date.now()) {
-    return preferredDate.toISOString();
-  }
-  return new Date(Date.now() + 30 * 60 * 1000).toISOString();
-}
-
 export default function PaymentPage() {
   const { orderId } = useParams();
   const location = useLocation();
@@ -87,6 +79,7 @@ export default function PaymentPage() {
   const [loading, setLoading] = useState(!routeSummary);
   const [paymentLoading, setPaymentLoading] = useState(!routePaymentId);
   const [message, setMessage] = useState<string | null>(null);
+  const [paymentReloadKey, setPaymentReloadKey] = useState(0);
 
   useEffect(() => {
     if (!orderId) {
@@ -96,29 +89,49 @@ export default function PaymentPage() {
     }
 
     let active = true;
-    if (!routePaymentId) setPaymentLoading(true);
-    void paymentApi.ensureNewebPayPayment(orderId, getPaymentExpireAt(routeSummary?.paymentDueAt))
-      .then((result) => {
-        if (active) setPayment(result);
-      })
-      .catch((error: unknown) => {
-        const statusCode = (error as { response?: { status?: number } })?.response?.status;
-        if (!active) return;
-        if (statusCode === 404) {
-          if (!routePaymentId) setMessage("此訂單的付款資料尚未建立，請稍後重新整理再試");
-        } else {
-          console.warn("讀取付款狀態失敗", error);
-          setMessage(getErrorMessage(error, "暫時無法取得付款資料"));
+
+    async function pollPayment() {
+      if (!routePaymentId) {
+        setPaymentLoading(true);
+        setMessage("訂單已建立，正在準備付款資料…");
+      }
+
+      for (let attempt = 0; attempt < 10 && active; attempt += 1) {
+        try {
+          const result = await paymentApi.getPaymentByOrder(orderId as string);
+          if (!active) return;
+          setPayment(result);
+          setMessage(null);
+          setPaymentLoading(false);
+          return;
+        } catch (error: unknown) {
+          if (!active) return;
+          const statusCode = (error as { response?: { status?: number } })?.response?.status;
+          if (statusCode !== 404) {
+            console.warn("讀取付款狀態失敗", error);
+            setMessage(getErrorMessage(error, "暫時無法取得付款資料"));
+            setPaymentLoading(false);
+            return;
+          }
+
+          if (attempt < 9) {
+            await new Promise<void>((resolve) => window.setTimeout(resolve, 1000));
+          }
         }
-      })
-      .finally(() => {
-        if (active) setPaymentLoading(false);
-      });
+      }
+
+      if (active) {
+        setMessage("訂單已成功建立，但付款資料仍在準備中，請點擊下方按鈕重試");
+        setPaymentLoading(false);
+      }
+    }
+
+    void pollPayment();
 
     return () => {
       active = false;
     };
-  }, [orderId, routePaymentId, routeSummary?.paymentDueAt]);
+  }, [orderId, routePaymentId, paymentReloadKey]);
 
   useEffect(() => {
     if (!orderId || status !== "authenticated" || !user?.id) {
@@ -260,6 +273,15 @@ export default function PaymentPage() {
                     ? `前往付款 ${formatPrice(summary?.totalAmountCents, summary?.currency)}`
                     : "尚未開放付款"}
               </button>
+              {!paymentLoading && !checkoutPaymentId && (
+                <button
+                  type="button"
+                  className="checkout-retry-button"
+                  onClick={() => setPaymentReloadKey((value) => value + 1)}
+                >
+                  重新取得付款資料
+                </button>
+              )}
               <p className="checkout-agreement">按下前往付款即表示你同意本店的訂購與退款政策。</p>
             </div>
           </main>

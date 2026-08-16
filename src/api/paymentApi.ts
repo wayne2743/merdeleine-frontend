@@ -241,16 +241,10 @@ function pickApproveUrl(payload: unknown): string | null {
 
 export const paymentApi = {
   async getPaymentByOrder(orderId: string): Promise<PaymentInfo> {
-    try {
-      const { data } = await http.get(`/api/payment/payments/orders/${encodeURIComponent(orderId)}`);
-      const normalized = normalizePaymentInfo(data);
-      upsertLocalPayment(normalized);
-      return normalized;
-    } catch (e: any) {
-      const localMatch = readLocalPayments().find((item) => item.orderId === orderId);
-      if (localMatch) return localMatch;
-      throw e;
-    }
+    const { data } = await http.get(`/api/payment/payments/orders/${encodeURIComponent(orderId)}`);
+    const normalized = normalizePaymentInfo(data);
+    upsertLocalPayment(normalized);
+    return normalized;
   },
 
   async pagePayments(page: number, size: number): Promise<PageResponse<PaymentInfo>> {
@@ -438,31 +432,6 @@ export const paymentApi = {
       ...((data && typeof data === "object") ? data : {}),
       approveUrl,
     };
-  },
-
-  async ensureNewebPayPayment(orderId: string, expireAt: string): Promise<PaymentInfo> {
-    try {
-      const { data } = await http.get(`/api/payment/payments/orders/${encodeURIComponent(orderId)}`);
-      const existing = normalizePaymentInfo(data);
-      if (!existing.paymentId) throw new Error("後端付款資料缺少 paymentId");
-      return upsertLocalPayment(existing);
-    } catch (error: unknown) {
-      const status = (error as { response?: { status?: number } })?.response?.status;
-      if (status !== 404) throw error;
-    }
-
-    const { data } = await http.post("/api/payment/payments", {
-      orderId,
-      provider: "NEWEBPAY",
-      status: "INIT",
-      expireAt,
-      payInfo: { paymentMethod: "CREDIT_CARD" },
-    });
-    const normalized = normalizePaymentInfo(data);
-    if (!normalized.paymentId) {
-      throw new Error("付款資料已建立，但後端未回傳 paymentId");
-    }
-    return upsertLocalPayment(normalized);
   },
 
   getNewebPayCheckoutUrl(paymentId: string): string {

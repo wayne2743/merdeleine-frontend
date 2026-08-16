@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { catalogApi } from "../../api/catalogApi";
-import { paymentApi } from "../../api/paymentApi";
 import { fetchImageWithCache } from "../../utils/imageCache";
 import { decodeProductDescription, extractSupplementalInfo } from "../../utils/productInfo";
 import ProductDetailModal from "../../components/ProductDetailModal";
@@ -390,8 +389,6 @@ export default function CustomerProductsPage() {
       };
       const result = await catalogApi.autoGroupOrder(payload);
       if (!result.orderId) throw new Error("訂單已建立，但未取得訂單編號");
-      const payment = await paymentApi.ensureNewebPayPayment(result.orderId, predictedGroupEndAt);
-
       nav(`/customer/orders/${result.orderId}/payment`, {
         state: {
           checkout: {
@@ -401,7 +398,6 @@ export default function CustomerProductsPage() {
             qty,
             totalAmountCents: Number(orderSelected.unitPriceCents ?? 0) * qty,
             paymentDueAt: predictedGroupEndAt,
-            paymentId: payment.paymentId,
           },
         },
       });

@@ -3969,6 +3969,16 @@ body.modal-scroll-lock {
   filter: brightness(1.03);
 }
 
+.checkout-retry-button {
+  justify-self: center;
+  padding: 7px 14px;
+  border: 1px solid #c8a977;
+  background: #fffdf9;
+  color: #765231;
+  font-size: 12px;
+  box-shadow: none;
+}
+
 .checkout-agreement {
   margin: -5px 0 0;
   color: #92806d;

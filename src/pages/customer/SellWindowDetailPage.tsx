@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { catalogApi } from "../../api/catalogApi";
 import { orderApi } from "../../api/orderApi";
-import { paymentApi } from "../../api/paymentApi";
 import type { StorePickupLocationResponse } from "../../api/orderApi";
 import { fetchImageWithCache } from "../../utils/imageCache";
 import { useAuth } from "../../auth/AuthProvider";
@@ -268,11 +267,6 @@ export default function SellWindowDetailPage() {
         customerId: user!.id,
         delivery,
       });
-      const payment = await paymentApi.ensureNewebPayPayment(
-        res.orderId,
-        data.paymentCloseAt ?? data.endAt
-      );
-
       setShowConfirmModal(false);
       nav(`/customer/orders/${res.orderId}/payment`, {
         state: {
@@ -283,7 +277,6 @@ export default function SellWindowDetailPage() {
             qty,
             totalAmountCents: data.unitPriceCents * qty,
             paymentDueAt: data.paymentCloseAt ?? null,
-            paymentId: payment.paymentId,
           },
         },
       });
