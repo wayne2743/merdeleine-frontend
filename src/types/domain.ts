@@ -377,6 +377,7 @@ export type AutoGroupOrderRequest = {
   productId: string;
   qty: number;
   customerId: string;
+  status?: "PAYMENT_REQUESTED";
   predictedGroupOpenAt: string;
   predictedGroupEndAt: string;
   leadsDay: number;
@@ -408,7 +409,7 @@ export type AutoGroupOrderRequest = {
 export type AutoGroupOrderResponse = {
   sellWindowId: string;
   orderId: string;
-  status: string; // RESERVED
+  status: string;
   sellWindow: {
     startAt: string;
     endAt: string;

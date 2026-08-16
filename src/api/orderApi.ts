@@ -66,7 +66,7 @@ export const orderApi = {
       "/api/order/orders",
       {
         ...input,
-        status: "RESERVED"
+        status: "PAYMENT_REQUESTED"
       }
     );
 
